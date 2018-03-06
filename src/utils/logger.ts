@@ -23,6 +23,7 @@ export type ILoggerLevel = "NONE" |
                            "DEBUG";
 
 type tConsoleFn = (...args : unknown[]) => void;
+type tLazyConsoleFn = (fn : () => (string|void)) => void;
 
 const DEFAULT_LOG_LEVEL : ILoggerLevel = "NONE";
 
@@ -35,6 +36,10 @@ export default class Logger {
   public warn : tConsoleFn;
   public info : tConsoleFn;
   public debug : tConsoleFn;
+  public lazyError : tLazyConsoleFn;
+  public lazyWarn : tLazyConsoleFn;
+  public lazyInfo : tLazyConsoleFn;
+  public lazyDebug : tLazyConsoleFn;
   private currentLevel : ILoggerLevel;
   private readonly LEVELS : Record<ILoggerLevel, number>;
 
@@ -43,11 +48,33 @@ export default class Logger {
     this.warn = noop;
     this.info = noop;
     this.debug = noop;
+<<<<<<< HEAD
     this.LEVELS = { NONE: 0,
                     ERROR: 1,
                     WARNING: 2,
                     INFO: 3,
                     DEBUG: 4 };
+||||||| merged common ancestors
+    this.LEVELS = {
+      NONE: 0,
+      ERROR: 1,
+      WARNING: 2,
+      INFO: 3,
+      DEBUG: 4,
+    };
+=======
+    this.lazyError = noop;
+    this.lazyWarn = noop;
+    this.lazyInfo = noop;
+    this.lazyDebug = noop;
+    this.LEVELS = {
+      NONE: 0,
+      ERROR: 1,
+      WARNING: 2,
+      INFO: 3,
+      DEBUG: 4,
+    };
+>>>>>>> misc/tools: add "lazy" logs
     this.currentLevel = DEFAULT_LOG_LEVEL;
   }
 
@@ -75,6 +102,15 @@ export default class Logger {
                                               noop;
     this.debug = (level >= this.LEVELS.DEBUG) ? console.log.bind(console) :
                                                 noop;
+
+    this.lazyError = (level >= this.LEVELS.ERROR) ? (fn) => console.error(fn()) :
+                                                    noop;
+    this.lazyWarn = (level >= this.LEVELS.WARNING) ? (fn) => console.warn(fn()) :
+                                                     noop;
+    this.lazyInfo = (level >= this.LEVELS.INFO) ? (fn) => console.info(fn()) :
+                                                  noop;
+    this.lazyDebug = (level >= this.LEVELS.DEBUG) ? (fn) => console.log(fn()) :
+                                                    noop;
     /* tslint:enable no-console */
     /* tslint:enable no-invalid-this */
   }
