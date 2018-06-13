@@ -28,7 +28,21 @@ export interface ISmoothInitSegmentPrivateInfos { codecPrivateData? : string;
                                                     }>;
                                                   }; }
 
-export interface IPrivateInfos { smoothInit? : ISmoothInitSegmentPrivateInfos; }
+// privateInfos specific to local Manifests
+export interface ILocalManifestSegmentPrivateInfos {
+  load : (callbacks : { resolve : (args: { data : ArrayBuffer |
+                                                  Uint8Array;
+                                           size : number;
+                                           duration : number; })
+                                  => void;
+                        reject : (err? : Error) => void; })
+         // returns either the aborting callback or nothing
+         => (() => void)|void; }
+
+export interface IPrivateInfos {
+  smoothInit? : ISmoothInitSegmentPrivateInfos;
+  localManifestSegment? : ILocalManifestSegmentPrivateInfos;
+}
 
 // ISegment Object.
 // Represent a single Segment from a Representation.
