@@ -81,6 +81,7 @@ import Manifest, {
   Period,
   Representation,
 } from "../../manifest";
+import { IEMSG } from "../../parsers/containers/isobmff";
 import { IBifThumbnail } from "../../parsers/images/bif";
 import ABRManager from "../abr";
 import {
@@ -142,6 +143,7 @@ interface IBitrateEstimate { type : IBufferType;
 
 interface IPublicAPIEvent {
   playerStateChange : string;
+  inbandStreamEvent : any;
   positionUpdate : IPositionUpdateItem;
   audioTrackChange : ITMAudioTrack | null;
   textTrackChange : ITMTextTrack | null;
@@ -1870,6 +1872,10 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     }
   }
 
+  private _priv_onInbandStreamEvent(value : IEMSG) : void {
+    this.trigger("inbandStreamEvent", value);
+  }
+
   /**
    * Triggered each time the playback Observable emits.
    *
@@ -1906,6 +1912,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         break;
       case "warning":
         this._priv_onPlaybackWarning(event.value);
+        break;
+      case "inband-stream-event":
+        this._priv_onInbandStreamEvent(event.value);
         break;
       case "added-segment":
         if (!this._priv_contentInfos) {
