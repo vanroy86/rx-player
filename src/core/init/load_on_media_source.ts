@@ -32,7 +32,7 @@ import {
 import { MediaError } from "../../errors";
 import log from "../../log";
 import Manifest, {
-  Period,
+  IFetchedPeriod,
 } from "../../manifest";
 import ABRManager from "../abr";
 import BufferOrchestrator, {
@@ -122,7 +122,7 @@ export default function createMediaSourceLoader({
                                                              duration);
 
     const initialPeriod = manifest.getPeriodForTime(initialTime);
-    if (initialPeriod == null) {
+    if (initialPeriod == null || !initialPeriod.isFetched()) { // XXX TODO
       throw new MediaError("MEDIA_STARTING_TIME_NOT_FOUND",
                            "Wanted starting time not found in the Manifest.",
                            true);
@@ -233,7 +233,7 @@ export default function createMediaSourceLoader({
  */
 function createNativeSourceBuffersForPeriod(
   sourceBuffersManager : SourceBuffersManager,
-  period : Period
+  period : IFetchedPeriod
 ) : void {
   Object.keys(period.adaptations).forEach(bufferType => {
     if (SourceBuffersManager.isNative(bufferType)) {
