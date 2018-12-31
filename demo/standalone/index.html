@@ -9,11 +9,28 @@
       <video id="video"></video>
       <script type="text/javascript" src="./lib.js" charset="utf-8"></script>
       <script charset="utf-8">
-        const player = new window.RxPlayer({
-          videoElement: document.getElementById("video")
-        });
+        const players = [];
+        const decodeErrors = [];
+        for (let i = 0; i < 1; i++) {
+          const player = new window.RxPlayer({
+            videoElement: document.getElementById("video")
+          });
+          player.setMaxBufferAhead(10);
+
+          player.addEventListener("error", function(err) {
+            if (
+              err.code === "BUFFER_APPEND_ERROR" ||
+              err.code === "MEDIA_ERR_DECODE"
+            ) {
+              const segs = player.getLastPushedSegment();
+              decodeErrors.push(segs);
+              console.error("!!!!!!!!!!!! IT HAPPENED");
+            }
+          });
+        }
 
         window.player = player;
+        window.decodeErrors = decodeErrors;
       </script>
     </body>
 

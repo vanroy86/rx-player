@@ -16876,9 +16876,12 @@ object-assign
                 var _this;
                 void 0 === options && (options = {}), _this = _EventEmitter.call(this) || this;
                 var _parseConstructorOpti = parseConstructorOptions(options), initialAudioBitrate = _parseConstructorOpti.initialAudioBitrate, initialVideoBitrate = _parseConstructorOpti.initialVideoBitrate, limitVideoWidth = _parseConstructorOpti.limitVideoWidth, maxAudioBitrate = _parseConstructorOpti.maxAudioBitrate, maxBufferAhead = _parseConstructorOpti.maxBufferAhead, maxBufferBehind = _parseConstructorOpti.maxBufferBehind, maxVideoBitrate = _parseConstructorOpti.maxVideoBitrate, preferredAudioTracks = _parseConstructorOpti.preferredAudioTracks, preferredTextTracks = _parseConstructorOpti.preferredTextTracks, throttleWhenHidden = _parseConstructorOpti.throttleWhenHidden, videoElement = _parseConstructorOpti.videoElement, wantedBufferAhead = _parseConstructorOpti.wantedBufferAhead, stopAtEnd = _parseConstructorOpti.stopAtEnd;
- // Workaround to support Firefox autoplay on FF 42.
+                return _this.last20PushedSegments = {
+                    audio: [],
+                    video: []
+                }, // Workaround to support Firefox autoplay on FF 42.
                 // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
-                                return videoElement.preload = "auto", _this.version = 
+                videoElement.preload = "auto", _this.version = 
                 /*PLAYER_VERSION*/
                 "3.13.0", _this.log = log.a, _this.state = "STOPPED", _this.videoElement = videoElement, 
                 _this._priv_destroy$ = new Subject.a(), 
@@ -17673,6 +17676,8 @@ object-assign
                     return this.videoElement.duration;
                 }
                 return null != manifest ? manifest.getMaximumPosition() : null;
+            }, _proto.getLastPushedSegments = function getLastPushedSegments() {
+                return this.last20PushedSegments;
             }
             /**
    * Reset all state properties relative to a playing content.
@@ -17748,12 +17753,16 @@ object-assign
                     break;
 
                   case "added-segment":
+                    var _event$value = event.value, bufferType = _event$value.bufferType, segmentData = _event$value.segmentData;
+                    if ("audio" === bufferType || "video" === bufferType) {
+                        for (;20 <= this.last20PushedSegments[bufferType].length; ) this.last20PushedSegments[bufferType].shift();
+                        this.last20PushedSegments[bufferType].push(segmentData);
+                    }
                     if (!this._priv_contentInfos) return void log.a.error("API: Added segment while no content is loaded");
  // Manage image tracks
                     // TODO Better way? Perhaps linked to an ImageSourceBuffer
                     // implementation
-                                        var _event$value = event.value, bufferType = _event$value.bufferType, segmentData = _event$value.segmentData;
-                    if ("image" === bufferType && null != segmentData && "bif" === segmentData.type) {
+                                        if ("image" === bufferType && null != segmentData && "bif" === segmentData.type) {
                         var imageData = segmentData.data;
  // TODO merge multiple data from the same track together
                                                 this._priv_contentInfos.thumbnails = imageData, this.trigger("imageTrackUpdate", {

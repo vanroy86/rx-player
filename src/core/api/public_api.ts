@@ -187,6 +187,11 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    */
   public readonly version : string;
 
+  public last20PushedSegments : {
+    audio : any[];
+    video : any[];
+  };
+
   /**
    * Media element attached to the RxPlayer.
    * @type {HTMLMediaElement|null}
@@ -523,6 +528,11 @@ class Player extends EventEmitter<IPublicAPIEvent> {
             videoElement,
             wantedBufferAhead,
             stopAtEnd } = parseConstructorOptions(options);
+
+    this.last20PushedSegments = {
+      audio: [],
+      video: [],
+    };
 
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
@@ -1796,6 +1806,10 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     return null;
   }
 
+  getLastPushedSegments() {
+    return this.last20PushedSegments;
+  }
+
   /**
    * Reset all state properties relative to a playing content.
    * @private
@@ -1885,6 +1899,14 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         this._priv_onPlaybackWarning(event.value);
         break;
       case "added-segment":
+        const { bufferType, segmentData } = event.value;
+        if (bufferType === "audio" || bufferType === "video") {
+          while (this.last20PushedSegments[bufferType].length >= 20) {
+            this.last20PushedSegments[bufferType].shift();
+          }
+          this.last20PushedSegments[bufferType].push(segmentData);
+        }
+
         if (!this._priv_contentInfos) {
           log.error("API: Added segment while no content is loaded");
           return;
@@ -1893,7 +1915,6 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         // Manage image tracks
         // TODO Better way? Perhaps linked to an ImageSourceBuffer
         // implementation
-        const { bufferType, segmentData } = event.value;
         if (bufferType === "image") {
           if (segmentData != null && (segmentData as { type : string }).type === "bif") {
             const imageData = (segmentData as { data : IBifThumbnail[] }).data;
