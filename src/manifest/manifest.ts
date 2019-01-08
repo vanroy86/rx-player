@@ -159,6 +159,16 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     time : number; // `Performance.now()` output at the time `value` was calculated
   };
 
+  /**
+   * Informations about the last seekable position.
+   * @type {Object|undefined}
+   */
+  public maximumTime? : {
+    isContinuous : boolean; // Whether this value continuously evolve over time
+    value : number; // Maximum seekable time in milliseconds calculated at `time`.
+    time : number; // `Performance.now()` output at the time `value` was calculated
+  };
+
   // Array containing every errors that happened when the Manifest has been
   // created, in the order they have happened.
   public parsingErrors : Array<Error|ICustomError>;
