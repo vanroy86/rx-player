@@ -25,6 +25,7 @@
 
 import nextTick from "next-tick";
 import {
+  BehaviorSubject,
   combineLatest as observableCombineLatest,
   concat as observableConcat,
   defer as observableDefer,
@@ -101,6 +102,7 @@ export interface IRepresentationBufferArguments<T> {
   segmentFetcher : IPrioritizedSegmentFetcher<T>;
   terminate$ : Observable<void>;
   wantedBufferAhead$ : Observable<number>;
+  lastStableBitrate$: BehaviorSubject<undefined|number>;
 }
 
 // Informations about a Segment waiting for download
@@ -156,7 +158,8 @@ export default function RepresentationBuffer<T>({
   segmentBookkeeper, // keep track of what segments already are in the SourceBuffer
   segmentFetcher, // allows to download new segments
   terminate$, // signal the RepresentationBuffer that it should terminate
-  wantedBufferAhead$, // emit the buffer goal
+  wantedBufferAhead$, // emit the buffer goal,
+  lastStableBitrate$,
 } : IRepresentationBufferArguments<T>) : Observable<IRepresentationBufferEvent<T>> {
   const { manifest, period, adaptation, representation } = content;
   const codec = representation.getMimeTypeString();
@@ -413,7 +416,6 @@ export default function RepresentationBuffer<T>({
       sourceBufferWaitingQueue.add(segment.id);
 
       return append$.pipe(
-        mapTo(EVENTS.addedSegment(bufferType, segment, segmentData)),
         tap(() => { // add to SegmentBookkeeper
           if (segment.isInit) {
             return;
@@ -429,6 +431,8 @@ export default function RepresentationBuffer<T>({
                                    start,
                                    end);
         }),
+        mapTo(EVENTS.addedSegment(
+          bufferType, segment, queuedSourceBuffer.getBuffered(), segmentData)),
         finalize(() => { // remove from queue
           sourceBufferWaitingQueue.remove(segment.id);
         }));
@@ -445,10 +449,12 @@ export default function RepresentationBuffer<T>({
     segment : ISegment,
     neededRange : { start: number; end: number }
   ) : boolean {
+    const lastStableBitrate = lastStableBitrate$.getValue();
     return segmentFilter(segment,
                          content,
                          segmentBookkeeper,
                          neededRange,
-                         sourceBufferWaitingQueue);
+                         sourceBufferWaitingQueue,
+                         lastStableBitrate);
   }
 }

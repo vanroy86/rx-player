@@ -128,7 +128,8 @@ export default function createSegmentFetcher<T>(
             if (size != null && duration != null) {
               network$.next({ type: bufferType,
                               value: { size,
-                                       duration } });
+                                       duration,
+                                       content } });
             }
             break;
           }

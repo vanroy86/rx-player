@@ -379,7 +379,7 @@ export default {
    * starvation mode.
    * @type {Number}
    */
-  ABR_STARVATION_FACTOR: 0.72,
+  ABR_STARVATION_FACTOR: 0.85,
 
   /**
    * Factor with which is multiplied the bandwidth estimate when the ABR is not
