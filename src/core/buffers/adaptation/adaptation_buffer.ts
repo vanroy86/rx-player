@@ -27,6 +27,7 @@
 import objectAssign from "object-assign";
 import {
   asapScheduler,
+  BehaviorSubject,
   concat as observableConcat,
   defer as observableDefer,
   merge as observableMerge,
@@ -42,6 +43,7 @@ import {
   observeOn,
   share,
   takeUntil,
+  tap,
 } from "rxjs/operators";
 import log from "../../../log";
 import Manifest, {
@@ -51,6 +53,7 @@ import Manifest, {
 } from "../../../manifest";
 import concatMapLatest from "../../../utils/concat_map_latest";
 import ABRManager, {
+  IABRBufferEvents,
   IABREstimation,
 } from "../../abr";
 import { IPrioritizedSegmentFetcher } from "../../pipelines";
@@ -107,7 +110,8 @@ export default function AdaptationBuffer<T>(
   wantedBufferAhead$ : Observable<number>,
   content : {
     manifest : Manifest;
-    period : Period; adaptation : Adaptation;
+    period : Period;
+    adaptation : Adaptation;
   },
   abrManager : ABRManager,
   options : { manualBitrateSwitchingMode : "seamless"|"direct" }
@@ -125,8 +129,13 @@ export default function AdaptationBuffer<T>(
     return objectAssign({ downloadBitrate }, tick);
   }));
 
+  const lastStableBitrate$ = new BehaviorSubject<undefined|number>(undefined);
+  const { representations } = adaptation;
+
+  const eventsForABR$ : Subject<IABRBufferEvents> = new Subject();
+
   const abr$ : Observable<IABREstimation> =
-    abrManager.get$(adaptation.type, abrClock$, adaptation.representations)
+    abrManager.get$(adaptation.type, representations, abrClock$, eventsForABR$)
       .pipe(observeOn(asapScheduler), share());
 
   // emit when the current RepresentationBuffer should be stopped right now
@@ -136,7 +145,10 @@ export default function AdaptationBuffer<T>(
   const terminateCurrentBuffer$ = new Subject<void>();
 
   // Emit at each bitrate estimate done by the ABRManager
-  const bitrateEstimate$ = abr$.pipe(
+  const bitrateEstimates$ = abr$.pipe(
+    tap(({ lastStableBitrate }) => {
+      lastStableBitrate$.next(lastStableBitrate);
+    }),
     filter(({ bitrate }) => bitrate != null),
     distinctUntilChanged((old, current) => old.bitrate === current.bitrate),
     map(({ bitrate }) => {
@@ -165,7 +177,17 @@ export default function AdaptationBuffer<T>(
           EVENTS.representationChange(adaptation.type, period, representation));
         const representationBuffer$ = createRepresentationBuffer(representation)
           .pipe(takeUntil(killCurrentBuffer$));
-        return observableConcat(representationChange$, representationBuffer$);
+
+        eventsForABR$.next({
+          type: "representation-buffer-change",
+          value: { representation },
+        });
+        return observableConcat(representationChange$, representationBuffer$)
+          .pipe(tap(evt => {
+            if (evt.type === "added-segment") {
+              eventsForABR$.next(evt);
+            }
+          }));
       })),
     newRepresentation$.pipe(map((estimation, i) => {
       if (i === 0) { // no buffer pending
@@ -185,7 +207,7 @@ export default function AdaptationBuffer<T>(
     }), ignoreElements())
   );
 
-  return observableMerge(adaptationBuffer$, bitrateEstimate$);
+  return observableMerge(adaptationBuffer$, bitrateEstimates$);
 
   /**
    * Create and returns a new RepresentationBuffer Observable, linked to the
@@ -211,6 +233,7 @@ export default function AdaptationBuffer<T>(
         segmentFetcher,
         terminate$: terminateCurrentBuffer$,
         wantedBufferAhead$,
+        lastStableBitrate$,
       });
     });
   }
