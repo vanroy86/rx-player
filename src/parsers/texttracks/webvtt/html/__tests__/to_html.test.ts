@@ -38,6 +38,7 @@ describe("parsers - webvtt - toHTML", () => {
       end: 100,
       header: "b",
       payload: ["<body><b></b><p>Hello<p><body>"],
+      settings: {},
     };
 
     const classes : IStyleElements = {};
@@ -49,16 +50,17 @@ describe("parsers - webvtt - toHTML", () => {
       "<div style=" +
         "\"width:100%;" +
         "height:100%;" +
-        "display:flex;" +
-        "flex-direction:column;" +
-        "justify-content:flex-end;" +
-        "align-items:center;\">" +
-        "<p style=\"text-align:center\">" +
+        "text-align: center;\">" +
+        "<div style=" +
+          "\"display: inline-block;" +
+          "position:absolute;" +
+          "bottom:1%;" +
+          "writing-mode:horizontal-tb;\">" +
           "<span style=\"background-color:rgba(0,0,0,0.8);color:white;\">" +
             "<b></b>" +
             "Hello" +
           "</span>" +
-        "</p>" +
+        "</div>" +
       "</div>");
   });
 
@@ -79,6 +81,7 @@ describe("parsers - webvtt - toHTML", () => {
       end: 100,
       header: "b",
       payload: ["<body><b></b><p>Hello<p><body>"],
+      settings: {},
     };
 
     const classes : IStyleElements = {
@@ -92,16 +95,17 @@ describe("parsers - webvtt - toHTML", () => {
       "<div style=" +
         "\"width:100%;" +
         "height:100%;" +
-        "display:flex;" +
-        "flex-direction:column;" +
-        "justify-content:flex-end;" +
-        "align-items:center;\">" +
-        "<p style=\"text-align:center\">" +
+        "text-align: center;\">" +
+        "<div style=" +
+          "\"display: inline-block;" +
+          "position:absolute;" +
+          "bottom:1%;" +
+          "writing-mode:horizontal-tb;\">" +
           "<span style=\"background-color:rgba(0,0,0,0.8);color:white;color:yellow;\">" +
             "<b></b>" +
             "Hello" +
           "</span>" +
-        "</p>" +
+        "</div>" +
       "</div>");
   });
 
@@ -122,6 +126,7 @@ describe("parsers - webvtt - toHTML", () => {
       end: 100,
       header: "b",
       payload: ["<body><b></b><p>Hello<p><body>"],
+      settings: {},
     };
 
     const classes : IStyleElements = {};
@@ -134,16 +139,17 @@ describe("parsers - webvtt - toHTML", () => {
       "<div style=" +
         "\"width:100%;" +
         "height:100%;" +
-        "display:flex;" +
-        "flex-direction:column;" +
-        "justify-content:flex-end;" +
-        "align-items:center;\">" +
-        "<p style=\"text-align:center\">" +
+        "text-align: center;\">" +
+        "<div style=" +
+          "\"display: inline-block;" +
+          "position:absolute;" +
+          "bottom:1%;" +
+          "writing-mode:horizontal-tb;\">" +
           "<span style=\"background-color:rgba(0,0,0,0.8);color:white;color:yellow;\">" +
             "<b></b>" +
             "Hello" +
           "</span>" +
-        "</p>" +
+        "</div>" +
       "</div>");
   });
 
@@ -164,6 +170,7 @@ describe("parsers - webvtt - toHTML", () => {
       end: 100,
       header: "b",
       payload: ["<body><b></b><p>Hello<p><body>"],
+      settings: {},
     };
 
     const classes : IStyleElements = { b: "bar: baz;" };
@@ -176,17 +183,18 @@ describe("parsers - webvtt - toHTML", () => {
       "<div style=" +
         "\"width:100%;" +
         "height:100%;" +
-        "display:flex;" +
-        "flex-direction:column;" +
-        "justify-content:flex-end;" +
-        "align-items:center;\">" +
-        "<p style=\"text-align:center\">" +
-          "<span style=\"background-color:rgba(0,0,0,0.8);color:white;" +
-            "color:yellow;bar: baz;\">" +
+        "text-align: center;\">" +
+        "<div style=" +
+          "\"display: inline-block;" +
+          "position:absolute;" +
+          "bottom:1%;" +
+          "writing-mode:horizontal-tb;\">" +
+          "<span style=\"background-color:rgba(0,0,0,0.8);color:white;color:yellow;" +
+          "bar: baz;\">" +
             "<b></b>" +
             "Hello" +
           "</span>" +
-        "</p>" +
+        "</div>" +
       "</div>");
   });
 
@@ -203,6 +211,7 @@ describe("parsers - webvtt - toHTML", () => {
       start: 0,
       end: 100,
       payload: [],
+      settings: {},
     };
 
     const classes : IStyleElements = {};
@@ -211,17 +220,21 @@ describe("parsers - webvtt - toHTML", () => {
     expect(start).toBe(0);
     expect(end).toBe(100);
     expect(element.outerHTML).toBe(
+
       "<div style=" +
         "\"width:100%;" +
         "height:100%;" +
-        "display:flex;" +
-        "flex-direction:column;" +
-        "justify-content:flex-end;" +
-        "align-items:center;\">" +
-        "<p style=\"text-align:center\">" +
-          "<span style=\"background-color:rgba(0,0,0,0.8);color:white;\">" +
-          "</span>" +
-        "</p>" +
+        "text-align: center;\">" +
+        "<div style=" +
+          "\"display: inline-block;" +
+          "position:absolute;" +
+          "bottom:1%;" +
+          "writing-mode:horizontal-tb;\">" +
+            "<span style=" +
+              "\"background-color:rgba(0,0,0,0.8);" +
+              "color:white;\">" +
+            "</span>" +
+        "</div>" +
       "</div>");
   });
 });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { IVTTCueObject } from "../parse_cue_block";
 import convertPayloadToHTML from "./convert_payload_to_html";
 import { IStyleElements } from "./parse_style_block";
 
@@ -21,6 +22,114 @@ export interface IVTTHTMLCue {
   start : number;
   end: number;
   element : HTMLElement;
+}
+
+function getHTMLCueSettings(cueObject: IVTTCueObject) {
+  const { settings } = cueObject;
+  const settingsHTMLStyles: Partial<Record<string, string>> = {
+    position: "absolute",
+    bottom: "1%",
+  };
+
+  // Apply vertical settings
+  switch (settings.vertical) {
+    case "rl":
+      settingsHTMLStyles["writing-mode"] = "vertical-rl";
+      break;
+    case "lr":
+      settingsHTMLStyles["writing-mode"] = "vertical-lr";
+      break;
+    default:
+      settingsHTMLStyles["writing-mode"] = "horizontal-tb";
+      break;
+  }
+
+  // Apply line settings
+  if (settings.line) {
+    const pourcentage: undefined|number = (() => {
+      const percentagePosition = /^(\d+(\.\d+)?)%(,([a-z]+))?/;
+      const percentageMatches = settings.line.match(percentagePosition);
+      if (percentageMatches) {
+        return Number(percentageMatches[1]);
+      } else {
+        const linePosition = /^(-?\d+)(,([a-z]+))?/;
+        const lineMatches = settings.line.match(linePosition);
+        if (lineMatches) {
+          return Number(lineMatches[1]) === 0 ? 0 : 100;
+        }
+      }
+    })();
+
+    if (pourcentage) {
+      if (!settings.vertical) {
+        if (pourcentage > 50) {
+          settingsHTMLStyles.bottom = (100 - pourcentage) + "%";
+        } else {
+          settingsHTMLStyles.top = pourcentage + "%";
+        }
+      } else if (settings.vertical === "rl") {
+        if (pourcentage > 50) {
+          settingsHTMLStyles.left = (100 - pourcentage) + "%";
+        } else {
+          settingsHTMLStyles.right = pourcentage + "%";
+        }
+      } else if (settings.vertical === "lr") {
+        if (pourcentage > 50) {
+          settingsHTMLStyles.right = (100 - pourcentage) + "%";
+        } else {
+          settingsHTMLStyles.left = pourcentage + "%";
+        }
+      }
+    }
+  }
+
+  // Apply position settings
+  if (settings.position) {
+    const percentagePosition = /^(\d+(\.\d+)?)%(,([a-z]+))?/;
+    const positions = percentagePosition.exec(settings.position);
+    if (positions) {
+      const pourcentage = parseInt(positions[1], 10);
+      if (!isNaN(pourcentage)) {
+        if (!settings.vertical) {
+          if (pourcentage > 50) {
+            settingsHTMLStyles.right = (100 - pourcentage) + "%";
+          } else {
+            settingsHTMLStyles.left = pourcentage + "%";
+          }
+        } else if (settings.vertical === "rl") {
+          if (pourcentage > 50) {
+            settingsHTMLStyles.bottom = (100 - pourcentage) + "%";
+          } else {
+            settingsHTMLStyles.top = pourcentage + "%";
+          }
+        } else if (settings.vertical === "lr") {
+          if (pourcentage > 50) {
+            settingsHTMLStyles.top = (100 - pourcentage) + "%";
+          } else {
+            settingsHTMLStyles.bottom = pourcentage + "%";
+          }
+        }
+      }
+    }
+  }
+
+  // Apply size settings
+  if (settings.size) {
+    const percentageSize = /^(\d+(\.\d+)?)%(,([a-z]+))?/;
+    const sizes = percentageSize.exec(settings.size);
+    if (sizes) {
+      const percentage = parseInt(sizes[1], 10);
+      if (!isNaN(percentage)) {
+        if (!settings.vertical) {
+          settingsHTMLStyles.width = percentage + "%";
+        } else {
+          settingsHTMLStyles.height = percentage + "%";
+        }
+      }
+    }
+  }
+
+  return settingsHTMLStyles;
 }
 
 /**
@@ -36,12 +145,7 @@ export interface IVTTHTMLCue {
  * @returns {Object|undefined}
  */
 export default function toHTML(
-  cueObj : {
-    start : number;
-    end : number;
-    header? : string;
-    payload : string[];
-  },
+  cueObj : IVTTCueObject,
   styling : { classes : IStyleElements; global? : string }
 ) : IVTTHTMLCue {
   const { start, end, header, payload } = cueObj;
@@ -51,16 +155,19 @@ export default function toHTML(
   regionAttr.value =
     "width:100%;" +
     "height:100%;" +
-    "display:flex;" +
-    "flex-direction:column;" +
-    "justify-content:flex-end;" +
-    "align-items:center;";
+    "text-align: center;";
   region.setAttributeNode(regionAttr);
 
   // Get content, format and apply style.
-  const pElement = document.createElement("p");
+  const pElement = document.createElement("div");
   const pAttr = document.createAttribute("style");
-  pAttr.value = "text-align:center";
+
+  const cueHTMLSettings = getHTMLCueSettings(cueObj);
+  const pStyles = Object.entries(cueHTMLSettings).reduce((acc, [key, value]) => {
+    const style = key + ":" + value + ";";
+    return acc + style;
+  }, "");
+  pAttr.value = "display: inline-block;" + pStyles;
   pElement.setAttributeNode(pAttr);
 
   const spanElement = document.createElement("span");
