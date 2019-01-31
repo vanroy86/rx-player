@@ -1,3 +1,4 @@
+/dist/_esm5.raw
 /node_modules
 /*.log
 /*.keys
@@ -10,15 +11,6 @@
 /test-output.xml
 
 /.scannerwork
-
-/dist/*.d.ts
-/dist/_esm5.processed
-/dist/_esm5.raw
-
-/features
-/minimal
-/experimental
-/types
 
 /localhost.key
 /localhost.crt
