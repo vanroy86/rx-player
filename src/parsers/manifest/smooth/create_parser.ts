@@ -21,6 +21,7 @@ import idGenerator from "../../../utils/id_generator";
 import resolveURL, {
   normalizeBaseURL,
 } from "../../../utils/resolve_url";
+import getKID from "../../drm/playready";
 import {
   IContentProtection,
   IParsedAdaptation,

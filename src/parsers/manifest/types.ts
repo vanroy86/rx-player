@@ -19,6 +19,8 @@ import { IRepresentationIndex } from "../../manifest";
 export interface IContentProtection {
   systemId? : string;
   keyId : string;
+  KID: any;
+  pssh: any;
 }
 
 export interface IParsedRepresentation {

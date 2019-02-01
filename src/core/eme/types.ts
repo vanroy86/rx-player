@@ -99,3 +99,15 @@ export const KEY_STATUS_ERRORS = {
   "status-pending": false,
 } as Partial<Record<string, boolean>>;
 /* tslint:enable no-object-literal-type-assertion */
+
+/* tslint:disable no-object-literal-type-assertion */
+export const KEY_STATUSES = [
+  "usable",
+  "expired",
+  "internal-error",
+  "released",
+  "output-restricted",
+  "output-downscaled",
+  "status-pending",
+];
+/* tslint:enable no-object-literal-type-assertion */

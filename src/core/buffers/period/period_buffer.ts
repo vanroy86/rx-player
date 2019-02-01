@@ -122,7 +122,9 @@ export default function PeriodBuffer({
   segmentPipelinesManager,
   sourceBuffersManager,
   options,
-} : IPeriodBufferArguments) : Observable<IPeriodBufferEvent> {
+} : IPeriodBufferArguments,
+  authorizations$ : Observable<IAuthorization[]>
+) : Observable<IPeriodBufferEvent> {
   const { period } = content;
   const { wantedBufferAhead$ } = options;
 
@@ -174,7 +176,7 @@ export default function PeriodBuffer({
 
           return observableConcat(
             cleanBuffer$,
-            observableMerge(adaptationBuffer$, bufferGarbageCollector$)
+            observableMerge(adaptationBuffer$, bufferGarbageCollector$, cleanRestrictedStreamBuffer$)
           );
         }));
 
@@ -199,6 +201,27 @@ export default function PeriodBuffer({
   ) : Observable<IAdaptationBufferEvent<T>|IBufferWarningEvent> {
     const { manifest } = content;
     const segmentBookkeeper = segmentBookkeepers.get(qSourceBuffer);
+
+      // Watch authorization changes to clean-up restricted stream concerned
+      // buffer ranges.
+      const cleanRestrictedStreamBuffer$ = authorizations$.pipe(
+        tap((authorizations) => {
+          authorizations.forEach((authorization) => {
+            const IDSet = authorization.IDSet;
+            if (!authorization.isPlayable) {
+              segmentBookkeeper.getBufferedRanges(IDSet).forEach((range) => {
+                if (range.start !== undefined && range.end !== undefined) {
+                  queuedSourceBuffer
+                    .removeBuffer(range as { start: number; end: number})
+                    .subscribe();
+                }
+              });
+            }
+          });
+        }),
+        ignoreElements()
+      );
+
     const pipelineOptions = getPipelineOptions(
       bufferType, options.segmentRetry, options.offlineRetry);
     const pipeline = segmentPipelinesManager

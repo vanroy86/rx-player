@@ -17,6 +17,13 @@
 import IRepresentationIndex from "./representation_index";
 
 interface IContentProtection {
+  schemeIdUri?: string;
+  value?: string;
+  KID?: string;
+  pssh?: string;
+}
+
+interface IContentProtection {
   keyId?: string;
   systemId?: string;
 }

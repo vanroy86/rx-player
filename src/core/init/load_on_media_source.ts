@@ -114,7 +114,8 @@ export default function createMediaSourceLoader({
   return function loadContentOnMediaSource(
     mediaSource : MediaSource,
     initialTime : number,
-    autoPlay : boolean
+    autoPlay : boolean,
+    authorizations$ : any,
   ) {
     // TODO Update the duration if it evolves?
     const duration = manifest.getDuration();
@@ -156,7 +157,8 @@ export default function createMediaSourceLoader({
       abrManager,
       sourceBuffersManager,
       segmentPipelinesManager,
-      bufferOptions
+      bufferOptions,
+      authorizations$
     ).pipe(
       mergeMap((evt) : Observable<IMediaSourceLoaderEvent> => {
         switch (evt.type) {

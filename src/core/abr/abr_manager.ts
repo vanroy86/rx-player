@@ -25,6 +25,9 @@ import {
 import log from "../../log";
 import { Representation } from "../../manifest";
 import { IBufferType } from "../source_buffers";
+import StreamAuthorizationManager, {
+  IAuthorization
+} from "../stream/stream_authorization_manager";
 import RepresentationChooser, {
   IABREstimation,
   IRepresentationChooserClockTick,
@@ -68,11 +71,13 @@ const defaultChooserOptions = {
  */
 const createChooser = (
   type : IBufferType,
-  options : IRepresentationChoosersOptions
+  options : IRepresentationChoosersOptions,
+  authorizations$ : Observable<IAuthorization[]>
 ) : RepresentationChooser => {
   return new RepresentationChooser({
     limitWidth$: options.limitWidth[type],
     throttle$: options.throttle[type],
+    authorizations$,
     initialBitrate: options.initialBitrates[type],
     manualBitrate: options.manualBitrates[type],
     maxAutoBitrate: options.maxAutoBitrates[type],
@@ -91,6 +96,7 @@ export default class ABRManager {
 
   private _choosers:  Partial<Record<IBufferType, RepresentationChooser>>;
   private _chooserInstanceOptions: IRepresentationChoosersOptions;
+  private _streamAuthorizationManager: StreamAuthorizationManager;
 
   /**
    * @param {Observable} requests$ - Emit requests infos as they begin, progress
@@ -156,8 +162,11 @@ export default class ABRManager {
   constructor(
     requests$: Observable<Observable<IRequest>>,
     metrics$: Observable<IMetric>,
-    options : IRepresentationChoosersOptions = defaultChooserOptions
+    options : IRepresentationChoosersOptions = defaultChooserOptions,
+    streamAuthorizationManager: StreamAuthorizationManager
   ) {
+    this._streamAuthorizationManager = streamAuthorizationManager;
+
     // Subject emitting and completing on dispose.
     // Used to clean up every created observables.
     this._dispose$ = new Subject();
@@ -230,7 +239,8 @@ export default class ABRManager {
     clock$: Observable<IABRClockTick>,
     representations: Representation[] = []
   ) : Observable<IABREstimation> {
-    return this._lazilyCreateChooser(type).get$(clock$, representations);
+    const authorizations$ = this._streamAuthorizationManager.getAuthorizations();
+    return this._lazilyCreateChooser(type).get$(clock$, representations, authorizations$);
   }
 
   /**

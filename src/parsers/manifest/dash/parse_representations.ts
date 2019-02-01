@@ -201,6 +201,10 @@ export default function parseRepresentations(
       parsedRepresentation.width =
         adaptation.attributes.width;
     }
+    if (adaptation.children.contentProtections) {
+      parsedRepresentation.contentProtections =
+        adaptation.children.contentProtections;
+    }
     return parsedRepresentation;
   });
 }

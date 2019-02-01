@@ -117,7 +117,8 @@ export default function BufferOrchestrator(
     offlineRetry? : number;
     textTrackOptions? : ITextTrackSourceBufferOptions;
     manualBitrateSwitchingMode : "seamless"|"direct";
-  }
+  },
+  authorizations$: any
 ) : Observable<IBufferOrchestratorEvent> {
   const { manifest, initialPeriod } = content;
   const { maxBufferAhead$, maxBufferBehind$ } = options;
@@ -367,7 +368,7 @@ export default function BufferOrchestrator(
       segmentPipelinesManager,
       sourceBuffersManager,
       options,
-    }).pipe(
+    }, authorizations$).pipe(
       mergeMap((
         evt : IPeriodBufferEvent
       ) : Observable<IMultiplePeriodBuffersEvent> => {

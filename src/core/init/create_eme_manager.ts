@@ -39,7 +39,8 @@ const { onEncrypted$ } = events;
  */
 export default function createEMEManager(
   mediaElement : HTMLMediaElement,
-  keySystems : IKeySystemOption[]
+  keySystems : IKeySystemOption[],
+  streamAuthorizationManager? : StreamAuthorizationManager
 ) : Observable<IEMEManagerEvent> {
   if (features.emeManager == null) {
     return onEncrypted$(mediaElement).pipe(map(() => {
@@ -66,7 +67,7 @@ export default function createEMEManager(
   }
 
   log.debug("Init: Creating EMEManager");
-  return features.emeManager(mediaElement, keySystems);
+  return features.emeManager(mediaElement, keySystems, streamAuthorizationManager);
 }
 
 export { IEMEManagerEvent };

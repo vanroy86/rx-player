@@ -75,6 +75,8 @@ import {
   IWarningEvent,
 } from "./types";
 
+import StreamAuthorizationManager from "./stream_authorization_manager"; 
+
 /**
  * Returns pipeline options based on the global config and the user config.
  * @param {Object} networkConfig
@@ -185,14 +187,6 @@ export default function InitializeOnMediaSource({
   const segmentPipelinesManager = new SegmentPipelinesManager<any>(
     pipelines, requestsInfos$, network$, warning$);
 
-  // Create ABR Manager, which will choose the right "Representation" for a
-  // given "Adaptation".
-  const abrManager = new ABRManager(requestsInfos$, network$, adaptiveOptions);
-
-  // Create EME Manager, an observable which will manage every EME-related
-  // issue.
-  const emeManager$ = createEMEManager(mediaElement, keySystems);
-
   // Translate errors coming from the media element into RxPlayer errors
   // through a throwing Observable.
   const mediaError$ = throwOnMediaError(mediaElement);
@@ -207,6 +201,18 @@ export default function InitializeOnMediaSource({
     openMediaSource(mediaElement),
     fetchManifest(url)
   ).pipe(mergeMap(([ mediaSource, { manifest, sendingTime } ]) => {
+
+    const streamAuthorizationManager = new StreamAuthorizationManager(manifest);
+    (window as any).streamAuthorizationManager = streamAuthorizationManager;
+
+    // Create ABR Manager, which will choose the right "Representation" for a
+    // given "Adaptation".
+    const abrManager =
+      new ABRManager(requestsInfos$, network$, adaptiveOptions, streamAuthorizationManager);
+
+  // Create EME Manager, an observable which will manage every EME-related
+  // issue.
+  const emeManager$ = createEMEManager(mediaElement, keySystems);
 
     /**
      * Refresh the manifest on subscription.
@@ -247,6 +253,8 @@ export default function InitializeOnMediaSource({
     const initialTime = getInitialTime(manifest, startAt);
     log.debug("Init: Initial time calculated:", initialTime);
 
+    const authorizations$ = streamAuthorizationManager.getAuthorizations$();
+
     const reloadMediaSource$ = new Subject<void>();
     const onEvent =
       createEventListener(reloadMediaSource$, refreshManifest);
@@ -255,7 +263,7 @@ export default function InitializeOnMediaSource({
         const currentPosition = mediaElement.currentTime;
         const isPaused = mediaElement.paused;
         return openMediaSource(mediaElement).pipe(
-          mergeMap(newMS => loadOnMediaSource(newMS, currentPosition, !isPaused)),
+          mergeMap(newMS => loadOnMediaSource(newMS, currentPosition, !isPaused, authorizations$)),
           mergeMap(onEvent),
           startWith(EVENTS.reloadingMediaSource())
         );

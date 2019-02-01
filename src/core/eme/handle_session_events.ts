@@ -44,13 +44,16 @@ import {
   isKnownError,
 } from "../../errors";
 import log from "../../log";
+import arrayIncludes from "../../utils/array-includes";
 import castToObservable from "../../utils/cast_to_observable";
 import retryObsWithBackoff from "../../utils/rx-retry_with_backoff";
 import tryCatch from "../../utils/rx-try_catch";
+import StreamAuthorizationManager from "../stream/stream_authorization_manager";
 import {
   IEMEWarningEvent,
   IKeySystemOption,
   KEY_STATUS_ERRORS,
+  KEY_STATUSES,
 } from "./types";
 
 const {
@@ -119,7 +122,8 @@ function licenseErrorSelector(
  */
 export default function handleSessionEvents(
   session: MediaKeySession|ICustomMediaKeySession,
-  keySystem: IKeySystemOption
+  keySystem: IKeySystemOption,
+  streamAuthManager?: StreamAuthorizationManager
 ) : Observable<IMediaKeySessionHandledEvents|IEMEWarningEvent> {
   log.debug("EME: Handle message events", session);
 
@@ -150,6 +154,22 @@ export default function handleSessionEvents(
         (session.keyStatuses as any).forEach((keyStatus : string, keyId : string) => {
           // Hack present because the order of the arguments has changed in spec
           // and is not the same between some versions of Edge and Chrome.
+          if (streamAuthManager) {
+            if (
+              arrayIncludes(KEY_STATUSES, keyStatus) &&
+              typeof keyId === "object" &&
+              typeof keyStatus === "string"
+            ) {
+              streamAuthManager.updateStatusForKID(keyId, keyStatus);
+            } else if (
+              arrayIncludes(KEY_STATUSES, keyId) &&
+              typeof keyId === "string" &&
+              typeof keyStatus === "object"
+            ) {
+              streamAuthManager.updateStatusForKID(keyStatus, keyId);
+            }
+          }
+
           if (keyStatus === KEY_STATUS_EXPIRED || keyId === KEY_STATUS_EXPIRED) {
             const { throwOnLicenseExpiration } = keySystem;
             const error =

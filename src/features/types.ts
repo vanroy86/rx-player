@@ -24,6 +24,7 @@ import {
   IDirectfileEvent,
   IDirectFileOptions,
 } from "../core/init/initialize_directfile";
+import StreamAuthorizationManager from "../core/stream/stream_authorization_manager";
 import {
   IHTMLTextTracksParserFn,
   INativeTextTracksParserFn,
@@ -35,7 +36,8 @@ export type IDirectFileInit =
 
 export type IEMEManager = (
   mediaElement : HTMLMediaElement,
-  keySystems: IKeySystemOption[]
+  keySystems: IKeySystemOption[],
+  streamAuthorizationManager?: StreamAuthorizationManager
 ) => Observable<IEMEManagerEvent>;
 
 export type INativeTextTracksBuffer =
