@@ -49,6 +49,7 @@ import retryObsWithBackoff from "../../utils/rx-retry_with_backoff";
 import tryCatch from "../../utils/rx-try_catch";
 import checkKeyStatuses from "./check_key_statuses";
 import {
+  IBlacklistKeyEvent,
   IEMEWarningEvent,
   IKeySystemOption,
   IMediaKeySessionHandledEvents,
@@ -91,16 +92,24 @@ export default function SessionEventsListener(
 ) : Observable<IMediaKeySessionHandledEvents | IEMEWarningEvent> {
   log.debug("EME: Binding session events", session);
 
-  function getKeyStatusesEvents() : Observable<IEMEWarningEvent> {
-    const warnings = checkKeyStatuses(session, keySystem);
-    const warnings$ = observableOf(...warnings);
-    return warnings$;
+  function getKeyStatusesEvents() : Observable<IEMEWarningEvent | IBlacklistKeyEvent> {
+    const [warnings, blacklistedKeyIDs] = checkKeyStatuses(session, keySystem);
+
+    const warnings$ = warnings.length ? observableOf(...warnings) :
+                                        EMPTY;
+
+    const blackListUpdate$ = blacklistedKeyIDs.length > 0 ?
+      observableOf({ type: "blacklist-key" as const,
+                     value: blacklistedKeyIDs }) :
+      EMPTY;
+
+    return observableConcat(warnings$, blackListUpdate$);
   }
 
   const sessionWarningSubject$ = new Subject<IEMEWarningEvent>();
   const { getLicenseConfig = {} } = keySystem;
-  const getLicenseRetryOptions = {
-    totalRetry: getLicenseConfig.retry != null ? getLicenseConfig.retry :
+  const getLicenseRetryOptions = { totalRetry: getLicenseConfig.retry != null ?
+                                                 getLicenseConfig.retry :
                                                  2,
     baseDelay: 200,
     maxDelay: 3000,
@@ -124,6 +133,7 @@ export default function SessionEventsListener(
         log.debug("EME: keystatuseschange event", session, keyStatusesEvent);
 
         const keyStatusesEvents$ = getKeyStatusesEvents();
+
         const handledKeyStatusesChange$ = tryCatch(() => {
           return keySystem && keySystem.onKeyStatusesChange ?
                    castToObservable(
