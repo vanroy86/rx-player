@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-// FIXME We cannot mock navigator.onLine easily, sadly
-xdescribe("Compat - isOffline", () => {
+describe("Compat - isOffline", () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
   it("should return true if navigator.onLine is `false`", () => {
-    const oldNavigator = window.navigator;
-    (window as any).navigator = { onLine: false };
+    const spy = jest.spyOn(navigator, "onLine", "get").mockImplementation(() => false);
     const isOffline = require("../is_offline").default;
     expect(isOffline()).toEqual(true);
-    (window as any).navigator = oldNavigator;
+    expect(spy).toHaveBeenCalled();
   });
 
   it("should return false if navigator.onLine is `true`", () => {
-    const oldNavigator = window.navigator;
-    (window as any).navigator = { onLine: true };
+    const spy = jest.spyOn(navigator, "onLine", "get").mockImplementation(() => true);
     const isOffline = require("../is_offline").default;
     expect(isOffline()).toEqual(false);
-    (window as any).navigator = oldNavigator;
+    expect(spy).toHaveBeenCalled();
   });
 
   it("should return false if navigator.onLine is `undefined`", () => {
-    const oldNavigator = window.navigator;
-    (window as any).navigator = {};
+    const spy = jest.spyOn(navigator, "onLine", "get")
+      .mockImplementation(() => undefined);
     const isOffline = require("../is_offline").default;
     expect(isOffline()).toEqual(false);
-    (window as any).navigator = oldNavigator;
+    expect(spy).toHaveBeenCalled();
   });
 
   it("should return false if navigator.onLine is `null`", () => {
-    const oldNavigator = window.navigator;
-    (window as any).navigator = { onLine: null };
+    const spy = jest.spyOn(navigator, "onLine", "get").mockImplementation(() => null);
     const isOffline = require("../is_offline").default;
     expect(isOffline()).toEqual(false);
-    (window as any).navigator = oldNavigator;
+    expect(spy).toHaveBeenCalled();
   });
 });
