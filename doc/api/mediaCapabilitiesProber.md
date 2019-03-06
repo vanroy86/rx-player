@@ -480,3 +480,8 @@ exploiting current available media API:
 - __getStatusForPolicy__ - ?
 (https://github.com/WICG/hdcp-detection/blob/master/explainer.md)
   - Query a hypothetical status associated with an HDCP policy.
+
+:warning: Tool's answers are a logic combination of all queries results. It may
+happen than a part of given configuration is not probed, due to either missing
+configuration attributes or lack of native API browser. Tools will warn through
+logs when capabilities are unprobed. If so, see DEBUG logs for more details.
