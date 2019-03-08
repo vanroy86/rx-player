@@ -737,7 +737,7 @@
    * starvation mode.
    * @type {Number}
    */
-            ABR_STARVATION_FACTOR: .72,
+            ABR_STARVATION_FACTOR: .85,
             /**
    * Factor with which is multiplied the bandwidth estimate when the ABR is not
    * in starvation mode.
@@ -2455,6 +2455,40 @@ object-assign
     /* 22 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
+            return subscribeToResult;
+        });
+        /* harmony import */ var _InnerSubscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(47), _subscribeTo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(80);
+        /* harmony import */        
+        /** PURE_IMPORTS_START _InnerSubscriber,_subscribeTo PURE_IMPORTS_END */
+        function subscribeToResult(outerSubscriber, result, outerValue, outerIndex, destination) {
+            if (void 0 === destination && (destination = new _InnerSubscriber__WEBPACK_IMPORTED_MODULE_0__.a(outerSubscriber, outerValue, outerIndex)), 
+            !destination.closed) return Object(_subscribeTo__WEBPACK_IMPORTED_MODULE_1__.a)(result)(destination);
+        }
+        //# sourceMappingURL=subscribeToResult.js.map
+        /***/    }, 
+    /* 23 */
+    /***/ function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
+        /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
+            return OuterSubscriber;
+        });
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), OuterSubscriber = /* */ function(_super) {
+            function OuterSubscriber() {
+                return null !== _super && _super.apply(this, arguments) || this;
+            }
+            return tslib__WEBPACK_IMPORTED_MODULE_0__.a(OuterSubscriber, _super), OuterSubscriber.prototype.notifyNext = function(outerValue, innerValue, outerIndex, innerIndex, innerSub) {
+                this.destination.next(innerValue);
+            }, OuterSubscriber.prototype.notifyError = function(error, innerSub) {
+                this.destination.error(error);
+            }, OuterSubscriber.prototype.notifyComplete = function(innerSub) {
+                this.destination.complete();
+            }, OuterSubscriber;
+        }(__webpack_require__(8).a);
+        /* harmony import */    }, 
+    /* 24 */
+    /***/ function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
         /**
  * Copyright 2015 CANAL+ Group
  *
@@ -2555,7 +2589,7 @@ object-assign
         };
         /* harmony default export */        __webpack_exports__.a = INIT_EVENTS;
     }, 
-    /* 23 */
+    /* 25 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Observable.js + 3 modules
@@ -2655,40 +2689,6 @@ object-assign
  */
         /* harmony default export */        __webpack_exports__.a = xhr_request;
     }, 
-    /* 24 */
-    /***/ function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
-            return subscribeToResult;
-        });
-        /* harmony import */ var _InnerSubscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(47), _subscribeTo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(80);
-        /* harmony import */        
-        /** PURE_IMPORTS_START _InnerSubscriber,_subscribeTo PURE_IMPORTS_END */
-        function subscribeToResult(outerSubscriber, result, outerValue, outerIndex, destination) {
-            if (void 0 === destination && (destination = new _InnerSubscriber__WEBPACK_IMPORTED_MODULE_0__.a(outerSubscriber, outerValue, outerIndex)), 
-            !destination.closed) return Object(_subscribeTo__WEBPACK_IMPORTED_MODULE_1__.a)(result)(destination);
-        }
-        //# sourceMappingURL=subscribeToResult.js.map
-        /***/    }, 
-    /* 25 */
-    /***/ function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
-            return OuterSubscriber;
-        });
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), OuterSubscriber = /* */ function(_super) {
-            function OuterSubscriber() {
-                return null !== _super && _super.apply(this, arguments) || this;
-            }
-            return tslib__WEBPACK_IMPORTED_MODULE_0__.a(OuterSubscriber, _super), OuterSubscriber.prototype.notifyNext = function(outerValue, innerValue, outerIndex, innerIndex, innerSub) {
-                this.destination.next(innerValue);
-            }, OuterSubscriber.prototype.notifyError = function(error, innerSub) {
-                this.destination.error(error);
-            }, OuterSubscriber.prototype.notifyComplete = function(innerSub) {
-                this.destination.complete();
-            }, OuterSubscriber;
-        }(__webpack_require__(8).a);
-        /* harmony import */    }, 
     /* 26 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
@@ -3223,7 +3223,7 @@ object-assign
         });
         /* unused harmony export MergeMapOperator */
         /* unused harmony export MergeMapSubscriber */
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(24), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(25), _InnerSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(47), _map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(34), _observable_from__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(53);
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(22), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(23), _InnerSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(47), _map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(34), _observable_from__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(53);
         /* harmony import */        
         /** PURE_IMPORTS_START tslib,_util_subscribeToResult,_OuterSubscriber,_InnerSubscriber,_map,_observable_from PURE_IMPORTS_END */
         function mergeMap(project, resultSelector, concurrent) {
@@ -5173,7 +5173,7 @@ object-assign
         }
         //# sourceMappingURL=isDate.js.map
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/OuterSubscriber.js
-                var OuterSubscriber = __webpack_require__(25), subscribeToResult = __webpack_require__(24);
+                var OuterSubscriber = __webpack_require__(23), subscribeToResult = __webpack_require__(22);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/util/subscribeToResult.js
                 // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/timeoutWith.js
         /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -7057,7 +7057,7 @@ object-assign
     /* 91 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        /* harmony import */        var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6), _utils_request__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
+        /* harmony import */        var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6), _utils_request__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(25);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -9014,7 +9014,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return switchMap;
         });
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(25), _InnerSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(47), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(24), _map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(34), _observable_from__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(53);
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23), _InnerSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(47), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(22), _map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(34), _observable_from__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(53);
         /* harmony import */        
         /** PURE_IMPORTS_START tslib,_OuterSubscriber,_InnerSubscriber,_util_subscribeToResult,_map,_observable_from PURE_IMPORTS_END */
         function switchMap(project, resultSelector) {
@@ -10935,7 +10935,7 @@ object-assign
         /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() {
             return initializeDirectfileContent;
         });
-        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(172), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(30), rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(112), rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(39), rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(120), rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(142), rxjs_operators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(34), rxjs_operators__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(139), rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(113), rxjs_operators__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(169), rxjs_operators__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(170), _compat__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(72), _compat__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(114), _errors__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(58), _log__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(0), _create_eme_manager__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(100), _events_generators__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(22), _get_stalled_events__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(103), _initial_seek_and_play__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(97), _throw_on_media_error__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(102), _update_playback_rate__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(107);
+        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(172), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(30), rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(112), rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(39), rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(120), rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(142), rxjs_operators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(34), rxjs_operators__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(139), rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(113), rxjs_operators__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(169), rxjs_operators__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(170), _compat__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(72), _compat__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(114), _errors__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(58), _log__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(0), _create_eme_manager__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(100), _events_generators__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(24), _get_stalled_events__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(103), _initial_seek_and_play__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(97), _throw_on_media_error__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(102), _update_playback_rate__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(107);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -11160,8 +11160,236 @@ object-assign
                 });
             };
         }
-        // EXTERNAL MODULE: ./src/utils/array_find.ts
-                var array_find = __webpack_require__(11), object_values = __webpack_require__(92), EWMA = 
+        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/OuterSubscriber.js
+                var OuterSubscriber = __webpack_require__(23), subscribeToResult = __webpack_require__(22);
+        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/util/subscribeToResult.js
+                // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/withLatestFrom.js
+        /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
+        function withLatestFrom() {
+            for (var args = [], _i = 0; _i < arguments.length; _i++) args[_i] = arguments[_i];
+            return function(source) {
+                var project;
+                "function" == typeof args[args.length - 1] && (project = args.pop());
+                var observables = args;
+                return source.lift(new WithLatestFromOperator(observables, project));
+            };
+        }
+        var WithLatestFromOperator = /* */ function() {
+            function WithLatestFromOperator(observables, project) {
+                this.observables = observables, this.project = project;
+            }
+            return WithLatestFromOperator.prototype.call = function(subscriber, source) {
+                return source.subscribe(new withLatestFrom_WithLatestFromSubscriber(subscriber, this.observables, this.project));
+            }, WithLatestFromOperator;
+        }(), withLatestFrom_WithLatestFromSubscriber = /* */ function(_super) {
+            function WithLatestFromSubscriber(destination, observables, project) {
+                var _this = _super.call(this, destination) || this;
+                _this.observables = observables, _this.project = project, _this.toRespond = [];
+                var len = observables.length;
+                _this.values = new Array(len);
+                for (var i = 0; i < len; i++) _this.toRespond.push(i);
+                for (i = 0; i < len; i++) {
+                    var observable = observables[i];
+                    _this.add(Object(subscribeToResult.a)(_this, observable, observable, i));
+                }
+                return _this;
+            }
+            return tslib_es6.a(WithLatestFromSubscriber, _super), WithLatestFromSubscriber.prototype.notifyNext = function(outerValue, innerValue, outerIndex, innerIndex, innerSub) {
+                this.values[outerIndex] = innerValue;
+                var toRespond = this.toRespond;
+                if (0 < toRespond.length) {
+                    var found = toRespond.indexOf(outerIndex);
+                    -1 !== found && toRespond.splice(found, 1);
+                }
+            }, WithLatestFromSubscriber.prototype.notifyComplete = function() {}, WithLatestFromSubscriber.prototype._next = function(value) {
+                if (0 === this.toRespond.length) {
+                    var args = [ value ].concat(this.values);
+                    this.project ? this._tryProject(args) : this.destination.next(args);
+                }
+            }, WithLatestFromSubscriber.prototype._tryProject = function(args) {
+                var result;
+                try {
+                    result = this.project.apply(this, args);
+                } catch (err) {
+                    return void this.destination.error(err);
+                }
+                this.destination.next(result);
+            }, WithLatestFromSubscriber;
+        }(OuterSubscriber.a);
+        //# sourceMappingURL=withLatestFrom.js.map
+        // CONCATENATED MODULE: ./src/core/abr/get_buffer_levels.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Return "Buffer Levels" which are steps of available buffers from which we
+ * are normally able switch safely to the next available bitrate.
+ * (Following an algorithm close to BOLA)
+ * @param {Array.<number>} bitrates - All available bitrates, __sorted__ in
+ * ascending order.
+ * @returns {Array.<number>}
+ */
+        function getBufferLevels(bitrates) {
+            var logs = bitrates.map(function(b) {
+                return Math.log(b / bitrates[0]);
+            }), utilities = logs.map(function(l) {
+                return l - logs[0] + 1;
+            }), gp = (utilities[utilities.length - 1] - 1) / (2 * bitrates.length + 10), Vp = 1 / gp;
+            return bitrates.map(function(_, i) {
+                return minBufferLevelForBitrate(i);
+            });
+            /**
+   * Get minimum buffer we should keep ahead to pick this bitrate.
+   * @param {number} index
+   * @returns {number}
+   */            function minBufferLevelForBitrate(index) {
+                if (0 === index) return 0;
+                var boundedIndex = Math.min(Math.max(1, index), bitrates.length - 1);
+                return Vp * (gp + (bitrates[boundedIndex] * utilities[boundedIndex - 1] - bitrates[boundedIndex - 1] * utilities[boundedIndex]) / (bitrates[boundedIndex] - bitrates[boundedIndex - 1])) + 4;
+            }
+        }
+        // CONCATENATED MODULE: ./src/utils/array_find_index.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Array.prototype.find ponyfill.
+ * @param {Array} arr
+ * @param {Function} predicate
+ * @param {*} context
+ * @returns {boolean}
+ */        function arrayFindIndex(arr, predicate, thisArg) {
+            if ("function" == typeof Array.prototype.findIndex) 
+            /* tslint:disable ban */
+            return arr.findIndex(predicate, thisArg);
+            /* tslint:enable ban */            for (var len = arr.length >>> 0, i = 0; i < len; i++) if (predicate.call(thisArg, arr[i], i, arr)) return i;
+            return -1;
+        }
+        // CONCATENATED MODULE: ./src/core/abr/get_estimate_from_buffer_levels.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * From the buffer gap, choose a representation.
+ * @param {Object} clockTick
+ * @param {Array.<Number>} bitrates
+ * @param {Array.<Number>} levels
+ * @returns {Object|undefined}
+ */        function getEstimateFromBufferLevels(clockTick, bitrates, bufferLevels) {
+            var bufferGap = clockTick.bufferGap, currentBitrate = clockTick.currentBitrate, currentScore = clockTick.currentScore, speed = clockTick.speed;
+            if (null != currentBitrate) {
+                var scaledScore, currentBitrateIndex = arrayFindIndex(bitrates, function(b) {
+                    return b === currentBitrate;
+                });
+                if (currentBitrateIndex < 0 || bitrates.length !== bufferLevels.length) return log.a.error("ABR: Current Bitrate not found in the calculated levels"), 
+                bitrates[0];
+                if (null != currentScore && (scaledScore = 0 === speed ? currentScore : currentScore / speed), 
+                null != scaledScore && 1 < scaledScore) {
+                    var currentBufferLevel = bufferLevels[currentBitrateIndex], nextIndex = function() {
+                        for (var i = currentBitrateIndex + 1; i < bufferLevels.length; i++) if (bufferLevels[i] > currentBufferLevel) return i;
+                    }();
+                    if (null != nextIndex) if (bufferLevels[nextIndex] <= bufferGap) return bitrates[nextIndex];
+                }
+                if (null == scaledScore || scaledScore < 1.15) if (bufferGap < bufferLevels[currentBitrateIndex]) {
+                    for (var i = currentBitrateIndex - 1; 0 <= i; i--) if (bitrates[i] < currentBitrate) return bitrates[i];
+                    return currentBitrate;
+                }
+                return currentBitrate;
+            }
+        }
+        // CONCATENATED MODULE: ./src/core/abr/buffer_based_chooser.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Choose a bitrate based on the currently available buffer.
+ *
+ * This algorithm is based on the deviation of the BOLA algorithm.
+ * It is a hybrid solution that also relies on a given bitrate's
+ * "maintainability".
+ * Each time a chunk is downloaded, from the ratio between the chunk duration
+ * and chunk's request time, we can assume that the representation is
+ * "maintanable" or not.
+ * If so, we may switch to a better quality, or conversely to a worse quality.
+ *
+ * @param {Observable} update$
+ * @param {Array.<number>} bitrates
+ * @returns {Observable}
+ */        function BufferBasedChooser(update$, bitrates) {
+            var levelsMap = getBufferLevels(bitrates);
+            return update$.pipe(Object(map.a)(function(clockTick) {
+                return getEstimateFromBufferLevels(clockTick, bitrates, levelsMap);
+            }));
+        }
+        // CONCATENATED MODULE: ./src/core/abr/ewma.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Tweaked implementation of an exponential weighted Moving Average.
+ * Heavily "inspired" from the shaka-player one (Ewma).
+ * @class EWMA
+ */        var EWMA = 
         /* */
         function() {
             /**
@@ -11185,86 +11413,7 @@ object-assign
                 var zeroFactor = 1 - Math.pow(this._alpha, this._totalWeight);
                 return this._lastEstimate / zeroFactor;
             }, EWMA;
-        }(), ABR_MINIMUM_TOTAL_BYTES = config.a.ABR_MINIMUM_TOTAL_BYTES, ABR_MINIMUM_CHUNK_SIZE = config.a.ABR_MINIMUM_CHUNK_SIZE, ABR_FAST_EMA = config.a.ABR_FAST_EMA, ABR_SLOW_EMA = config.a.ABR_SLOW_EMA, bandwidth_estimator_BandwidthEstimator = 
-        /* */
-        function() {
-            function BandwidthEstimator() {
-                /**
-     * A fast-moving average.
-     * @private
-     */
-                this._fastEWMA = new EWMA(ABR_FAST_EMA), 
-                /**
-     * A slow-moving average.
-     * @private
-     */
-                this._slowEWMA = new EWMA(ABR_SLOW_EMA), 
-                /**
-     * Number of bytes sampled.
-     * @private
-     */
-                this._bytesSampled = 0;
-            }
-            /**
-   * Takes a bandwidth sample.
-   * @param {number} durationMs - The amount of time, in milliseconds, for a
-   *   particular request.
-   * @param {number} numBytes - The total number of bytes transferred in that
-   *   request.
-   */            var _proto = BandwidthEstimator.prototype;
-            return _proto.addSample = function addSample(durationInMs, numberOfBytes) {
-                if (!(numberOfBytes < ABR_MINIMUM_CHUNK_SIZE)) {
-                    var bandwidth = 8e3 * numberOfBytes / durationInMs, weight = durationInMs / 1e3;
-                    this._bytesSampled += numberOfBytes, this._fastEWMA.addSample(weight, bandwidth), 
-                    this._slowEWMA.addSample(weight, bandwidth);
-                }
-            }
-            /**
-   * Get estimate of the bandwidth, in bits per seconds.
-   * @returns {Number|undefined}
-   */ , _proto.getEstimate = function getEstimate() {
-                if (!(this._bytesSampled < ABR_MINIMUM_TOTAL_BYTES)) // Take the minimum of these two estimates.  This should have the effect of
-                // adapting down quickly, but up more slowly.
-                return Math.min(this._fastEWMA.getEstimate(), this._slowEWMA.getEstimate());
-            }
-            /**
-   * Reset the bandwidth estimation.
-   */ , _proto.reset = function reset() {
-                this._fastEWMA = new EWMA(ABR_FAST_EMA), this._slowEWMA = new EWMA(ABR_SLOW_EMA), 
-                this._bytesSampled = 0;
-            }, BandwidthEstimator;
         }();
-        // EXTERNAL MODULE: ./src/utils/object_values.ts
-                // CONCATENATED MODULE: ./src/utils/array_find_index.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * Array.prototype.find ponyfill.
- * @param {Array} arr
- * @param {Function} predicate
- * @param {*} context
- * @returns {boolean}
- */
-        function arrayFindIndex(arr, predicate, thisArg) {
-            if ("function" == typeof Array.prototype.findIndex) 
-            /* tslint:disable ban */
-            return arr.findIndex(predicate, thisArg);
-            /* tslint:enable ban */            for (var len = arr.length >>> 0, i = 0; i < len; i++) if (predicate.call(thisArg, arr[i], i, arr)) return i;
-            return -1;
-        }
         // CONCATENATED MODULE: ./src/core/abr/filter_by_bitrate.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -11292,6 +11441,8 @@ object-assign
             });
             return -1 === firstSuperiorBitrate ? representations : representations.slice(0, firstSuperiorBitrate);
         }
+        // EXTERNAL MODULE: ./src/utils/array_find.ts
+                var array_find = __webpack_require__(11);
         // CONCATENATED MODULE: ./src/core/abr/filter_by_width.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -11348,14 +11499,14 @@ object-assign
         /**
  * @param {Array.<Representation>} representations - The representations array
  * @param {Number} bitrate
- * @returns {Representation}
+ * @returns {Representation|undefined}
  */        function fromBitrateCeil(representations, bitrate) {
             var tooHighIndex = arrayFindIndex(representations, function(representation) {
                 return representation.bitrate > bitrate;
             });
             return -1 === tooHighIndex ? representations[representations.length - 1] : representations[tooHighIndex - 1];
         }
-        // CONCATENATED MODULE: ./src/core/abr/representation_chooser.ts
+        // CONCATENATED MODULE: ./src/core/abr/bandwidth_estimator.ts
         /**
  * Copyright 2015 CANAL+ Group
  *
@@ -11370,16 +11521,72 @@ object-assign
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */        var ABR_REGULAR_FACTOR = config.a.ABR_REGULAR_FACTOR, ABR_STARVATION_DURATION_DELTA = config.a.ABR_STARVATION_DURATION_DELTA, ABR_STARVATION_FACTOR = config.a.ABR_STARVATION_FACTOR, ABR_STARVATION_GAP = config.a.ABR_STARVATION_GAP, OUT_OF_STARVATION_GAP = config.a.OUT_OF_STARVATION_GAP;
+ */        var ABR_MINIMUM_TOTAL_BYTES = config.a.ABR_MINIMUM_TOTAL_BYTES, ABR_MINIMUM_CHUNK_SIZE = config.a.ABR_MINIMUM_CHUNK_SIZE, ABR_FAST_EMA = config.a.ABR_FAST_EMA, ABR_SLOW_EMA = config.a.ABR_SLOW_EMA, bandwidth_estimator_BandwidthEstimator = 
+        /* */
+        function() {
+            function BandwidthEstimator() {
+                /**
+     * A fast-moving average.
+     * @private
+     */
+                this._fastEWMA = new EWMA(ABR_FAST_EMA), 
+                /**
+     * A slow-moving average.
+     * @private
+     */
+                this._slowEWMA = new EWMA(ABR_SLOW_EMA), 
+                /**
+     * Number of bytes sampled.
+     * @private
+     */
+                this._bytesSampled = 0;
+            }
+            /**
+   * Takes a bandwidth sample.
+   * @param {number} durationMs - The amount of time, in milliseconds, for a
+   *   particular request.
+   * @param {number} numBytes - The total number of bytes transferred in that
+   *   request.
+   */            var _proto = BandwidthEstimator.prototype;
+            return _proto.addSample = function addSample(durationInMs, numberOfBytes) {
+                if (!(numberOfBytes < ABR_MINIMUM_CHUNK_SIZE)) {
+                    var bandwidth = 8e3 * numberOfBytes / durationInMs, weight = durationInMs / 1e3;
+                    this._bytesSampled += numberOfBytes, this._fastEWMA.addSample(weight, bandwidth), 
+                    this._slowEWMA.addSample(weight, bandwidth);
+                }
+            }
+            /**
+   * Get estimate of the bandwidth, in bits per seconds.
+   * @returns {Number|undefined}
+   */ , _proto.getEstimate = function getEstimate() {
+                if (!(this._bytesSampled < ABR_MINIMUM_TOTAL_BYTES)) // Take the minimum of these two estimates.  This should have the effect of
+                // adapting down quickly, but up more slowly.
+                return Math.min(this._fastEWMA.getEstimate(), this._slowEWMA.getEstimate());
+            }
+            /**
+   * Reset the bandwidth estimation.
+   */ , _proto.reset = function reset() {
+                this._fastEWMA = new EWMA(ABR_FAST_EMA), this._slowEWMA = new EWMA(ABR_SLOW_EMA), 
+                this._bytesSampled = 0;
+            }, BandwidthEstimator;
+        }(), ABR_REGULAR_FACTOR = config.a.ABR_REGULAR_FACTOR, ABR_STARVATION_DURATION_DELTA = config.a.ABR_STARVATION_DURATION_DELTA, ABR_STARVATION_FACTOR = config.a.ABR_STARVATION_FACTOR, ABR_STARVATION_GAP = config.a.ABR_STARVATION_GAP, OUT_OF_STARVATION_GAP = config.a.OUT_OF_STARVATION_GAP;
+        /**
+ * Calculate a mean bandwidth based on the bytes downloaded and the amount
+ * of time needed to do so.
+ *
+ * Heavily "inspired" from the Shaka-Player's "ewma bandwidth estimator".
+ * @class BandwidthEstimator
+ */        
         /**
  * Get the pending request starting with the asked segment position.
  * @param {Object} requests
  * @param {number} position
  * @returns {IRequestInfo|undefined}
- */        function getConcernedRequest(requests, neededPosition) {
-            for (var currentRequestIds = Object.keys(requests), len = currentRequestIds.length, i = 0; i < len; i++) {
-                var request = requests[currentRequestIds[i]];
-                if (null != request && 0 < request.duration) if (neededPosition < request.time + request.duration && -.3 < neededPosition - request.time) return request;
+ */
+        function getConcernedRequest(requests, neededPosition) {
+            for (var i = 0; i < requests.length; i++) {
+                var request = requests[i];
+                if (0 < request.duration) if (neededPosition < request.time + request.duration && -.3 < neededPosition - request.time) return request;
             }
         }
         /**
@@ -11398,20 +11605,6 @@ object-assign
                 }
                 return ewma1.getEstimate();
             }
-        }
-        /**
- * Filter representations given through filters options.
- * @param {Array.<Representation>} representations
- * @param {Object} filters - Filter Object.
- * _Can_ contain each of the following properties:
- *   - bitrate {Number} - max bitrate authorized (included).
- *   - width {Number} - max width authorized (included).
- * @returns {Array.<Representation>}
- */        function getFilteredRepresentations(representations, filters) {
-            var _representations = representations;
-            return null != filters.bitrate && (_representations = filterByBitrate(_representations, filters.bitrate)), 
-            null != filters.width && (_representations = filterByWidth(_representations, filters.width)), 
-            _representations;
         }
         /**
  * Estimate remaining time for a pending request from a progress event.
@@ -11452,12 +11645,11 @@ object-assign
  * switch immediately if a lower bitrate is more adapted.
  * Returns false if it estimates that you have time before switching to a lower
  * bitrate.
- * @param {Object} pendingRequests
  * @param {Object} clock
- */        function shouldDirectlySwitchToLowBitrate(pendingRequests, clock) {
-            var nextNeededPosition = clock.currentTime + clock.bufferGap, requests = Object(object_values.a)(pendingRequests).filter(function(a) {
-                return !!a;
-            }).sort(function(a, b) {
+ * @param {Object} pendingRequests
+ * @returns {boolean}
+ */        function shouldDirectlySwitchToLowBitrate(clock, currentRequests) {
+            var nextNeededPosition = clock.currentTime + clock.bufferGap, requests = currentRequests.sort(function(a, b) {
                 return a.time - b.time;
             }), nextNeededRequest = Object(array_find.a)(requests, function(r) {
                 return r.time + r.duration > nextNeededPosition;
@@ -11469,13 +11661,165 @@ object-assign
             return !((now - lastProgressEvent.timestamp) / 1e3 <= 1.2 * remainingTime && remainingTime < clock.bufferGap / clock.speed + ABR_STARVATION_GAP);
         }
         /**
- * Choose the right representation based on multiple parameters given, such as:
- *   - the current user's bandwidth
- *   - the max bitrate authorized
- *   - the size of the video element
+ * Analyze the current network conditions and give a bandwidth estimate as well
+ * as a maximum bitrate a Representation should be.
+ * @class NetworkAnalyzer
+ */        var network_analyzer_NetworkAnalyzer = 
+        /* */
+        function() {
+            function NetworkAnalyzer(initialBitrate) {
+                this._initialBitrate = initialBitrate, this._estimator = new bandwidth_estimator_BandwidthEstimator(), 
+                this._inStarvationMode = !1;
+            }
+            var _proto = NetworkAnalyzer.prototype;
+            return _proto.getBandwidthEstimate = function getBandwidthEstimate(clockTick, currentRequests, lastEstimatedBitrate) {
+                var newBitrateCeil, bandwidthEstimate, bufferGap = clockTick.bufferGap;
+ // bitrate ceil for the chosen Representation
+                                // If in starvation mode, check if a quick new estimate can be done
+                // from the last requests.
+                // If so, cancel previous estimations and replace it by the new one
+                if (// check if should get in/out of starvation mode
+                bufferGap + clockTick.currentTime < clockTick.duration - ABR_STARVATION_DURATION_DELTA ? !this._inStarvationMode && bufferGap <= ABR_STARVATION_GAP ? (log.a.info("ABR: enter starvation mode."), 
+                this._inStarvationMode = !0) : this._inStarvationMode && OUT_OF_STARVATION_GAP <= bufferGap && (log.a.info("ABR: exit starvation mode."), 
+                this._inStarvationMode = !1) : this._inStarvationMode && (log.a.info("ABR: exit starvation mode."), 
+                this._inStarvationMode = !1), this._inStarvationMode && null != (bandwidthEstimate = estimateStarvationModeBitrate(currentRequests, clockTick, lastEstimatedBitrate))) {
+                    log.a.info("ABR: starvation mode emergency estimate:", bandwidthEstimate), this._estimator.reset();
+                    var currentBitrate = clockTick.downloadBitrate;
+                    newBitrateCeil = null == currentBitrate ? bandwidthEstimate : Math.min(bandwidthEstimate, currentBitrate);
+                }
+ // if newBitrateCeil is not yet defined, do the normal estimation
+                                return null == newBitrateCeil && (newBitrateCeil = null != (bandwidthEstimate = this._estimator.getEstimate()) ? this._inStarvationMode ? bandwidthEstimate * ABR_STARVATION_FACTOR : bandwidthEstimate * ABR_REGULAR_FACTOR : null != lastEstimatedBitrate ? this._inStarvationMode ? lastEstimatedBitrate * ABR_STARVATION_FACTOR : lastEstimatedBitrate * ABR_REGULAR_FACTOR : this._initialBitrate), 
+                1 < clockTick.speed && (newBitrateCeil /= clockTick.speed), {
+                    bandwidthEstimate: bandwidthEstimate,
+                    bitrateChosen: newBitrateCeil
+                };
+            }
+            /**
+   * Add a bandwidth estimate by giving:
+   *   - the duration of the request, in s
+   *   - the size of the request in bytes
+   * @param {number} duration
+   * @param {number} size
+   */ , _proto.addEstimate = function addEstimate(duration, size) {
+                this._estimator.addSample(duration, size);
+            }
+            /**
+   * For a given wanted bitrate, tells if should switch urgently.
+   * @param {number} bitrate
+   * @param {Object} clockTick
+   * @returns {boolean}
+   */ , _proto.isUrgent = function isUrgent(bitrate, currentRequests, clockTick) {
+                return null == clockTick.downloadBitrate || bitrate !== clockTick.downloadBitrate && (bitrate > clockTick.downloadBitrate ? !this._inStarvationMode : shouldDirectlySwitchToLowBitrate(clockTick, currentRequests));
+            }, NetworkAnalyzer;
+        }(), object_values = __webpack_require__(92), pending_requests_store_PendingRequestsStore = 
+        /* */
+        function() {
+            function PendingRequestsStore() {
+                this._currentRequests = {};
+            }
+            /**
+   * Add informations about a new pending request.
+   * @param {string} id
+   * @param {Object} payload
+   */            var _proto = PendingRequestsStore.prototype;
+            return _proto.add = function add(id, payload) {
+                if (this._currentRequests[id]) log.a.warn("ABR: request already added."); else {
+                    var _payload$value = payload.value, time = _payload$value.time, duration = _payload$value.duration, requestTimestamp = _payload$value.requestTimestamp;
+                    this._currentRequests[id] = {
+                        time: time,
+                        duration: duration,
+                        requestTimestamp: requestTimestamp,
+                        progress: []
+                    };
+                }
+            }
+            /**
+   * Notify of the progress of a currently pending request.
+   * @param {string} id
+   * @param {Object} progress
+   */ , _proto.addProgress = function addProgress(id, progress) {
+                var request = this._currentRequests[id];
+                request ? request.progress.push(progress.value) : log.a.warn("ABR: progress for a request not added");
+            }
+            /**
+   * Remove a request previously set as pending.
+   * @param {string} id
+   */ , _proto.remove = function remove(id) {
+                this._currentRequests[id] || log.a.warn("ABR: can't remove unknown request"), delete this._currentRequests[id];
+            }
+            /**
+   *
+   */ , _proto.getRequests = function getRequests() {
+                return Object(object_values.a)(this._currentRequests).filter(function(x) {
+                    return null != x;
+                });
+            }, PendingRequestsStore;
+        }();
+        // EXTERNAL MODULE: ./src/utils/object_values.ts
+                // CONCATENATED MODULE: ./src/core/abr/representation_chooser.ts
+        /**
+ * Copyright 2015 CANAL+ Group
  *
- * Those parameters can be set through different subjects and methods.
- * The subjects (undocumented here are):
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Filter representations given through filters options.
+ * @param {Array.<Representation>} representations
+ * @param {Object} filters - Filter Object.
+ * _Can_ contain each of the following properties:
+ *   - bitrate {Number} - max bitrate authorized (included).
+ *   - width {Number} - max width authorized (included).
+ * @returns {Array.<Representation>}
+ */
+        function getFilteredRepresentations(representations, filters) {
+            var _representations = representations;
+            return null != filters.bitrate && (_representations = filterByBitrate(_representations, filters.bitrate)), 
+            null != filters.width && (_representations = filterByWidth(_representations, filters.width)), 
+            _representations;
+        }
+        /**
+ * Create Observable that merge several throttling Observables into one.
+ * @param {Observable} limitWidth$ - Emit the width at which the chosen
+ * Representation should be limited.
+ * @param {Observable} throttleBitrate$ - Emit the maximum bitrate authorized.
+ * @returns {Observable}
+ */        function createDeviceEvents(limitWidth$, throttleBitrate$) {
+            var deviceEventsArray = [];
+            // Emit restrictions on the pools of available representations to choose
+            // from.
+            return limitWidth$ && deviceEventsArray.push(limitWidth$.pipe(Object(map.a)(function(width) {
+                return {
+                    width: width
+                };
+            }))), throttleBitrate$ && deviceEventsArray.push(throttleBitrate$.pipe(Object(map.a)(function(bitrate) {
+                return {
+                    bitrate: bitrate
+                };
+            }))), deviceEventsArray.length ? combineLatest.a.apply(void 0, deviceEventsArray).pipe(Object(map.a)(function(args) {
+                return object_assign_default.a.apply(void 0, [ {} ].concat(args));
+            })) : Object(of.a)({});
+        }
+        /**
+ * Choose the right Representation thanks to "choosers":
+ *
+ * - The throughput chooser choose the Representation relatively to the current
+ *   user's bandwidth.
+ *
+ * - The buffer-based chooser choose the Representation relatively to the
+ *   current size of the buffer.
+ *
+ * To have more control over which Representation should be choosen, you can
+ * also use the following exposed subjects:
  *
  *   - manualBitrate$ {Subject}: Set the bitrate manually, if no representation
  *     is found with the given bitrate. An immediately inferior one will be
@@ -11495,137 +11839,134 @@ object-assign
             /**
    * @param {Object} options
    */
-            function RepresentationChooser(options) {
-                this._dispose$ = new Subject.a(), this.manualBitrate$ = new BehaviorSubject_BehaviorSubject(null != options.manualBitrate ? options.manualBitrate : -1), 
-                this.maxAutoBitrate$ = new BehaviorSubject_BehaviorSubject(null != options.maxAutoBitrate ? options.maxAutoBitrate : Infinity), 
-                this.estimator = new bandwidth_estimator_BandwidthEstimator(), this._currentRequests = {}, 
-                this._initialBitrate = options.initialBitrate || 0, this._limitWidth$ = options.limitWidth$, 
-                this._throttle$ = options.throttle$, this._reEstimate$ = new Subject.a();
+            function RepresentationChooser(mediaElement, options) {
+                this._dispose$ = new Subject.a(), this._scoreEstimator = null, this._networkAnalyzer = new network_analyzer_NetworkAnalyzer(options.initialBitrate || 0), 
+                this._pendingRequests = new pending_requests_store_PendingRequestsStore(), this._mediaElement = mediaElement, 
+                this._limitWidth$ = options.limitWidth$, this._throttle$ = options.throttle$, this.manualBitrate$ = new BehaviorSubject_BehaviorSubject(null != options.manualBitrate ? options.manualBitrate : -1), 
+                this.maxAutoBitrate$ = new BehaviorSubject_BehaviorSubject(null != options.maxAutoBitrate ? options.maxAutoBitrate : Infinity);
             }
-            /**
-   * @param {Observable} clock$
-   * @param {Array.<Object>} representations
-   * @returns {Observable}
-   */            var _proto = RepresentationChooser.prototype;
-            return _proto.get$ = function get$(clock$, representations) {
-                var _this = this;
+            var _proto = RepresentationChooser.prototype;
+            return _proto.get$ = function get$(representations, clock$, bufferEvents$) {
+                var currentRepresentation, _this = this;
                 if (!representations.length) throw new Error("ABRManager: no representation choice given");
                 if (1 === representations.length) return Object(of.a)({
                     bitrate: void 0,
                     representation: representations[0],
                     manual: !1,
-                    urgent: !0
+                    urgent: !0,
+                    lastStableBitrate: void 0
                 });
-                var manualBitrate$ = this.manualBitrate$, maxAutoBitrate$ = this.maxAutoBitrate$, _initialBitrate = this._initialBitrate, _deviceEventsArray = [];
-                this._limitWidth$ && _deviceEventsArray.push(this._limitWidth$.pipe(Object(map.a)(function(width) {
-                    return {
-                        width: width
-                    };
-                }))), this._throttle$ && _deviceEventsArray.push(this._throttle$.pipe(Object(map.a)(function(bitrate) {
-                    return {
-                        bitrate: bitrate
-                    };
-                })));
-                // Emit restrictions on the pools of available Representations to choose
-                // from.
-                var lastEstimatedBitrate, deviceEvents$ = _deviceEventsArray.length ? combineLatest.a.apply(void 0, _deviceEventsArray).pipe(Object(map.a)(function(args) {
-                    return object_assign_default.a.apply(void 0, [ {} ].concat(args));
-                })) : Object(of.a)({});
- // Store the last client's bitrate generated by our estimation algorithms.
-                                return manualBitrate$.pipe(Object(switchMap.a)(function(manualBitrate) {
+                var manualBitrate$ = this.manualBitrate$, maxAutoBitrate$ = this.maxAutoBitrate$, deviceEvents$ = createDeviceEvents(this._limitWidth$, this._throttle$);
+                return bufferEvents$.pipe(Object(filter.a)(function(evt) {
+                    return "representation-buffer-change" === evt.type;
+                }), Object(takeUntil.a)(this._dispose$)).subscribe(function(evt) {
+                    currentRepresentation = evt.value.representation, _this._scoreEstimator = null;
+                }), manualBitrate$.pipe(Object(switchMap.a)(function(manualBitrate) {
                     if (0 <= manualBitrate) 
                     // -- MANUAL mode --
                     return Object(of.a)({
-                        bitrate: void 0,
                         representation: fromBitrateCeil(representations, manualBitrate) || representations[0],
+                        bitrate: void 0,
+                        lastStableBitrate: void 0,
                         manual: !0,
                         urgent: !0
                     });
  // -- AUTO mode --
-                                        var inStarvationMode = !1;
- // == buffer gap too low == panic mode
-                                        return Object(combineLatest.a)(clock$, maxAutoBitrate$, deviceEvents$, _this._reEstimate$.pipe(Object(startWith.a)(null))).pipe(Object(map.a)(function(_ref) {
-                        var newBitrateCeil, bandwidthEstimate, nextEstimate, clock = _ref[0], maxAutoBitrate = _ref[1], deviceEvents = _ref[2], bufferGap = clock.bufferGap;
-                        // If in starvation mode, check if a quick new estimate can be done
-                        // from the last requests.
-                        // If so, cancel previous estimations and replace it by the new one
-                        if (// check if should get in/out of starvation mode
-                        bufferGap + clock.currentTime < clock.duration - ABR_STARVATION_DURATION_DELTA ? !inStarvationMode && bufferGap <= ABR_STARVATION_GAP ? (log.a.info("ABR: enter starvation mode."), 
-                        inStarvationMode = !0) : inStarvationMode && OUT_OF_STARVATION_GAP <= bufferGap && (log.a.info("ABR: exit starvation mode."), 
-                        inStarvationMode = !1) : inStarvationMode && (log.a.info("ABR: exit starvation mode."), 
-                        inStarvationMode = !1), inStarvationMode && null != (bandwidthEstimate = estimateStarvationModeBitrate(_this._currentRequests, clock, lastEstimatedBitrate))) {
-                            log.a.info("ABR: starvation mode emergency estimate:", bandwidthEstimate), _this.estimator.reset();
-                            var currentBitrate = clock.downloadBitrate;
-                            newBitrateCeil = null == currentBitrate ? Math.min(bandwidthEstimate, maxAutoBitrate) : Math.min(bandwidthEstimate, maxAutoBitrate, currentBitrate);
-                        }
- // if newBitrateCeil is not yet defined, do the normal estimation
-                                                null == newBitrateCeil && (nextEstimate = null != (bandwidthEstimate = _this.estimator.getEstimate()) ? inStarvationMode ? bandwidthEstimate * ABR_STARVATION_FACTOR : bandwidthEstimate * ABR_REGULAR_FACTOR : null != lastEstimatedBitrate ? inStarvationMode ? lastEstimatedBitrate * ABR_STARVATION_FACTOR : lastEstimatedBitrate * ABR_REGULAR_FACTOR : _initialBitrate, 
-                        newBitrateCeil = Math.min(nextEstimate, maxAutoBitrate));
-                        1 < clock.speed && (newBitrateCeil /= clock.speed);
-                        var chosenRepresentation = fromBitrateCeil(getFilteredRepresentations(representations, deviceEvents), newBitrateCeil) || representations[0], urgent = function() {
-                            return null == clock.downloadBitrate || chosenRepresentation.bitrate !== clock.downloadBitrate && (chosenRepresentation.bitrate > clock.downloadBitrate ? !inStarvationMode : shouldDirectlySwitchToLowBitrate(_this._currentRequests, clock));
-                        }();
+                                        var lastEstimatedBitrate, forceBandwidthMode = !0, bufferBasedEstimation$ = BufferBasedChooser(bufferEvents$.pipe(Object(filter.a)(function(e) {
+                        return "added-segment" === e.type;
+                    }), withLatestFrom(clock$), Object(map.a)(function(_ref) {
+                        var addedSegmentEvt = _ref[0], speed = _ref[1].speed, currentTime = _this._mediaElement.currentTime, timeRanges = addedSegmentEvt.value.buffered;
                         return {
-                            bitrate: bandwidthEstimate,
-                            representation: chosenRepresentation,
-                            manual: !1,
-                            urgent: urgent
+                            bufferGap: Object(utils_ranges.c)(timeRanges, currentTime),
+                            currentBitrate: null == currentRepresentation ? void 0 : currentRepresentation.bitrate,
+                            currentScore: null == _this._scoreEstimator ? void 0 : _this._scoreEstimator.getEstimate(),
+                            speed: speed
                         };
-                    }), Object(tap.a)(function(_ref2) {
-                        var bitrate = _ref2.bitrate;
-                        null != bitrate && (lastEstimatedBitrate = bitrate);
+                    })), representations.map(function(r) {
+                        return r.bitrate;
+                    }));
+                    return Object(combineLatest.a)(clock$, maxAutoBitrate$, deviceEvents$, bufferBasedEstimation$.pipe(Object(startWith.a)(void 0))).pipe(Object(map.a)(function(_ref2) {
+                        var lastStableBitrate, clock = _ref2[0], maxAutoBitrate = _ref2[1], deviceEvents = _ref2[2], bufferBasedBitrate = _ref2[3], _representations = getFilteredRepresentations(representations, deviceEvents), requests = _this._pendingRequests.getRequests(), _this$_networkAnalyze = _this._networkAnalyzer.getBandwidthEstimate(clock, requests, lastEstimatedBitrate), bandwidthEstimate = _this$_networkAnalyze.bandwidthEstimate, bitrateChosen = _this$_networkAnalyze.bitrateChosen;
+                        lastEstimatedBitrate = bandwidthEstimate, _this._scoreEstimator && (lastStableBitrate = null == currentRepresentation ? lastStableBitrate : 1 < _this._scoreEstimator.getEstimate() ? currentRepresentation.bitrate : lastStableBitrate);
+                        var bufferGap = clock.bufferGap;
+                        !forceBandwidthMode && bufferGap <= 5 ? forceBandwidthMode = !0 : forceBandwidthMode && Number.isFinite(bufferGap) && 10 < bufferGap && (forceBandwidthMode = !1);
+                        var chosenRepFromBandwidth = fromBitrateCeil(_representations, Math.min(bitrateChosen, maxAutoBitrate)) || _representations[0] || representations[0];
+                        return forceBandwidthMode ? {
+                            bitrate: bandwidthEstimate,
+                            representation: chosenRepFromBandwidth,
+                            urgent: _this._networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate, requests, clock),
+                            manual: !1,
+                            lastStableBitrate: lastStableBitrate
+                        } : null == bufferBasedBitrate || chosenRepFromBandwidth.bitrate >= bufferBasedBitrate ? {
+                            bitrate: bandwidthEstimate,
+                            representation: chosenRepFromBandwidth,
+                            urgent: _this._networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate, requests, clock),
+                            manual: !1,
+                            lastStableBitrate: lastStableBitrate
+                        } : {
+                            bitrate: bandwidthEstimate,
+                            representation: fromBitrateCeil(_representations, Math.min(bufferBasedBitrate, maxAutoBitrate)) || _representations[0] || representations[0],
+                            urgent: _this._networkAnalyzer.isUrgent(bufferBasedBitrate, requests, clock),
+                            manual: !1,
+                            lastStableBitrate: lastStableBitrate
+                        };
+                    }), Object(distinctUntilChanged.a)(function(a, b) {
+                        return a.representation.id === b.representation.id && b.lastStableBitrate === a.lastStableBitrate;
                     }), Object(takeUntil.a)(_this._dispose$));
                 }));
             }
             /**
-   * Add a bandwidth estimate by giving:
+   * Add bandwidth and "maintainability score" estimate by giving:
    *   - the duration of the request, in s
    *   - the size of the request in bytes
+   *   - the content downloaded
    * @param {number} duration
    * @param {number} size
-   */ , _proto.addEstimate = function addEstimate(duration, size) {
-                null != duration && null != size && (this.estimator.addSample(duration, size), this._reEstimate$.next());
+   * @param {Object} content
+   */ , _proto.addEstimate = function addEstimate(duration, size, content) {
+                this._networkAnalyzer.addEstimate(duration, size);
+                // calculate bandwidth
+                // calculate "maintainability score"
+                var segment = content.segment;
+                if (null != segment.duration) {
+                    var requestDuration = duration / 1e3, ratio = segment.duration / segment.timescale / requestDuration;
+                    if (null == this._scoreEstimator) {
+                        var newEWMA = new EWMA(5);
+                        newEWMA.addSample(requestDuration, ratio), this._scoreEstimator = newEWMA;
+                    } else this._scoreEstimator.addSample(requestDuration, ratio);
+                }
             }
             /**
    * Add informations about a new pending request.
    * This can be useful if the network bandwidth drastically changes to infer
    * a new bandwidth through this single request.
-   * @param {string|number} id
+   * @param {string} id
    * @param {Object} payload
    */ , _proto.addPendingRequest = function addPendingRequest(id, payload) {
-                if (this._currentRequests[id]) log.a.warn("ABR: request already added."); else {
-                    var _payload$value = payload.value, time = _payload$value.time, duration = _payload$value.duration, requestTimestamp = _payload$value.requestTimestamp;
-                    this._currentRequests[id] = {
-                        time: time,
-                        duration: duration,
-                        requestTimestamp: requestTimestamp,
-                        progress: []
-                    };
-                }
+                this._pendingRequests.add(id, payload);
             }
             /**
    * Add progress informations to a pending request.
    * Progress objects are a key part to calculate the bandwidth from a single
    * request, in the case the user's bandwidth changes drastically while doing
    * it.
-   * @param {string|number} id
+   * @param {string} id
    * @param {Object} progress
    */ , _proto.addRequestProgress = function addRequestProgress(id, progress) {
-                var request = this._currentRequests[id];
-                request ? request.progress.push(progress.value) : log.a.warn("ABR: progress for a request not added");
+                this._pendingRequests.addProgress(id, progress);
             }
             /**
    * Remove a request previously set as pending through the addPendingRequest
    * method.
-   * @param {string|number} id
+   * @param {string} id
    */ , _proto.removePendingRequest = function removePendingRequest(id) {
-                this._currentRequests[id] || log.a.warn("ABR: can't remove unknown request"), delete this._currentRequests[id];
+                this._pendingRequests.remove(id);
             }
             /**
    * Free up the resources used by the RepresentationChooser.
    */ , _proto.dispose = function dispose() {
-                this._dispose$.next(), this._dispose$.complete(), this._reEstimate$.next(), this._reEstimate$.complete(), 
-                this.manualBitrate$.complete(), this.maxAutoBitrate$.complete();
+                this._dispose$.next(), this._dispose$.complete(), this.manualBitrate$.complete(), 
+                this.maxAutoBitrate$.complete();
             }, RepresentationChooser;
         }(), defaultChooserOptions = {
             limitWidth: {},
@@ -11633,8 +11974,8 @@ object-assign
             initialBitrates: {},
             manualBitrates: {},
             maxAutoBitrates: {}
-        }, abr_manager_createChooser = function createChooser(type, options) {
-            return new representation_chooser_RepresentationChooser({
+        }, abr_manager_createChooser = function createChooser(type, mediaElement, options) {
+            return new representation_chooser_RepresentationChooser(mediaElement, {
                 limitWidth$: options.limitWidth[type],
                 throttle$: options.throttle[type],
                 initialBitrate: options.initialBitrates[type],
@@ -11645,6 +11986,7 @@ object-assign
         /* */
         function() {
             /**
+   * @param {HTMLMediaElement} mediaElement
    * @param {Observable} requests$ - Emit requests infos as they begin, progress
    * and end.
    * Allows to know if a request take too much time to be finished in
@@ -11697,7 +12039,7 @@ object-assign
    * a new segment for a given buffer type. Allows to obtain informations about
    * the user's bitrate.
    *
-   * The items emitted are object with the following keys:
+   * The items emitted are objects with the following keys:
    *   - type {string}: the buffer type (example: "video")
    *   - value {Object}:
    *     - duration {number}: duration of the request, in seconds.
@@ -11705,9 +12047,9 @@ object-assign
    *
    * @param {Object|undefined} options
    */
-            function ABRManager(requests$, metrics$, options) {
+            function ABRManager(mediaElement, requests$, metrics$, options) {
                 var _this = this;
-                void 0 === options && (options = defaultChooserOptions), 
+                void 0 === options && (options = defaultChooserOptions), this._mediaElement = mediaElement, 
                 // Subject emitting and completing on dispose.
                 // Used to clean up every created observables.
                 this._dispose$ = new Subject.a(), // Will contain every RepresentationChooser attached to the ABRManager,
@@ -11722,8 +12064,8 @@ object-assign
                     throttle: options.throttle || {},
                     limitWidth: options.limitWidth || {}
                 }, metrics$.pipe(Object(takeUntil.a)(this._dispose$)).subscribe(function(_ref) {
-                    var type = _ref.type, value = _ref.value, chooser = _this._lazilyCreateChooser(type), duration = value.duration, size = value.size;
-                    chooser.addEstimate(duration, size);
+                    var type = _ref.type, value = _ref.value, chooser = _this._lazilyCreateChooser(type), duration = value.duration, size = value.size, content = value.content;
+                    chooser.addEstimate(duration, size, content);
                 }), requests$.pipe(// requests$ emits observables which are subscribed to
                 Object(mergeMap.a)(function(request$) {
                     return request$;
@@ -11753,12 +12095,13 @@ object-assign
    * observable emitting the best representation (given the network/buffer
    * state).
    * @param {string} type
-   * @param {Observable<Object>} clock$
    * @param {Array.<Representation>|undefined} representations
+   * @param {Observable<Object>} clock$
+   * @param {Observable<Object>} bufferEvents$
    * @returns {Observable}
    */            var _proto = ABRManager.prototype;
-            return _proto.get$ = function get$(type, clock$, representations) {
-                return void 0 === representations && (representations = []), this._lazilyCreateChooser(type).get$(clock$, representations);
+            return _proto.get$ = function get$(type, representations, clock$, bufferEvents$) {
+                return void 0 === representations && (representations = []), this._lazilyCreateChooser(type).get$(representations, clock$, bufferEvents$);
             }
             /**
    * Set manually the bitrate for a given type.
@@ -11826,7 +12169,7 @@ object-assign
    * @returns {Object}
    */ , _proto._lazilyCreateChooser = function _lazilyCreateChooser(bufferType) {
                 return this._choosers[bufferType] || (log.a.debug("ABR: Creating new buffer for ", bufferType), 
-                this._choosers[bufferType] = abr_manager_createChooser(bufferType, this._chooserInstanceOptions)), 
+                this._choosers[bufferType] = abr_manager_createChooser(bufferType, this._mediaElement, this._chooserInstanceOptions)), 
                 this._choosers[bufferType];
             }, ABRManager;
         }(), is_known_error = __webpack_require__(180), request_error = __webpack_require__(182), error_message = __webpack_require__(55);
@@ -12641,7 +12984,8 @@ object-assign
                             type: bufferType,
                             value: {
                                 size: size,
-                                duration: duration
+                                duration: duration,
+                                content: content
                             }
                         });
                         break;
@@ -12878,7 +13222,7 @@ object-assign
             }));
         }
         // EXTERNAL MODULE: ./src/core/init/events_generators.ts
-                var events_generators = __webpack_require__(22), DEFAULT_LIVE_GAP = config.a.DEFAULT_LIVE_GAP;
+                var events_generators = __webpack_require__(24), DEFAULT_LIVE_GAP = config.a.DEFAULT_LIVE_GAP;
         // CONCATENATED MODULE: ./src/core/init/get_initial_time.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -12934,9 +13278,9 @@ object-assign
             }
             return manifest.getMinimumPosition();
         }
-        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/OuterSubscriber.js
-                var OuterSubscriber = __webpack_require__(25), InnerSubscriber = __webpack_require__(47), subscribeToResult = __webpack_require__(24), from = __webpack_require__(53);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/InnerSubscriber.js
+                var InnerSubscriber = __webpack_require__(47), from = __webpack_require__(53);
+        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/from.js + 5 modules
                 // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/exhaustMap.js
         /** PURE_IMPORTS_START tslib,_OuterSubscriber,_InnerSubscriber,_util_subscribeToResult,_map,_observable_from PURE_IMPORTS_END */
         function exhaustMap(project, resultSelector) {
@@ -13811,13 +14155,14 @@ object-assign
                     }
                 };
             },
-            addedSegment: function addedSegment(bufferType, segment, segmentData) {
+            addedSegment: function addedSegment(bufferType, segment, buffered, segmentData) {
                 return {
                     type: "added-segment",
                     value: {
                         bufferType: bufferType,
                         segment: segment,
-                        segmentData: segmentData
+                        segmentData: segmentData,
+                        buffered: buffered
                     }
                 };
             },
@@ -14262,7 +14607,7 @@ object-assign
  * @param {Object} wantedRange
  * @param {Object} segmentIDsToIgnore
  * @returns {boolean}
- */        function segment_filter_shouldDownloadSegment(segment, content, segmentBookkeeper, wantedRange, segmentIDsToIgnore) {
+ */        function segment_filter_shouldDownloadSegment(segment, content, segmentBookkeeper, wantedRange, segmentIDsToIgnore, lastStableBitrate) {
             var period = content.period, adaptation = content.adaptation, representation = content.representation;
             if (segmentIDsToIgnore.test(segment.id)) return !1;
  // segment without time info are usually init segments or some
@@ -14281,8 +14626,9 @@ object-assign
             // segments for later periods have the advantage here
             return period.start >= currentSegment.infos.period.start;
             if (currentSegment.infos.adaptation.id !== adaptation.id) return !0;
- // only re-load comparatively-poor bitrates for the same adaptation.
-                        var bitrateCeil = currentSegment.infos.representation.bitrate * BITRATE_REBUFFERING_RATIO;
+            if (null != lastStableBitrate) return currentSegment.infos.representation.bitrate < lastStableBitrate;
+            // only re-load comparatively-poor bitrates for the same adaptation.
+            var bitrateCeil = currentSegment.infos.representation.bitrate * BITRATE_REBUFFERING_RATIO;
             return representation.bitrate > bitrateCeil;
         }
         // CONCATENATED MODULE: ./src/core/buffers/representation/representation_buffer.ts
@@ -14338,7 +14684,7 @@ object-assign
  * limitations under the License.
  */
         /* harmony default export */ var buffers_representation = function RepresentationBuffer(_ref) {
-            var clock$ = _ref.clock$, content = _ref.content, queuedSourceBuffer = _ref.queuedSourceBuffer, segmentBookkeeper = _ref.segmentBookkeeper, segmentFetcher = _ref.segmentFetcher, terminate$ = _ref.terminate$, wantedBufferAhead$ = _ref.wantedBufferAhead$, manifest = content.manifest, period = content.period, adaptation = content.adaptation, representation = content.representation, codec = representation.getMimeTypeString(), bufferType = adaptation.type, initSegment = representation.index.getInitSegment(), paddings = getBufferPaddings(adaptation), initSegmentObject = null == initSegment ? {
+            var clock$ = _ref.clock$, content = _ref.content, queuedSourceBuffer = _ref.queuedSourceBuffer, segmentBookkeeper = _ref.segmentBookkeeper, segmentFetcher = _ref.segmentFetcher, terminate$ = _ref.terminate$, wantedBufferAhead$ = _ref.wantedBufferAhead$, lastStableBitrate$ = _ref.lastStableBitrate$, manifest = content.manifest, period = content.period, adaptation = content.adaptation, representation = content.representation, codec = representation.getMimeTypeString(), bufferType = adaptation.type, initSegment = representation.index.getInitSegment(), paddings = getBufferPaddings(adaptation), initSegmentObject = null == initSegment ? {
                 segmentData: null,
                 segmentInfos: null,
                 segmentOffset: 0
@@ -14425,12 +14771,12 @@ object-assign
                         timestampOffset: segmentOffset,
                         codec: codec
                     });
-                    return sourceBufferWaitingQueue.add(segment.id), append$.pipe(Object(mapTo.a)(buffers_events_generators.addedSegment(bufferType, segment, segmentData)), Object(tap.a)(function() {
+                    return sourceBufferWaitingQueue.add(segment.id), append$.pipe(Object(tap.a)(function() {
                         if (!segment.isInit) {
                             var _ref3 = null != segmentInfos ? segmentInfos : segment, time = _ref3.time, duration = _ref3.duration, timescale = _ref3.timescale, start = time / timescale, end = duration && (time + duration) / timescale;
                             segmentBookkeeper.insert(period, adaptation, representation, segment, start, end);
                         }
-                    }), finalize(function() {
+                    }), Object(mapTo.a)(buffers_events_generators.addedSegment(bufferType, segment, queuedSourceBuffer.getBuffered(), segmentData)), finalize(function() {
                         sourceBufferWaitingQueue.remove(segment.id);
                     }));
                 });
@@ -14485,7 +14831,8 @@ object-assign
                 }));
             }
             function shouldDownloadSegment(segment, neededRange) {
-                return segment_filter_shouldDownloadSegment(segment, content, segmentBookkeeper, neededRange, sourceBufferWaitingQueue);
+                var lastStableBitrate = lastStableBitrate$.getValue();
+                return segment_filter_shouldDownloadSegment(segment, content, segmentBookkeeper, neededRange, sourceBufferWaitingQueue, lastStableBitrate);
             }
         };
         // CONCATENATED MODULE: ./src/core/buffers/adaptation/adaptation_buffer.ts
@@ -14556,12 +14903,15 @@ object-assign
                 return object_assign_default()({
                     downloadBitrate: downloadBitrate
                 }, tick);
-            })), abr$ = abrManager.get$(adaptation.type, abrClock$, adaptation.representations).pipe(Object(observeOn.b)(asap.a), Object(share.a)()), killCurrentBuffer$ = new Subject.a(), terminateCurrentBuffer$ = new Subject.a(), bitrateEstimate$ = abr$.pipe(Object(filter.a)(function(_ref) {
-                return null != _ref.bitrate;
+            })), lastStableBitrate$ = new BehaviorSubject_BehaviorSubject(void 0), representations = adaptation.representations, eventsForABR$ = new Subject.a(), abr$ = abrManager.get$(adaptation.type, representations, abrClock$, eventsForABR$).pipe(Object(observeOn.b)(asap.a), Object(share.a)()), killCurrentBuffer$ = new Subject.a(), terminateCurrentBuffer$ = new Subject.a(), bitrateEstimates$ = abr$.pipe(Object(tap.a)(function(_ref) {
+                var lastStableBitrate = _ref.lastStableBitrate;
+                lastStableBitrate$.next(lastStableBitrate);
+            }), Object(filter.a)(function(_ref2) {
+                return null != _ref2.bitrate;
             }), Object(distinctUntilChanged.a)(function(old, current) {
                 return old.bitrate === current.bitrate;
-            }), Object(map.a)(function(_ref2) {
-                var bitrate = _ref2.bitrate;
+            }), Object(map.a)(function(_ref3) {
+                var bitrate = _ref3.bitrate;
                 return log.a.debug("Buffer: new " + adaptation.type + " bitrate estimation", bitrate), 
                 buffers_events_generators.bitrateEstimationChange(adaptation.type, bitrate);
             })), newRepresentation$ = abr$.pipe(Object(distinctUntilChanged.a)(function(a, b) {
@@ -14572,7 +14922,14 @@ object-assign
                 // To do that properly, we need to reload the MediaSource
                 if (currentRepresentation = representation, directManualBitrateSwitching && estimate.manual && 0 !== i) return Object(of.a)(buffers_events_generators.needsMediaSourceReload());
                 var representationChange$ = Object(of.a)(buffers_events_generators.representationChange(adaptation.type, period, representation)), representationBuffer$ = createRepresentationBuffer(representation).pipe(Object(takeUntil.a)(killCurrentBuffer$));
-                return Object(concat.a)(representationChange$, representationBuffer$);
+                return eventsForABR$.next({
+                    type: "representation-buffer-change",
+                    value: {
+                        representation: representation
+                    }
+                }), Object(concat.a)(representationChange$, representationBuffer$).pipe(Object(tap.a)(function(evt) {
+                    "added-segment" === evt.type && eventsForABR$.next(evt);
+                }));
             })), newRepresentation$.pipe(Object(map.a)(function(estimation, i) {
                 0 !== i && (estimation.urgent ? (log.a.info("Buffer: urgent Representation switch", adaptation.type), 
                 // kill current buffer after concatMapLatest has been called
@@ -14580,7 +14937,7 @@ object-assign
                 // terminate current buffer after concatMapLatest has been called
                 terminateCurrentBuffer$.next()));
             }), Object(ignoreElements.a)()));
-            return Object(merge.a)(adaptationBuffer$, bitrateEstimate$);
+            return Object(merge.a)(adaptationBuffer$, bitrateEstimates$);
             /**
    * Create and returns a new RepresentationBuffer Observable, linked to the
    * given Representation.
@@ -14601,7 +14958,8 @@ object-assign
                         segmentBookkeeper: segmentBookkeeper,
                         segmentFetcher: segmentFetcher,
                         terminate$: terminateCurrentBuffer$,
-                        wantedBufferAhead$: wantedBufferAhead$
+                        wantedBufferAhead$: wantedBufferAhead$,
+                        lastStableBitrate$: lastStableBitrate$
                     });
                 });
             }
@@ -15810,7 +16168,7 @@ object-assign
  * limitations under the License.
  */
         /* harmony default export */        var core_init = function InitializeOnMediaSource(_ref) {
-            var adaptiveOptions = _ref.adaptiveOptions, autoPlay = _ref.autoPlay, bufferOptions = _ref.bufferOptions, clock$ = _ref.clock$, keySystems = _ref.keySystems, mediaElement = _ref.mediaElement, networkConfig = _ref.networkConfig, speed$ = _ref.speed$, startAt = _ref.startAt, textTrackOptions = _ref.textTrackOptions, pipelines = _ref.pipelines, url = _ref.url, warning$ = new Subject.a(), fetchManifest = throttle(pipelines_manifest(pipelines, getManifestPipelineOptions(networkConfig), warning$)), network$ = new Subject.a(), requestsInfos$ = new Subject.a(), segmentPipelinesManager = new pipelines_segment(pipelines, requestsInfos$, network$, warning$), abrManager = new abr(requestsInfos$, network$, adaptiveOptions), openMediaSource$ = openMediaSource(mediaElement).pipe(Object(observeOn.b)(asap.a), // to launch subscriptions only when all
+            var adaptiveOptions = _ref.adaptiveOptions, autoPlay = _ref.autoPlay, bufferOptions = _ref.bufferOptions, clock$ = _ref.clock$, keySystems = _ref.keySystems, mediaElement = _ref.mediaElement, networkConfig = _ref.networkConfig, speed$ = _ref.speed$, startAt = _ref.startAt, textTrackOptions = _ref.textTrackOptions, pipelines = _ref.pipelines, url = _ref.url, warning$ = new Subject.a(), fetchManifest = throttle(pipelines_manifest(pipelines, getManifestPipelineOptions(networkConfig), warning$)), network$ = new Subject.a(), requestsInfos$ = new Subject.a(), segmentPipelinesManager = new pipelines_segment(pipelines, requestsInfos$, network$, warning$), abrManager = new abr(mediaElement, requestsInfos$, network$, adaptiveOptions), openMediaSource$ = openMediaSource(mediaElement).pipe(Object(observeOn.b)(asap.a), // to launch subscriptions only when all
             Object(share.a)()), emeManager$ = openMediaSource$.pipe(Object(mergeMap.a)(function() {
                 return Object(create_eme_manager.a)(mediaElement, keySystems);
             }), Object(observeOn.b)(asap.a), // to launch subscriptions only when all
@@ -17896,7 +18254,7 @@ object-assign
                     if (activePeriodRepresentations) activePeriodRepresentations[type] = representation; else activeRepresentations[period.id] = ((_activeRepresentation = {})[type] = representation, 
                     _activeRepresentation);
                     var bitrate = representation && representation.bitrate;
-                    null != bitrate && (this._priv_bitrateInfos.lastBitrates[type] = bitrate), null != period && null != currentPeriod && currentPeriod.id === period.id && ("video" === type ? this._priv_triggerContentEvent("videoBitrateChange", null != bitrate ? bitrate : -1) : "audio" === type && this._priv_triggerContentEvent("audioBitrateChange", null != bitrate ? bitrate : -1));
+                    null != period && null != currentPeriod && currentPeriod.id === period.id && ("video" === type ? this._priv_triggerContentEvent("videoBitrateChange", null != bitrate ? bitrate : -1) : "audio" === type && this._priv_triggerContentEvent("audioBitrateChange", null != bitrate ? bitrate : -1));
                 } else log.a.error("API: The representations changed but no content is loaded");
             }
             /**
@@ -17908,7 +18266,7 @@ object-assign
    * @private
    */ , _proto._priv_onBitrateEstimationChange = function _priv_onBitrateEstimationChange(_ref5) {
                 var type = _ref5.type, bitrate = _ref5.bitrate;
-                this._priv_triggerContentEvent("bitrateEstimationChange", {
+                null != bitrate && (this._priv_bitrateInfos.lastBitrates[type] = bitrate), this._priv_triggerContentEvent("bitrateEstimationChange", {
                     type: type,
                     bitrate: bitrate
                 });
@@ -20528,7 +20886,7 @@ object-assign
             var root = document.documentElement;
             if (!root || "MPD" !== root.nodeName) throw new Error("DASH Parser: document root should be MPD");
             return parseMPD(root, uri);
-        }, request = __webpack_require__(23), manifest_loader = __webpack_require__(91);
+        }, request = __webpack_require__(25), manifest_loader = __webpack_require__(91);
         // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
                 /* harmony default export */ var isobmff_timing_infos = 
         // CONCATENATED MODULE: ./src/transports/dash/isobmff_timing_infos.ts
@@ -21853,7 +22211,7 @@ object-assign
                 };
                 return Object(check_manifest_ids.a)(manifest), manifest;
             };
-        }, request = __webpack_require__(23), string_from_utf8 = __webpack_require__(93), warn_once = __webpack_require__(26), manifest_loader = __webpack_require__(91), utils = __webpack_require__(183), get_box = __webpack_require__(63);
+        }, request = __webpack_require__(25), string_from_utf8 = __webpack_require__(93), warn_once = __webpack_require__(26), manifest_loader = __webpack_require__(91), utils = __webpack_require__(183), get_box = __webpack_require__(63);
         // CONCATENATED MODULE: ./src/parsers/manifest/smooth/index.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -24973,7 +25331,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return catchError;
         });
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(25), _InnerSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(47), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(24);
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23), _InnerSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(47), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(22);
         /* harmony import */        
         /** PURE_IMPORTS_START tslib,_OuterSubscriber,_InnerSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
         function catchError(selector) {
@@ -25128,7 +25486,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return takeUntil;
         });
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(25), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(24);
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(22);
         /* harmony import */        
         /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
         function takeUntil(notifier) {
@@ -25163,7 +25521,7 @@ object-assign
         });
         /* unused harmony export CombineLatestOperator */
         /* unused harmony export CombineLatestSubscriber */
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _util_isScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(40), _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(45), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(25), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(24), _fromArray__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(36), NONE = {};
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _util_isScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(40), _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(45), _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(23), _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(22), _fromArray__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(36), NONE = {};
         /* harmony import */        function combineLatest() {
             for (var observables = [], _i = 0; _i < arguments.length; _i++) observables[_i] = arguments[_i];
             var resultSelector = null, scheduler = null;
