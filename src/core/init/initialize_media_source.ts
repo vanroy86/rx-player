@@ -166,12 +166,24 @@ export default function InitializeOnMediaSource({
 } : IInitializeOptions) : Observable<IInitEvent> {
   const warning$ = new Subject<Error|ICustomError>();
 
+  const manifestPipelines =
+    createManifestPipeline(pipelines,
+                           getManifestPipelineOptions(networkConfig),
+                           warning$);
+
   // Fetch and parse the manifest from the URL given.
   // Throttled to avoid doing multiple simultaneous requests.
   const fetchManifest = throttle(
-    createManifestPipeline(pipelines,
-                           getManifestPipelineOptions(networkConfig),
-                           warning$));
+    (args: { manifestURL: string; hasClockSynchronization: boolean }) => {
+      const { manifestURL, hasClockSynchronization } = args;
+      return manifestPipelines.fetch(manifestURL).pipe(
+        mergeMap((response) =>
+          manifestPipelines.parse(response.value, hasClockSynchronization, manifestURL)
+        ),
+        share()
+      );
+    }
+  );
 
   // Subject through which network metrics will be sent by the segment
   // pipelines to the ABR manager.
@@ -213,7 +225,7 @@ export default function InitializeOnMediaSource({
 
   const loadContent$ = observableCombineLatest([
     openMediaSource$,
-    fetchManifest({ url, hasClockSynchronization: false }),
+    fetchManifest({ manifestURL: url, hasClockSynchronization: false }),
     emeManager$.pipe(filter(isEMEReadyEvent), take(1)),
   ]).pipe(mergeMap(([ mediaSource, { manifest, sendingTime } ]) => {
 
@@ -229,7 +241,7 @@ export default function InitializeOnMediaSource({
       }
 
       const hasClockSynchronization = manifest.hasClockSynchronization();
-      return fetchManifest({ url: refreshURL, hasClockSynchronization }).pipe(
+      return fetchManifest({ manifestURL: refreshURL, hasClockSynchronization }).pipe(
         tap(({ manifest: newManifest, sendingTime: newSendingTime }) => {
           manifest.update(newManifest);
           manifestRefreshed$.next({ manifest, sendingTime: newSendingTime });

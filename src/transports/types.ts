@@ -119,7 +119,7 @@ export type ILoaderObservable<T> = Observable<ILoaderEvent<T>>;
 
 export interface IManifestParserArguments<T, U> {
   response : ILoaderResponseValue<T>; // Response from the loader
-  url : string; // URL originally requested
+  url? : string; // URL originally requested
   hasClockSynchronization : boolean; // If true, the current device is currently
                                      // synchronized with the server's clock.
                                      // If false, there may be a delay/advance
