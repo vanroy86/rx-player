@@ -27,6 +27,7 @@ declare const __FEATURES__ : {
   HTML_SRT : boolean;
   HTML_TTML : boolean;
   HTML_VTT : boolean;
+  LOCAL_MANIFEST : boolean;
   NATIVE_SAMI : boolean;
   NATIVE_SRT : boolean;
   NATIVE_TTML : boolean;
@@ -40,6 +41,7 @@ declare const __RELATIVE_PATH__ : {
   BIF_PARSER: string;
   SMOOTH: string;
   DASH: string;
+  LOCAL_MANIFEST : string;
   NATIVE_TEXT_BUFFER: string;
   NATIVE_VTT: string;
   NATIVE_SRT: string;
