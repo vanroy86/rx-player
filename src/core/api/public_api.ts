@@ -331,7 +331,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
      * URL of the content currently being played.
      * @type {string}
      */
-    url : string;
+    url? : string;
 
     /**
      * true if the current content is in DirectFile mode.
@@ -671,6 +671,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
             defaultAudioTrack,
             defaultTextTrack,
             keySystems,
+            initialManifest,
             manualBitrateSwitchingMode,
             networkConfig,
             startAt,
@@ -762,6 +763,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                     this._priv_bufferOptions),
         clock$,
         keySystems,
+        initialManifest,
         mediaElement: videoElement,
         networkConfig,
         pipelines,
@@ -776,6 +778,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       if (features.directfile == null) {
         throw new Error("DirectFile feature not activated in your build.");
       }
+      if (url == null) {
+        throw new Error("DirectFile mode but no URL set.");
+      }
       playback$ = features.directfile({ autoPlay,
                                         clock$,
                                         keySystems,
@@ -783,8 +788,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                         speed$: this._priv_speed$,
                                         startAt,
                                         url }
-      ).pipe(takeUntil(contentIsStopped$))
-       .pipe(publish()) as ConnectableObservable<IInitEvent>;
+      )
+        .pipe(takeUntil(contentIsStopped$))
+        .pipe(publish()) as ConnectableObservable<IInitEvent>;
     }
 
     // Emit an object when the player stalls and null when it unstall

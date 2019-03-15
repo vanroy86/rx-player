@@ -133,7 +133,7 @@ export interface IParsedConstructorOptions {
 }
 
 export interface ILoadVideoOptions {
-  url : string;
+  url? : string;
   transport : string;
 
   autoPlay? : boolean;
@@ -143,6 +143,7 @@ export interface ILoadVideoOptions {
   supplementaryImageTracks? : ISupplementaryImageTrackOption[];
   defaultAudioTrack? : IDefaultAudioTrackOption|null|undefined;
   defaultTextTrack? : IDefaultTextTrackOption|null|undefined;
+  initialManifest? : Document|string|any; // XXX TODO
   networkConfig? : INetworkConfigOption;
   startAt? : IStartAtOption;
   textTrackMode? : "native"|"html";
@@ -152,10 +153,11 @@ export interface ILoadVideoOptions {
 }
 
 interface IParsedLoadVideoOptionsBase {
-  url : string;
+  url? : string;
   transport : string;
   autoPlay : boolean;
   keySystems : IKeySystemOption[];
+  initialManifest? : Document|string|any; // XXX TODO
   networkConfig: INetworkConfigOption;
   transportOptions : ITransportOptions;
   supplementaryTextTracks : ISupplementaryTextTrackOption[];
@@ -334,7 +336,7 @@ function parseConstructorOptions(
 function parseLoadVideoOptions(
   options : ILoadVideoOptions
 ) : IParsedLoadVideoOptions {
-  let url : string;
+  let url : string|undefined;
   let transport : string;
   let keySystems : IKeySystemOption[];
   let supplementaryTextTracks : ISupplementaryTextTrackOption[];
@@ -343,11 +345,13 @@ function parseLoadVideoOptions(
   let textTrackElement : HTMLElement|undefined;
   let startAt : IParsedStartAtOption|undefined;
 
-  if (!options || options.url == null) {
+  if (!options || (options.url == null && options.initialManifest == null)) {
     throw new Error("No url set on loadVideo");
-  } else {
+  } else if (options.url != null) {
     url = String(options.url);
   }
+
+  const initialManifest = options.initialManifest;
 
   if (options.transport == null) {
     throw new Error("No transport set on loadVideo");
@@ -480,6 +484,7 @@ function parseLoadVideoOptions(
 
   // TODO without cast
   /* tslint:disable no-object-literal-type-assertion */
+<<<<<<< HEAD
   return { autoPlay,
            defaultAudioTrack,
            defaultTextTrack,
@@ -495,6 +500,44 @@ function parseLoadVideoOptions(
            transport,
            transportOptions,
            url } as IParsedLoadVideoOptions;
+||||||| merged common ancestors
+  return {
+    autoPlay,
+    defaultAudioTrack,
+    defaultTextTrack,
+    hideNativeSubtitle,
+    keySystems,
+    manualBitrateSwitchingMode,
+    networkConfig,
+    startAt,
+    supplementaryImageTracks,
+    supplementaryTextTracks,
+    textTrackElement,
+    textTrackMode,
+    transport,
+    transportOptions,
+    url,
+  } as IParsedLoadVideoOptions;
+=======
+  return {
+    autoPlay,
+    defaultAudioTrack,
+    defaultTextTrack,
+    hideNativeSubtitle,
+    keySystems,
+    initialManifest,
+    manualBitrateSwitchingMode,
+    networkConfig,
+    startAt,
+    supplementaryImageTracks,
+    supplementaryTextTracks,
+    textTrackElement,
+    textTrackMode,
+    transport,
+    transportOptions,
+    url,
+  } as IParsedLoadVideoOptions;
+>>>>>>> api: add initialManifest loadVideo option
   /* tslint:enable no-object-literal-type-assertion */
 }
 
