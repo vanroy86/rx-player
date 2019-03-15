@@ -163,12 +163,24 @@ export default function InitializeOnMediaSource({
 } : IInitializeOptions) : Observable<IInitEvent> {
   const warning$ = new Subject<ICustomError>();
 
+  const manifestPipelines =
+    createManifestPipeline(pipelines,
+                           getManifestPipelineOptions(networkConfig),
+                           warning$);
+
   // Fetch and parse the manifest from the URL given.
   // Throttled to avoid doing multiple simultaneous requests.
   const fetchManifest = throttle(
-    createManifestPipeline(pipelines,
-                           getManifestPipelineOptions(networkConfig),
-                           warning$));
+    (args: { manifestURL: string; externalClockOffset?: number }) => {
+      const { manifestURL, externalClockOffset } = args;
+      return manifestPipelines.fetch(manifestURL).pipe(
+        mergeMap((response) =>
+          manifestPipelines.parse(response.value, manifestURL, externalClockOffset)
+        ),
+        share()
+      );
+    }
+  );
 
   // Creates pipelines for downloading segments.
   const segmentPipelinesManager = new SegmentPipelinesManager<any>(pipelines);
@@ -199,7 +211,7 @@ export default function InitializeOnMediaSource({
 
   const loadContent$ = observableCombineLatest([
     openMediaSource$,
-    fetchManifest({ url }),
+    fetchManifest({ manifestURL: url }),
     emeManager$.pipe(filter(isEMEReadyEvent), take(1)),
   ]).pipe(mergeMap(([ mediaSource, { manifest, sendingTime } ]) => {
 
@@ -215,7 +227,7 @@ export default function InitializeOnMediaSource({
       }
 
       const externalClockOffset = manifest.getClockOffset();
-      return fetchManifest({ url: refreshURL, externalClockOffset }).pipe(
+      return fetchManifest({ manifestURL: refreshURL, externalClockOffset }).pipe(
         tap(({ manifest: newManifest, sendingTime: newSendingTime }) => {
           manifest.update(newManifest);
           manifestRefreshed$.next({ manifest, sendingTime: newSendingTime });

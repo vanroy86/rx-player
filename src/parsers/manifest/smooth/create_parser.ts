@@ -113,7 +113,7 @@ function createSmoothStreamingParser(
   parserOptions : IHSSParserConfiguration = {}
 ) : (
   manifest : Document,
-  url : string,
+  url? : string,
   manifestReceivedTime? : number
 ) => IParsedManifest {
 
@@ -367,10 +367,10 @@ function createSmoothStreamingParser(
 
   function parseFromDocument(
     doc : Document,
-    url : string,
+    url? : string,
     manifestReceivedTime? : number
   ) : IParsedManifest {
-    const rootURL = normalizeBaseURL(url);
+    const rootURL = normalizeBaseURL(url == null ? "" : url);
     const root = doc.documentElement;
     if (!root || root.nodeName !== "SmoothStreamingMedia") {
       throw new Error("document root should be SmoothStreamingMedia");
@@ -564,7 +564,7 @@ function createSmoothStreamingParser(
       maximumTime,
       minimumTime,
       suggestedPresentationDelay,
-      uris: [url],
+      uris: url == null ? [] : [url],
     };
     checkManifestIDs(manifest);
     return manifest;

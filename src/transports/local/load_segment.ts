@@ -16,8 +16,8 @@
 
 import { Observable } from "rxjs";
 import {
-  ILoaderObservable,
-  ILoaderObserver,
+  ISegmentLoaderObservable,
+  ISegmentLoaderObserver,
 } from "../types";
 
 export type ILocalManifestSegmentLoader = (
@@ -40,8 +40,8 @@ export type ILocalManifestSegmentLoader = (
  */
 export default function loadSegment(
   customSegmentLoader : ILocalManifestSegmentLoader
-) : ILoaderObservable<Uint8Array|ArrayBuffer|null> {
-  return new Observable((obs : ILoaderObserver<Uint8Array|ArrayBuffer>) => {
+) : ISegmentLoaderObservable< Uint8Array | ArrayBuffer | null > {
+  return new Observable((obs : ISegmentLoaderObserver<Uint8Array|ArrayBuffer>) => {
     let hasFinished = false;
 
     /**
@@ -54,14 +54,10 @@ export default function loadSegment(
       duration : number;
     }) => {
       hasFinished = true;
-      obs.next({
-        type: "response",
-        value: {
-          responseData: _args.data,
-          size: _args.size,
-          duration: _args.duration,
-        },
-      });
+      obs.next({ type: "data-loaded",
+                 value: { responseData: _args.data,
+                          size: _args.size,
+                          duration: _args.duration } });
       obs.complete();
     };
 

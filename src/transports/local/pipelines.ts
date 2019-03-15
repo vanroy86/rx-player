@@ -28,10 +28,10 @@ import {
   parser as textTrackParser,
 } from "../dash/text_pipelines";
 import {
-  ILoaderObservable,
   IManifestParserArguments,
   IManifestParserObservable,
   ISegmentLoaderArguments,
+  ISegmentLoaderObservable,
   ITransportOptions,
   ITransportPipelines,
 } from "../types";
@@ -44,7 +44,7 @@ import loadSegment from "./load_segment";
  */
 function segmentLoader(
   { segment } : ISegmentLoaderArguments
-) : ILoaderObservable<ArrayBuffer|Uint8Array|null> {
+) : ISegmentLoaderObservable< ArrayBuffer | Uint8Array | null > {
   const privateInfos = segment.privateInfos;
   if (!privateInfos || privateInfos.localManifestSegment == null) {
     throw new Error("Segment is not an local Manifest segment");
