@@ -40,7 +40,7 @@ import parsePeriods from "./parse_periods";
 const generateManifestID = idGenerator();
 
 export interface IMPDParserArguments {
-  url : string; // URL of the manifest (post-redirection if one)
+  url? : string; // URL of the manifest (post-redirection if one)
   referenceDateTime? : number; // Default base time, in seconds
   externalClockOffset? : number; // If set, offset to add to `performance.now()`
                                  // to obtain the current server's time
@@ -137,7 +137,8 @@ function parseCompleteIntermediateRepresentation(
   const { children: rootChildren,
           attributes: rootAttributes } = mpdIR;
 
-  const baseURL = resolveURL(normalizeBaseURL(args.url),
+  const baseURL = resolveURL(normalizeBaseURL(args.url == null ? "" :
+                                                                 args.url),
                              rootChildren.baseURL);
 
   const availabilityStartTime = parseAvailabilityStartTime(rootAttributes,
@@ -171,7 +172,8 @@ function parseCompleteIntermediateRepresentation(
     periods: parsedPeriods,
     transportType: "dash",
     isLive: isDynamic,
-    uris: [args.url, ...rootChildren.locations],
+    uris: args.url == null ?
+      rootChildren.locations : [args.url, ...rootChildren.locations],
     suggestedPresentationDelay: rootAttributes.suggestedPresentationDelay,
     clockOffset: clockOffsetFromDirectUTCTiming != null &&
                  !isNaN(clockOffsetFromDirectUTCTiming) ?
