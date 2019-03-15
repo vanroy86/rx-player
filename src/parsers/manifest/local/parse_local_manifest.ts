@@ -38,6 +38,12 @@ const generateManifestID = idGenerator();
 export default function parseLocalManifest(
   localManifest : ILocalManifest
 ) : IParsedManifest {
+  const [majorVersion] = localManifest.version.split(".");
+  if (!majorVersion || isNaN(+majorVersion) || +majorVersion > 0) {
+    throw new Error("The current Local Manifest version " +
+      `${localManifest.version}" is not compatible with the current version of ` +
+      "the RxPlayer");
+  }
   const periodIdGenerator = idGenerator();
   const manifest = {
     availabilityStartTime: 0,
