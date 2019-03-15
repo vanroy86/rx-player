@@ -317,7 +317,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
      * URL of the content currently being played.
      * @type {string}
      */
-    url : string;
+    url? : string;
 
     /**
      * true if the current content is in DirectFile mode.
@@ -669,6 +669,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
             defaultAudioTrack,
             defaultTextTrack,
             keySystems,
+            initialManifest,
             manualBitrateSwitchingMode,
             networkConfig,
             startAt,
@@ -769,6 +770,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                                     autoPlay,
                                                     bufferOptions,
                                                     clock$,
+                                                    initialManifest,
                                                     keySystems,
                                                     mediaElement: videoElement,
                                                     networkConfig,
@@ -783,6 +785,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     } else {
       if (features.directfile == null) {
         throw new Error("DirectFile feature not activated in your build.");
+      }
+      if (url == null) {
+        throw new Error("DirectFile mode but no URL set.");
       }
       const directfileInit$ = features.directfile({ autoPlay,
                                                     clock$,

@@ -136,7 +136,7 @@ export interface IParsedConstructorOptions {
 }
 
 export interface ILoadVideoOptions {
-  url : string;
+  url? : string;
   transport : string;
 
   autoPlay? : boolean;
@@ -146,6 +146,7 @@ export interface ILoadVideoOptions {
   supplementaryImageTracks? : ISupplementaryImageTrackOption[];
   defaultAudioTrack? : IDefaultAudioTrackOption|null|undefined;
   defaultTextTrack? : IDefaultTextTrackOption|null|undefined;
+  initialManifest? : Document|string|any; // XXX TODO
   networkConfig? : INetworkConfigOption;
   startAt? : IStartAtOption;
   textTrackMode? : "native"|"html";
@@ -155,10 +156,11 @@ export interface ILoadVideoOptions {
 }
 
 interface IParsedLoadVideoOptionsBase {
-  url : string;
+  url? : string;
   transport : string;
   autoPlay : boolean;
   keySystems : IKeySystemOption[];
+  initialManifest? : Document|string|any; // XXX TODO
   networkConfig: INetworkConfigOption;
   transportOptions : ITransportOptions;
   supplementaryTextTracks : ISupplementaryTextTrackOption[];
@@ -354,7 +356,7 @@ function parseConstructorOptions(
 function parseLoadVideoOptions(
   options : ILoadVideoOptions
 ) : IParsedLoadVideoOptions {
-  let url : string;
+  let url : string|undefined;
   let transport : string;
   let keySystems : IKeySystemOption[];
   let supplementaryTextTracks : ISupplementaryTextTrackOption[];
@@ -363,11 +365,13 @@ function parseLoadVideoOptions(
   let textTrackElement : HTMLElement|undefined;
   let startAt : IParsedStartAtOption|undefined;
 
-  if (!options || options.url == null) {
+  if (!options || (options.url == null && options.initialManifest == null)) {
     throw new Error("No url set on loadVideo");
-  } else {
+  } else if (options.url != null) {
     url = String(options.url);
   }
+
+  const initialManifest = options.initialManifest;
 
   if (options.transport == null) {
     throw new Error("No transport set on loadVideo");
@@ -503,6 +507,7 @@ function parseLoadVideoOptions(
            defaultAudioTrack,
            defaultTextTrack,
            hideNativeSubtitle,
+           initialManifest,
            keySystems,
            manualBitrateSwitchingMode,
            networkConfig,
