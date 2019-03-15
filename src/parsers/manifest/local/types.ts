@@ -45,8 +45,7 @@ export interface ILocalIndex {
 }
 
 export interface ILocalRepresentation {
-  id : string; // unique ID string
-  bitrate : number; // (worst?) bitrate of the content in bps
+  bitrate : number; // bitrate of the content in bps
   mimeType : string; // same than in the DASH MPD
   codecs : string; // same than in the DASH MPD
   width? : number;
@@ -55,7 +54,6 @@ export interface ILocalRepresentation {
 }
 
 export interface ILocalAdaptation {
-  id : string; // unique ID string
   type : "audio"|"video"|"text"|"thumbnail";
   audioDescription? : boolean; // self-explanatory
   closedCaption? : boolean;
@@ -64,7 +62,6 @@ export interface ILocalAdaptation {
 }
 
 export interface ILocalPeriod {
-  id: string; // unique ID string
   start: number; // the time at which the content begins in this period in ms
   duration: number; // total duration of this period in ms
   adaptations: ILocalAdaptation[];

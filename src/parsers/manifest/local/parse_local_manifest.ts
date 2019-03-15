@@ -29,7 +29,7 @@ import {
   ILocalRepresentation,
 } from "./types";
 
-const generateNewId = idGenerator();
+const generateManifestID = idGenerator();
 
 /**
  * @param {Object} localManifest
@@ -38,14 +38,16 @@ const generateNewId = idGenerator();
 export default function parseLocalManifest(
   localManifest : ILocalManifest
 ) : IParsedManifest {
+  const periodIdGenerator = idGenerator();
   const manifest = {
     availabilityStartTime: 0,
     duration: localManifest.duration,
-    id: "local-manifest_" + generateNewId(),
+    id: "local-manifest_" + generateManifestID(),
     transportType: "local",
     isLive: false,
     uris: [],
-    periods: localManifest.periods.map(parsePeriod),
+    periods: localManifest.periods
+      .map(period => parsePeriod(period, periodIdGenerator)),
   };
   return manifest;
 }
@@ -54,9 +56,13 @@ export default function parseLocalManifest(
  * @param {Object} period
  * @returns {Object}
  */
-function parsePeriod(period : ILocalPeriod) : IParsedPeriod {
+function parsePeriod(
+  period : ILocalPeriod,
+  periodIdGenerator : () => string
+) : IParsedPeriod {
+  const adaptationIdGenerator = idGenerator();
   return {
-    id: period.id,
+    id: "period-" + periodIdGenerator(),
     start: period.start,
     end: period.duration - period.start,
     duration: period.duration,
@@ -66,7 +72,8 @@ function parsePeriod(period : ILocalPeriod) : IParsedPeriod {
         if (acc[type] == null) {
           acc[type] = [];
         }
-        (acc[type] as IParsedAdaptation[]).push(parseAdaptation(ada));
+        (acc[type] as IParsedAdaptation[])
+          .push(parseAdaptation(ada, adaptationIdGenerator));
         return acc;
       }, {}),
   };
@@ -76,13 +83,19 @@ function parsePeriod(period : ILocalPeriod) : IParsedPeriod {
  * @param {Object} adaptation
  * @returns {Object}
  */
-function parseAdaptation(adaptation : ILocalAdaptation) : IParsedAdaptation {
+function parseAdaptation(
+  adaptation : ILocalAdaptation,
+  adaptationIdGenerator : () => string
+) : IParsedAdaptation {
+  const representationIdGenerator = idGenerator();
   return {
-    id: adaptation.id,
+    id: "adaptation-" + adaptationIdGenerator(),
     type: adaptation.type,
     audioDescription: adaptation.audioDescription,
     closedCaption: adaptation.closedCaption,
-    representations: adaptation.representations.map(parseRepresentation),
+    representations: adaptation.representations
+      .map((representation) =>
+        parseRepresentation(representation, representationIdGenerator)),
   };
 }
 
@@ -91,15 +104,17 @@ function parseAdaptation(adaptation : ILocalAdaptation) : IParsedAdaptation {
  * @returns {Object}
  */
 function parseRepresentation(
-  representation : ILocalRepresentation
+  representation : ILocalRepresentation,
+  representationIdGenerator : () => string
 ) : IParsedRepresentation {
+  const id = "representation-" + representationIdGenerator();
   return {
-    id: representation.id,
+    id,
     bitrate: representation.bitrate,
     height: representation.height,
     width: representation.width,
     codecs: representation.codecs,
     mimeType: representation.mimeType,
-    index: createRepresentationIndex(representation.index, representation.id),
+    index: createRepresentationIndex(representation.index, id),
   };
 }
