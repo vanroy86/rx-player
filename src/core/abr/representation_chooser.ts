@@ -23,7 +23,6 @@ import {
   Subject,
 } from "rxjs";
 import {
-  distinctUntilChanged,
   filter,
   map,
   startWith,
@@ -403,10 +402,6 @@ export default class RepresentationChooser {
             manual: false,
             lastStableBitrate,
           };
-        }),
-        distinctUntilChanged((a, b) => {
-          return a.representation.id === b.representation.id &&
-            b.lastStableBitrate === a.lastStableBitrate;
         }),
         takeUntil(this._dispose$)
       );
