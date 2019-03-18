@@ -15,7 +15,7 @@
  */
 import objectAssign from "object-assign";
 import { BehaviorSubject, combineLatest as observableCombineLatest, of as observableOf, Subject, } from "rxjs";
-import { distinctUntilChanged, filter, map, startWith, switchMap, takeUntil, withLatestFrom, } from "rxjs/operators";
+import { filter, map, startWith, switchMap, takeUntil, withLatestFrom, } from "rxjs/operators";
 import BufferBasedChooser from "./buffer_based_chooser";
 import EWMA from "./ewma";
 import filterByBitrate from "./filter_by_bitrate";
@@ -214,9 +214,6 @@ var RepresentationChooser = /** @class */ (function () {
                     manual: false,
                     lastStableBitrate: lastStableBitrate,
                 };
-            }), distinctUntilChanged(function (a, b) {
-                return a.representation.id === b.representation.id &&
-                    b.lastStableBitrate === a.lastStableBitrate;
             }), takeUntil(_this._dispose$));
         }));
     };
