@@ -11910,8 +11910,6 @@ object-assign
                             manual: !1,
                             lastStableBitrate: lastStableBitrate
                         };
-                    }), Object(distinctUntilChanged.a)(function(a, b) {
-                        return a.representation.id === b.representation.id && b.lastStableBitrate === a.lastStableBitrate;
                     }), Object(takeUntil.a)(_this._dispose$));
                 }));
             }
