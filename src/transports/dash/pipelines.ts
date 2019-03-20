@@ -23,6 +23,7 @@ import {
   filter,
   map,
   mergeMap,
+  tap,
 } from "rxjs/operators";
 import features from "../../features";
 import Manifest from "../../manifest";
@@ -57,6 +58,18 @@ import {
   parser as TextTrackParser,
 } from "./pipelines_text";
 import generateSegmentLoader from "./segment_loader";
+
+const MAX_CACHE_SIZE = 30;
+type ISegmentCache<T> =
+  Record<string, Array<{
+    segmentData: T;
+    initSegmentData: T;
+    segment: any;
+    adaptation: any;
+    representation: any;
+  }>>;
+const NETWORK_SEGMENT_CACHE : ISegmentCache<any> = {};
+(window as any).NETWORK_SEGMENT_CACHE = NETWORK_SEGMENT_CACHE;
 
 /**
  * Request external "xlink" ressource from a MPD.
@@ -141,7 +154,28 @@ export default function(
         period,
         representation,
         segment,
-      });
+      }).pipe(
+        tap((_data) => {
+          const { type, value } = _data;
+          if (type === "response") {
+            const bufferType = adaptation.type;
+            const { isInit } = segment;
+            if (NETWORK_SEGMENT_CACHE[bufferType] == null) {
+              NETWORK_SEGMENT_CACHE[bufferType] = [];
+            }
+            while (NETWORK_SEGMENT_CACHE[bufferType].length >= MAX_CACHE_SIZE) {
+              NETWORK_SEGMENT_CACHE[bufferType].shift();
+            }
+            NETWORK_SEGMENT_CACHE[bufferType].push({
+              segmentData: !isInit ? value : undefined,
+              initSegmentData: isInit ? value : undefined,
+              segment,
+              representation,
+              adaptation,
+            });
+          }
+        })
+      );
     },
 
     parser({

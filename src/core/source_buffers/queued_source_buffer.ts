@@ -31,6 +31,7 @@ import {
 } from "../../compat";
 import config from "../../config";
 import log from "../../log";
+import hashBuffer from "../../utils/hash_buffer";
 import ICustomTimeRanges from "./time_ranges";
 
 const { SOURCE_BUFFER_FLUSHING_INTERVAL } = config;
@@ -85,11 +86,16 @@ interface IRemoveOrder { type : SourceBufferAction.Remove;
                          value : { start : number;
                                    end : number; }; }
 
-interface IAppendAction<T> { type : SourceBufferAction.Append;
-                             value : { segment : T;
-                                       isInit : boolean;
-                                       codec : string;
-                                       timestampOffset? : number; }; }
+interface IAppendAction<T> {
+  type : SourceBufferAction.Append;
+  value : {
+    segment : T;
+    isInit : boolean;
+    codec : string;
+    timestampOffset? : number;
+    initSegmentAssociated? : T|null;
+  };
+}
 
 interface IRemoveAction { type : SourceBufferAction.Remove;
                           value : { start : number;
@@ -98,6 +104,15 @@ interface IRemoveAction { type : SourceBufferAction.Remove;
 // Orders understood by the QueuedSourceBuffer
 type IQSBOrders<T> = IAppendOrder<T> |
                      IRemoveOrder;
+
+const MAX_CACHE_SIZE = 30;
+type ISegmentCache<T> =
+  Record<string, Array<{
+    segment: T;
+    initSegment: T|null;
+    hashInit: number|null;
+  }>>;
+const SEGMENT_CACHE : ISegmentCache<any> = {};
 
 /**
  * Wrap a SourceBuffer and append/remove segments in it in a queue.
@@ -409,11 +424,15 @@ export default class QueuedSourceBuffer<T> {
           newQueueItem.subject.complete();
         }
         if (newQueueItem.value.segment !== null) {
-          tasks.push({ type: SourceBufferAction.Append,
-                       value: { segment: newQueueItem.value.segment,
-                                isInit: false,
-                                codec: newQueueItem.value.codec,
-                                timestampOffset: newQueueItem.value.timestampOffset },
+          tasks.push({
+            type: SourceBufferAction.Append,
+            value: {
+              initSegmentAssociated: newQueueItem.value.initSegment,
+              segment: newQueueItem.value.segment,
+              isInit: false,
+              codec: newQueueItem.value.codec,
+              timestampOffset: newQueueItem.value.timestampOffset,
+            },
           });
         }
       } else {
@@ -439,7 +458,13 @@ export default class QueuedSourceBuffer<T> {
     try {
       switch (task.type) {
         case SourceBufferAction.Append:
-          const { segment, isInit, timestampOffset = 0, codec } = task.value;
+          const {
+            segment,
+            isInit,
+            timestampOffset = 0,
+            codec,
+            initSegmentAssociated,
+          } = task.value;
           if (isInit && this._lastInitSegment === segment) {
             this._flush(); // nothing to do
             return;
@@ -469,6 +494,30 @@ export default class QueuedSourceBuffer<T> {
           if (isInit) {
             this._lastInitSegment = segment;
           }
+
+          if (SEGMENT_CACHE[this.bufferType] == null) {
+            SEGMENT_CACHE[this.bufferType] = [];
+          }
+          while (SEGMENT_CACHE[this.bufferType].length >= MAX_CACHE_SIZE) {
+            SEGMENT_CACHE[this.bufferType].shift();
+          }
+
+          let hashInit = null;
+          if (isInit && segment instanceof Uint8Array) {
+            hashInit = hashBuffer(segment);
+          } else if (
+            !!initSegmentAssociated &&
+            initSegmentAssociated instanceof Uint8Array
+          ) {
+            hashInit = hashBuffer(initSegmentAssociated);
+          }
+
+          SEGMENT_CACHE[this.bufferType].push({
+            segment: !isInit ? segment : undefined,
+            initSegment: isInit ? segment : initSegmentAssociated,
+            hashInit,
+          });
+
           this._sourceBuffer.appendBuffer(segment);
           break;
         case SourceBufferAction.Remove:
@@ -485,3 +534,5 @@ export default class QueuedSourceBuffer<T> {
     }
   }
 }
+
+(window as any).SEGMENT_CACHE = SEGMENT_CACHE;
