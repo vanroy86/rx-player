@@ -18,7 +18,7 @@ import {
   Observable,
   of as observableOf,
 } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, tap } from "rxjs/operators";
 import features from "../../features";
 import log from "../../log";
 import Manifest, {
@@ -76,6 +76,18 @@ function addNextSegments(
     representation.index._addSegments(nextSegments, dlSegment);
   }
 }
+
+const MAX_CACHE_SIZE = 30;
+type ISegmentCache<T> =
+  Record<string, Array<{
+    segmentData: T;
+    initSegmentData: T;
+    segment: any;
+    adaptation: any;
+    representation: any;
+  }>>;
+const NETWORK_SEGMENT_CACHE : ISegmentCache<any> = {};
+(window as any).NETWORK_SEGMENT_CACHE = NETWORK_SEGMENT_CACHE;
 
 export default function(
   options : ITransportOptions = {}
@@ -158,7 +170,28 @@ export default function(
         period,
         representation,
         segment,
-      });
+      }).pipe(
+        tap((_data) => {
+          const { type, value } = _data;
+          if (type === "response") {
+            const bufferType = adaptation.type;
+            const { isInit } = segment;
+            if (NETWORK_SEGMENT_CACHE[bufferType] == null) {
+              NETWORK_SEGMENT_CACHE[bufferType] = [];
+            }
+            while (NETWORK_SEGMENT_CACHE[bufferType].length >= MAX_CACHE_SIZE) {
+              NETWORK_SEGMENT_CACHE[bufferType].shift();
+            }
+            NETWORK_SEGMENT_CACHE[bufferType].push({
+              segmentData: !isInit ? value : undefined,
+              initSegmentData: isInit ? value : undefined,
+              segment,
+              representation,
+              adaptation,
+            });
+          }
+        })
+      );
     },
 
     parser({
