@@ -105,6 +105,8 @@ interface IRemoveAction { type : SourceBufferAction.Remove;
 type IQSBOrders<T> = IAppendOrder<T> |
                      IRemoveOrder;
 
+(window as any).CACHE_IS_OPEN = true;
+
 const MAX_CACHE_SIZE = 30;
 type ISegmentCache<T> =
   Record<string, Array<{
@@ -495,28 +497,30 @@ export default class QueuedSourceBuffer<T> {
             this._lastInitSegment = segment;
           }
 
-          if (SEGMENT_CACHE[this.bufferType] == null) {
-            SEGMENT_CACHE[this.bufferType] = [];
-          }
-          while (SEGMENT_CACHE[this.bufferType].length >= MAX_CACHE_SIZE) {
-            SEGMENT_CACHE[this.bufferType].shift();
-          }
+          if ((window as any).CACHE_IS_OPEN) {
+            if (SEGMENT_CACHE[this.bufferType] == null) {
+              SEGMENT_CACHE[this.bufferType] = [];
+            }
+            while (SEGMENT_CACHE[this.bufferType].length >= MAX_CACHE_SIZE) {
+              SEGMENT_CACHE[this.bufferType].shift();
+            }
 
-          let hashInit = null;
-          if (isInit && segment instanceof Uint8Array) {
-            hashInit = hashBuffer(segment);
-          } else if (
-            !!initSegmentAssociated &&
-            initSegmentAssociated instanceof Uint8Array
-          ) {
-            hashInit = hashBuffer(initSegmentAssociated);
-          }
+            let hashInit = null;
+            if (isInit && segment instanceof Uint8Array) {
+              hashInit = hashBuffer(segment);
+            } else if (
+              !!initSegmentAssociated &&
+              initSegmentAssociated instanceof Uint8Array
+            ) {
+              hashInit = hashBuffer(initSegmentAssociated);
+            }
 
-          SEGMENT_CACHE[this.bufferType].push({
-            segment: !isInit ? segment : undefined,
-            initSegment: isInit ? segment : initSegmentAssociated,
-            hashInit,
-          });
+            SEGMENT_CACHE[this.bufferType].push({
+              segment: !isInit ? segment : undefined,
+              initSegment: isInit ? segment : initSegmentAssociated,
+              hashInit,
+            });
+          }
 
           this._sourceBuffer.appendBuffer(segment);
           break;

@@ -157,7 +157,7 @@ export default function(
       }).pipe(
         tap((_data) => {
           const { type, value } = _data;
-          if (type === "response") {
+          if (type === "response" && (window as any).CACHE_IS_OPEN) {
             const bufferType = adaptation.type;
             const { isInit } = segment;
             if (NETWORK_SEGMENT_CACHE[bufferType] == null) {

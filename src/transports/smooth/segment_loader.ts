@@ -18,6 +18,7 @@ import {
   Observable,
   of as observableOf,
 } from "rxjs";
+import { tap } from "rxjs/operators";
 import assert from "../../utils/assert";
 import request from "../../utils/request";
 import {
@@ -36,13 +37,23 @@ interface IRegularSegmentLoaderArguments extends ISegmentLoaderArguments {
   url : string;
 }
 
+const MAX_CACHE_SIZE = 30;
+type ISegmentCache<T> =
+  Record<string, Array<{
+    segmentData: T;
+    initSegmentData: T;
+    segment: any;
+  }>>;
+const XHR_SEGMENT_CACHE : ISegmentCache<any> = {};
+(window as any).XHR_SEGMENT_CACHE = XHR_SEGMENT_CACHE;
+
 /**
  * Segment loader triggered if there was no custom-defined one in the API.
  * @param {Object} opt
  * @returns {Observable}
  */
 function regularSegmentLoader(
-  { url, segment } : IRegularSegmentLoaderArguments
+  { url, segment, adaptation } : IRegularSegmentLoaderArguments
 ) : ILoaderObservable<ArrayBuffer> {
   let headers;
   const range = segment.range;
@@ -57,7 +68,25 @@ function regularSegmentLoader(
     responseType: "arraybuffer",
     headers,
     sendProgressEvents: true,
-  });
+  }).pipe(tap(_data => {
+    const { type, value } = _data;
+    if (type === "response" && (window as any).CACHE_IS_OPEN) {
+      const { isInit } = segment;
+      const bufferType = adaptation.type;
+
+      if (XHR_SEGMENT_CACHE[bufferType] == null) {
+        XHR_SEGMENT_CACHE[bufferType] = [];
+      }
+      while (XHR_SEGMENT_CACHE[bufferType].length >= MAX_CACHE_SIZE) {
+        XHR_SEGMENT_CACHE[bufferType].shift();
+      }
+      XHR_SEGMENT_CACHE[bufferType].push({
+        segmentData: !isInit ? value : undefined,
+        initSegmentData: isInit ? value : undefined,
+        segment,
+      });
+    }
+  }));
 }
 
 /**
