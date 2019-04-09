@@ -18,7 +18,7 @@
  * It always should be imported through the `features` object.
  */
 import { asapScheduler, merge as observableMerge, of as observableOf, } from "rxjs";
-import { filter, ignoreElements, map, mergeMap, mergeMapTo, observeOn, share, take, } from "rxjs/operators";
+import { ignoreElements, map, mergeMap, observeOn, share, } from "rxjs/operators";
 import { clearElementSrc, setElementSrc$, } from "../../compat";
 import { MediaError } from "../../errors";
 import log from "../../log";
@@ -102,10 +102,7 @@ export default function initializeDirectfileContent(_a) {
     var stalled$ = getStalledEvents(mediaElement, clock$)
         .pipe(map(EVENTS.stalled));
     // Manage "loaded" event and warn if autoplay is blocked on the current browser
-    var loadedEvent$ = emeManager$.pipe(filter(function (_a) {
-        var type = _a.type;
-        return type === "eme-init" || type === "eme-disabled";
-    }), take(1), mergeMapTo(load$), mergeMap(function (evt) {
+    var loadedEvent$ = load$.pipe(mergeMap(function (evt) {
         if (evt === "autoplay-blocked") {
             var error = new MediaError("MEDIA_ERR_BLOCKED_AUTOPLAY", "Cannot trigger auto-play automatically: your browser does not allow it.", false);
             return observableOf(EVENTS.warning(error), EVENTS.loaded());

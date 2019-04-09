@@ -15,7 +15,7 @@
  */
 import objectAssign from "object-assign";
 import { asapScheduler, combineLatest as observableCombineLatest, concat as observableConcat, EMPTY, merge as observableMerge, of as observableOf, ReplaySubject, Subject, timer as observableTimer, } from "rxjs";
-import { filter, ignoreElements, map, mergeMap, observeOn, share, startWith, switchMap, take, takeUntil, tap, } from "rxjs/operators";
+import { ignoreElements, map, mergeMap, observeOn, share, startWith, switchMap, takeUntil, tap, } from "rxjs/operators";
 import config from "../../config";
 import log from "../../log";
 import throttle from "../../utils/rx-throttle";
@@ -84,11 +84,7 @@ export default function InitializeOnMediaSource(_a) {
     var mediaError$ = throwOnMediaError(mediaElement);
     // Emit each time the manifest is refreshed.
     var manifestRefreshed$ = new ReplaySubject(1);
-    var emeInitialized$ = emeManager$.pipe(filter(function (_a) {
-        var type = _a.type;
-        return type === "eme-init" || type === "eme-disabled";
-    }), take(1));
-    var loadContent$ = observableCombineLatest(openMediaSource$, fetchManifest(url), emeInitialized$).pipe(mergeMap(function (_a) {
+    var loadContent$ = observableCombineLatest(openMediaSource$, fetchManifest(url)).pipe(mergeMap(function (_a) {
         var mediaSource = _a[0], _b = _a[1], manifest = _b.manifest, sendingTime = _b.sendingTime;
         /**
          * Refresh the manifest on subscription.
