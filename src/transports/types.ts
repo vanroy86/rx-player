@@ -266,11 +266,11 @@ interface IParsedKeySystem { systemId : string;
 export interface ITransportOptions {
   aggressiveMode? : boolean;
   keySystems? : (hex? : Uint8Array) => IParsedKeySystem[]; // TODO deprecate
-  manifestLoader?: CustomManifestLoader;
+  manifestLoader?: ICustomManifestLoader;
   minRepresentationBitrate? : number; // TODO deprecate
   referenceDateTime? : number;
   representationFilter? : IRepresentationFilter;
-  segmentLoader? : CustomSegmentLoader;
+  segmentLoader? : ICustomSegmentLoader;
   suggestedPresentationDelay? : number;
   supplementaryImageTracks? : ISupplementaryImageTrack[];
   supplementaryTextTracks? : ISupplementaryTextTrack[];
@@ -279,7 +279,7 @@ export interface ITransportOptions {
 export type ITransportFunction = (options? : ITransportOptions) =>
                                    ITransportPipelines;
 
-export type CustomSegmentLoader = (
+export type ICustomSegmentLoader = (
   // first argument: infos on the segment
   args : { adaptation : Adaptation;
            representation : Representation;
@@ -299,7 +299,7 @@ export type CustomSegmentLoader = (
   // returns either the aborting callback or nothing
   (() => void)|void;
 
-export type CustomManifestLoader = (
+export type ICustomManifestLoader = (
   // first argument: url of the manifest
   url : string,
 

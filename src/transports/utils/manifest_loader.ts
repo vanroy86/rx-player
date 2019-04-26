@@ -18,7 +18,7 @@ import { Observable } from "rxjs";
 import request from "../../utils/request";
 
 import {
-  CustomManifestLoader,
+  ICustomManifestLoader,
   ILoaderObservable,
   ILoaderObserver,
 } from "../types";
@@ -37,8 +37,9 @@ function regularManifestLoader(url: string) {
  * @returns {Function}
  */
 const manifestPreLoader = (
-  { customManifestLoader } : { customManifestLoader?: CustomManifestLoader }
+  options: { customManifestLoader?: ICustomManifestLoader }
 ) => (url: string) : ILoaderObservable<Document|string> => {
+    const { customManifestLoader } = options;
     if (!customManifestLoader) {
       return regularManifestLoader(url);
     }

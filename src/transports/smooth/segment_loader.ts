@@ -21,7 +21,7 @@ import {
 import assert from "../../utils/assert";
 import request from "../../utils/request";
 import {
-  CustomSegmentLoader,
+  ICustomSegmentLoader,
   ILoaderObservable,
   ILoaderObserver,
   ISegmentLoaderArguments,
@@ -65,7 +65,7 @@ function regularSegmentLoader(
  * one).
  */
 const generateSegmentLoader = (
-  customSegmentLoader? : CustomSegmentLoader
+  customSegmentLoader? : ICustomSegmentLoader
 ) => ({
   segment,
   representation,

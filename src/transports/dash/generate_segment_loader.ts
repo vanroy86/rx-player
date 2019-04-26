@@ -20,7 +20,7 @@ import {
 } from "rxjs";
 import request from "../../utils/request";
 import {
-  CustomSegmentLoader,
+  ICustomSegmentLoader,
   ILoaderObservable,
   ILoaderObserver,
   ISegmentLoaderArguments,
@@ -68,7 +68,7 @@ function regularSegmentLoader(
  * @param {Function} [customSegmentLoader]
  * @returns {Function}
  */
-const segmentPreLoader = (customSegmentLoader? : CustomSegmentLoader) => ({
+const segmentPreLoader = (customSegmentLoader? : ICustomSegmentLoader) => ({
   adaptation,
   manifest,
   period,

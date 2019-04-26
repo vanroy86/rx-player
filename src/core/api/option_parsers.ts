@@ -24,8 +24,8 @@ import config from "../../config";
 import log from "../../log";
 import { IRepresentationFilter } from "../../manifest";
 import {
-  CustomManifestLoader,
-  CustomSegmentLoader,
+  ICustomManifestLoader,
+  ICustomSegmentLoader,
 } from "../../transports";
 import {
   normalizeAudioTrack,
@@ -53,65 +53,82 @@ const { DEFAULT_AUTO_PLAY,
 
 export { IKeySystemOption };
 
-export interface ITransportOptions { aggressiveMode? : boolean;
-                                     manifestLoader? : CustomManifestLoader;
-                                     segmentLoader? : CustomSegmentLoader;
-                                     representationFilter? : IRepresentationFilter;
-                                     referenceDateTime? : number; }
+export interface ITransportOptions {
+  aggressiveMode? : boolean;
+  manifestLoader? : ICustomManifestLoader;
+  segmentLoader? : ICustomSegmentLoader;
+  representationFilter? : IRepresentationFilter;
+  referenceDateTime? : number;
+}
 
-export interface ISupplementaryTextTrackOption { url : string;
-                                                 language : string;
-                                                 closedCaption : boolean;
-                                                 mimeType : string;
-                                                 codecs? : string; }
+export interface ISupplementaryTextTrackOption {
+  url : string;
+  language : string;
+  closedCaption : boolean;
+  mimeType : string;
+  codecs? : string;
+}
 
-export interface ISupplementaryImageTrackOption { url : string;
-                                                  mimeType : string; }
+export interface ISupplementaryImageTrackOption {
+  url : string;
+  mimeType : string;
+}
 
-export interface IDefaultAudioTrackOption { language : string;
-                                            normalized : string;
-                                            audioDescription : boolean; }
+export interface IDefaultAudioTrackOption {
+  language : string;
+  normalized : string;
+  audioDescription : boolean;
+}
 
-export interface IDefaultTextTrackOption { language : string;
-                                           normalized : string;
-                                           closedCaption : boolean; }
+export interface IDefaultTextTrackOption {
+  language : string;
+  normalized : string;
+  closedCaption : boolean;
+}
 
-export type ITextTrackPreference = null |
-                                   { language : string;
-                                     closedCaption : boolean; };
+export type ITextTrackPreference = null | {
+  language : string;
+  closedCaption : boolean;
+};
 
-export interface INetworkConfigOption { manifestRetry? : number;
-                                        offlineRetry? : number;
-                                        segmentRetry? : number; }
+export interface INetworkConfigOption {
+  manifestRetry? : number;
+  offlineRetry? : number;
+  segmentRetry? : number;
+}
 
-export type IStartAtOption = { position : number } |
-                             { wallClockTime : Date|number } |
-                             { percentage : number } |
-                             { fromLastPosition : number } |
-                             { fromFirstPosition : number };
+export type IStartAtOption =
+  { position : number } |
+  { wallClockTime : Date|number } |
+  { percentage : number } |
+  { fromLastPosition : number } |
+  { fromFirstPosition : number };
 
-type IParsedStartAtOption = { position : number } |
-                            { wallClockTime : number } |
-                            { percentage : number } |
-                            { fromLastPosition : number } |
-                            { fromFirstPosition : number };
+type IParsedStartAtOption =
+  { position : number } |
+  { wallClockTime : number } |
+  { percentage : number } |
+  { fromLastPosition : number } |
+  { fromFirstPosition : number };
 
-export interface IConstructorOptions { maxBufferAhead? : number;
-                                       maxBufferBehind? : number;
-                                       wantedBufferAhead? : number;
+export interface IConstructorOptions {
+  maxBufferAhead? : number;
+  maxBufferBehind? : number;
+  wantedBufferAhead? : number;
 
-                                       limitVideoWidth? : boolean;
-                                       throttleWhenHidden? : boolean;
+  limitVideoWidth? : boolean;
+  throttleWhenHidden? : boolean;
 
-                                       preferredAudioTracks? : IAudioTrackPreference[];
-                                       preferredTextTracks? : ITextTrackPreference[];
+  preferredAudioTracks? : IAudioTrackPreference[];
+  preferredTextTracks? : ITextTrackPreference[];
 
-                                       videoElement? : HTMLMediaElement;
-                                       initialVideoBitrate? : number;
-                                       initialAudioBitrate? : number;
-                                       maxAudioBitrate? : number;
-                                       maxVideoBitrate? : number;
-                                       stopAtEnd? : boolean; }
+  videoElement? : HTMLMediaElement;
+  initialVideoBitrate? : number;
+  initialAudioBitrate? : number;
+  maxAudioBitrate? : number;
+  maxVideoBitrate? : number;
+  stopAtEnd? : boolean;
+}
 
 export interface IParsedConstructorOptions {
   maxBufferAhead : number;
@@ -484,12 +501,12 @@ function parseLoadVideoOptions(
 
   // TODO without cast
   /* tslint:disable no-object-literal-type-assertion */
-<<<<<<< HEAD
   return { autoPlay,
            defaultAudioTrack,
            defaultTextTrack,
            hideNativeSubtitle,
            keySystems,
+           initialManifest,
            manualBitrateSwitchingMode,
            networkConfig,
            startAt,
@@ -500,44 +517,6 @@ function parseLoadVideoOptions(
            transport,
            transportOptions,
            url } as IParsedLoadVideoOptions;
-||||||| merged common ancestors
-  return {
-    autoPlay,
-    defaultAudioTrack,
-    defaultTextTrack,
-    hideNativeSubtitle,
-    keySystems,
-    manualBitrateSwitchingMode,
-    networkConfig,
-    startAt,
-    supplementaryImageTracks,
-    supplementaryTextTracks,
-    textTrackElement,
-    textTrackMode,
-    transport,
-    transportOptions,
-    url,
-  } as IParsedLoadVideoOptions;
-=======
-  return {
-    autoPlay,
-    defaultAudioTrack,
-    defaultTextTrack,
-    hideNativeSubtitle,
-    keySystems,
-    initialManifest,
-    manualBitrateSwitchingMode,
-    networkConfig,
-    startAt,
-    supplementaryImageTracks,
-    supplementaryTextTracks,
-    textTrackElement,
-    textTrackMode,
-    transport,
-    transportOptions,
-    url,
-  } as IParsedLoadVideoOptions;
->>>>>>> api: add initialManifest loadVideo option
   /* tslint:enable no-object-literal-type-assertion */
 }
 
