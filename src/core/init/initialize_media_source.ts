@@ -124,7 +124,7 @@ export interface IInitializeOptions {
   startAt? : IInitialTimeOptions;
   textTrackOptions : ITextTrackSourceBufferOptions;
   pipelines : ITransportPipelines;
-  url : string;
+  url? : string;
 }
 
 // Every events emitted by Init.
@@ -174,7 +174,7 @@ export default function InitializeOnMediaSource({
   // Fetch and parse the manifest from the URL given.
   // Throttled to avoid doing multiple simultaneous requests.
   const fetchManifest = throttle(
-    (args: { manifestURL: string; hasClockSynchronization: boolean }) => {
+    (args: { manifestURL? : string; hasClockSynchronization: boolean }) => {
       const { manifestURL, hasClockSynchronization } = args;
       return manifestPipelines.fetch(manifestURL).pipe(
         mergeMap((response) =>

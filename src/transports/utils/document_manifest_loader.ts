@@ -41,7 +41,7 @@ function regularManifestLoader(url? : string) : ILoaderObservable<Document> {
  */
 const manifestPreLoader = (
   options: { customManifestLoader?: ICustomManifestLoader<any> }
-) => (url: string) : ILoaderObservable<Document|string> => {
+) => (url? : string) : ILoaderObservable<Document|string> => {
     const { customManifestLoader } = options;
     if (!customManifestLoader) {
       return regularManifestLoader(url);

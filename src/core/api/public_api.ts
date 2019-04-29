@@ -332,7 +332,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
      * URL of the content currently being played.
      * @type {string}
      */
-    url : string;
+    url? : string;
 
     /**
      * true if the current content is in DirectFile mode.
@@ -659,10 +659,6 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * Load a new video.
    * @param {Object} opts
    * @returns {Observable}
-   * @throws Error - throws if no url is given.
-   * @throws Error - throws if no transport is given and no default transport
-   * has been set.
-   * @throws Error - throws if the asked transport does not exist
    */
   loadVideo(opts : ILoadVideoOptions) : void {
     const options = parseLoadVideoOptions(opts);

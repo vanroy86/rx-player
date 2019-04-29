@@ -82,7 +82,7 @@ function errorSelector(code : string, error : Error, fatal : boolean) : ICustomE
 }
 
 export interface ICoreManifestPipeline {
-  fetch(url : string) : Observable<IPipelineLoaderResponse<Document|string>>;
+  fetch(url? : string) : Observable<IPipelineLoaderResponse<Document|string>>;
   parse(
     response : IPipelineLoaderResponseValue<Document|string>,
     hasClockSynchronization : boolean,

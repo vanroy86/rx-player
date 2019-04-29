@@ -372,10 +372,10 @@ describe("API - parseLoadVideoOptions", () => {
     }
     expect(err).toBeDefined();
     expect(opt).not.toBeDefined();
-    expect(err.message).toEqual("No url set on loadVideo");
+    expect(err.message).toEqual("No option set on loadVideo");
   });
 
-  it("should throw if no url is given", () => {
+  it("should throw if no url nor custom Manifest loader is given", () => {
     let err1;
     let opt1;
     let err2;
@@ -419,6 +419,22 @@ describe("API - parseLoadVideoOptions", () => {
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
+    });
+  });
+
+  /* tslint:disable max-line-length */
+  it("should set a default object if both a Manifest loader and transport is given", () => {
+  /* tslint:enable max-line-length */
+    const manifestLoader = () : never => {
+      throw new Error("Should not execute");
+    };
+    expect(parseLoadVideoOptions({
+      transport: "bar",
+      transportOptions: { manifestLoader },
+    })).toEqual({
+      ...defaultLoadVideoOptions,
+      transport: "bar",
+      transportOptions: { manifestLoader },
     });
   });
 
