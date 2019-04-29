@@ -70,8 +70,8 @@ const generateManifestID = idGenerator();
  * @param {string} data
  */
 export default function parseMetaPlaylist(
-  data: string,
-  url : string
+  data : string,
+  url? : string
 ): IParserResponse<IParsedManifest> {
   let parsedData;
   try {
@@ -131,9 +131,9 @@ export default function parseMetaPlaylist(
  * @param {string} url
  */
 function createManifest(
-  mplData: IMetaPlaylist,
+  mplData : IMetaPlaylist,
   manifests : Manifest[],
-  url: string
+  url? : string
 ): IParsedManifest {
   const generateAdaptationID = idGenerator();
   const generateRepresentationID = idGenerator();
@@ -217,13 +217,12 @@ function createManifest(
           language: track.language,
           closedCaption: track.closedCaption,
           manuallyAdded: true,
-          representations: [
-            {
+          representations: [ {
               bitrate: 0,
               id: representationID,
               mimeType: track.mimeType,
               codecs: track.codecs,
-              index: new StaticRepresentationIndex({ media: url }),
+              index: new StaticRepresentationIndex({ media: track.url }),
             },
           ],
         };
@@ -279,7 +278,7 @@ function createManifest(
     periods,
     transportType: "metaplaylist",
     isLive,
-    uris: [url],
+    uris: url == null ? [] : [url],
     maximumTime: { isContinuous: false, value: maximumTime, time },
     minimumTime: { isContinuous: false, value: minimumTime, time },
     lifetime: mplData.pollInterval,
