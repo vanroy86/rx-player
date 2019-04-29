@@ -68,9 +68,10 @@ export interface ILocalPeriod {
 }
 
 export interface ILocalManifest {
-  version: string; // MAJOR.MINOR
-                   // MAJOR = previous parser should not parse it
-                   // MINOR = retro-compatible
-  duration: number; // total duration of the content in ms
-  periods: ILocalPeriod[];
+  version : string; // MAJOR.MINOR
+                    // MAJOR = previous parser should not parse it
+                    // MINOR = retro-compatible
+  duration : number; // total duration of the content in ms
+  periods : ILocalPeriod[];
+  isFinished : boolean; // whether the local-manifest generation is finished
 }

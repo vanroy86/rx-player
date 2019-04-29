@@ -48,10 +48,7 @@ export default function getInitialTime(
       return Math.max(Math.min(startAt.position, max), min);
     }
     else if (startAt.wallClockTime != null) {
-      const position = manifest.isLive ?
-        startAt.wallClockTime - (manifest.availabilityStartTime || 0) :
-        startAt.wallClockTime;
-
+      const position = startAt.wallClockTime - (manifest.availabilityStartTime || 0);
       return Math.max(Math.min(position, max), min);
     }
     else if (startAt.fromFirstPosition != null) {

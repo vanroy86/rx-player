@@ -65,7 +65,8 @@ export interface IParsedPeriod {
 export interface IParsedManifest {
   // required
   id: string; // Unique ID for the manifest.
-  isLive : boolean; // If true, this Manifest describes a content not finished yet.
+  isDynamic : boolean; // If true, this Manifest can still evolve
+  isLive : boolean; // If true, this Manifest describes a "live" content
   periods: IParsedPeriod[]; // Periods contained in this manifest.
   transportType: string; // "smooth", "dash" etc.
 

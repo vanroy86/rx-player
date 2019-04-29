@@ -171,6 +171,7 @@ function parseCompleteIntermediateRepresentation(
                                     "gen-dash-manifest-" + generateManifestID(),
     periods: parsedPeriods,
     transportType: "dash",
+    isDynamic,
     isLive: isDynamic,
     uris: args.url == null ?
       rootChildren.locations : [args.url, ...rootChildren.locations],
@@ -192,7 +193,7 @@ function parseCompleteIntermediateRepresentation(
   }
 
   checkManifestIDs(parsedMPD);
-  if (parsedMPD.isLive) {
+  if (parsedMPD.isDynamic) {
     const lastTimeReference = getLastTimeReference(parsedMPD);
     if (parsedMPD.clockOffset == null && lastTimeReference == null) {
       const UTCTimingHTTPURL = getHTTPUTCTimingURL(mpdIR);

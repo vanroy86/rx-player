@@ -84,7 +84,6 @@ import getPipelineOptions from "./get_pipeline_options";
 export interface IAdaptationBufferClockTick extends IRepresentationBufferClockTick {
   bufferGap : number; // /!\ bufferGap of the SourceBuffer
   duration : number; // duration of the HTMLMediaElement
-  isLive : boolean; // If true, we're playing a live content
   isPaused: boolean; // If true, the player is on pause
   speed : number; // Current regular speed asked by the user
 }
