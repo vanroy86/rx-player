@@ -126,12 +126,12 @@ export default function(
     },
 
     parser(
-      { response, url: reqURL } : IManifestParserArguments<Document|string, string>
+      { response, url: reqURL } : IManifestParserArguments
     ) : IManifestParserObservable {
       const url = response.url == null ? reqURL : response.url;
       const data = typeof response.responseData === "string" ?
         new DOMParser().parseFromString(response.responseData, "text/xml") :
-        response.responseData;
+        response.responseData as Document;
       const { receivedTime: manifestReceivedTime } = response;
       const parserResult = smoothManifestParser(data, url, manifestReceivedTime);
       const manifest = new Manifest(parserResult, {

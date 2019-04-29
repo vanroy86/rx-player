@@ -117,8 +117,8 @@ export type ILoaderObservable<T> = Observable<ILoaderEvent<T>>;
 
 // -- arguments
 
-export interface IManifestParserArguments<T, U> {
-  response : ILoaderResponseValue<T>; // Response from the loader
+export interface IManifestParserArguments {
+  response : ILoaderResponseValue<unknown>; // Response from the loader
   url? : string; // URL originally requested
   hasClockSynchronization : boolean; // If true, the current device is currently
                                      // synchronized with the server's clock.
@@ -130,7 +130,7 @@ export interface IManifestParserArguments<T, U> {
                                      // Manifest.
 
   // allow the parser to load supplementary ressources (of type U)
-  scheduleRequest : (request : () => Observable<U>) => Observable<U>;
+  scheduleRequest : (request : () => Observable<string>) => Observable<string>;
 }
 
 export interface ISegmentParserArguments<T> {
@@ -208,9 +208,8 @@ export type ImageParserObservable = Observable<{
 export interface ITransportManifestPipeline {
   // TODO Remove resolver
   resolver? : (x : IManifestLoaderArguments) => Observable<IManifestLoaderArguments>;
-  loader : (x : IManifestLoaderArguments) => ILoaderObservable<Document|string>;
-  parser : (x : IManifestParserArguments< Document |
-                                          string, string>) => IManifestParserObservable;
+  loader : (x : IManifestLoaderArguments) => ILoaderObservable<unknown>;
+  parser : (x : IManifestParserArguments) => IManifestParserObservable;
 }
 
 interface ITransportSegmentPipelineBase<T> {

@@ -21,7 +21,9 @@
 
 import { of as observableOf } from "rxjs";
 import Manifest from "../../manifest";
-import parseLocalManifest from "../../parsers/manifest/local";
+import parseLocalManifest, {
+  ILocalManifest,
+} from "../../parsers/manifest/local";
 import { imageParser } from "../dash/image_pipelines";
 import segmentParser from "../dash/segment_parser";
 import {
@@ -66,14 +68,12 @@ export default function getLocalManifestPipelines(
       throw new Error("An local Manifest is not loadable.");
     },
 
-    parser(
-      { response } : IManifestParserArguments<any, string> // TODO
-    ) : IManifestParserObservable {
+    parser({ response } : IManifestParserArguments) : IManifestParserObservable {
       const manifestData = response.responseData;
       if (typeof manifestData !== "object") {
         throw new Error("Wrong format for the manifest data");
       }
-      const parsed = parseLocalManifest(response.responseData);
+      const parsed = parseLocalManifest(response.responseData as ILocalManifest);
       const manifest = new Manifest(parsed, options);
       return observableOf({ manifest, url: undefined });
     },
