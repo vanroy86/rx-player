@@ -26,9 +26,7 @@ const plugins = [
         process.env.RXP_DASH === "true" :
         process.env.RXP_DASH !== "false",
 
-      LOCAL_MANIFEST: isBarebone ?
-        process.env.RXP_LOCAL_MANIFEST === "true" :
-        process.env.RXP_LOCAL_MANIFEST !== "false",
+      LOCAL_MANIFEST: process.env.RXP_LOCAL_MANIFEST === "true",
 
       DIRECTFILE: isBarebone ?
         process.env.RXP_DIRECTFILE === "true" :
