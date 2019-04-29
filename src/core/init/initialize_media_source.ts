@@ -56,7 +56,6 @@ import {
 } from "../eme";
 import {
   createManifestPipeline,
-  IFetchManifestResult,
   SegmentPipelinesManager,
 } from "../pipelines";
 import {
@@ -117,7 +116,6 @@ export interface IInitializeOptions {
                     manualBitrateSwitchingMode : "seamless" | "direct"; };
   clock$ : Observable<IInitClockTick>;
   keySystems : IKeySystemOption[];
-  initialManifest : string|Document|any; // XXX TODO
   mediaElement : HTMLMediaElement;
   networkConfig: { manifestRetry? : number;
                    offlineRetry? : number;
@@ -126,7 +124,7 @@ export interface IInitializeOptions {
   startAt? : IInitialTimeOptions;
   textTrackOptions : ITextTrackSourceBufferOptions;
   pipelines : ITransportPipelines;
-  url? : string;
+  url : string;
 }
 
 // Every events emitted by Init.
@@ -158,7 +156,6 @@ export default function InitializeOnMediaSource({
   bufferOptions,
   clock$,
   keySystems,
-  initialManifest,
   mediaElement,
   networkConfig,
   speed$,
@@ -226,18 +223,9 @@ export default function InitializeOnMediaSource({
   const manifestRefreshed$ =
     new ReplaySubject<{ manifest : Manifest; sendingTime? : number }>(1);
 
-  const initialFetch$ : Observable<IFetchManifestResult> = (() => {
-    if (initialManifest != null) {
-      return manifestPipelines.parse({ responseData: initialManifest }, false);
-    } else if (url == null) {
-      throw new MediaError(); // XXX TODO
-    }
-    return fetchManifest({ manifestURL: url, hasClockSynchronization: false });
-  })();
-
   const loadContent$ = observableCombineLatest([
     openMediaSource$,
-    initialFetch$,
+    fetchManifest({ manifestURL: url, hasClockSynchronization: false }),
     emeManager$.pipe(filter(isEMEReadyEvent), take(1)),
   ]).pipe(mergeMap(([ mediaSource, { manifest, sendingTime } ]) => {
 
