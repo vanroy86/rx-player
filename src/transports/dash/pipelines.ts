@@ -87,14 +87,14 @@ export default function(
 
     parser(
       { response, url: loaderURL, scheduleRequest, externalClockOffset } :
-      IManifestParserArguments< Document | string, string >
+      IManifestParserArguments
     ) : IManifestParserObservable {
       const url = response.url == null ? loaderURL :
                                          response.url;
       const data = typeof response.responseData === "string" ?
                      new DOMParser().parseFromString(response.responseData,
                                                      "text/xml") :
-                     response.responseData;
+                     response.responseData as Document;
 
       const parsedManifest = dashManifestParser(data, {
         url,

@@ -113,14 +113,14 @@ export type ISegmentLoaderObserver<T> = Observer<ISegmentLoaderEvent<T>>;
 
 // -- arguments
 
-export interface IManifestParserArguments<T, U> {
-  response : ILoaderDataLoadedValue<T>; // Response from the loader
+export interface IManifestParserArguments {
+  response : ILoaderDataLoadedValue<unknown>; // Response from the loader
   url? : string; // URL originally requested
   externalClockOffset? : number; // If set, offset to add to `performance.now()`
                                  // to obtain the current server's time
 
   // allow the parser to load supplementary ressources (of type U)
-  scheduleRequest : (request : () => Observable<U>) => Observable<U>;
+  scheduleRequest : (request : () => Observable<string>) => Observable<string>;
 }
 
 export interface ISegmentParserArguments<T> {
@@ -209,8 +209,7 @@ export type IManifestLoaderFunction =
   (x : IManifestLoaderArguments) => IManifestLoaderObservable< Document | string >;
 
 export type IManifestParserFunction =
-  (x : IManifestParserArguments< Document | string,
-                                 string>) => IManifestParserObservable;
+  (x : IManifestParserArguments) => IManifestParserObservable;
 
 // TODO Remove resolver
 export interface ITransportManifestPipeline { resolver? : IManifestResolverFunction;
