@@ -206,7 +206,7 @@ export type IManifestResolverFunction =
   (x : IManifestLoaderArguments) => Observable<IManifestLoaderArguments>;
 
 export type IManifestLoaderFunction =
-  (x : IManifestLoaderArguments) => IManifestLoaderObservable< Document | string >;
+  (x : IManifestLoaderArguments) => IManifestLoaderObservable< unknown >;
 
 export type IManifestParserFunction =
   (x : IManifestParserArguments) => IManifestParserObservable;
@@ -275,7 +275,7 @@ interface IParsedKeySystem { systemId : string;
 export interface ITransportOptions {
   aggressiveMode? : boolean;
   keySystems? : (hex? : Uint8Array) => IParsedKeySystem[]; // TODO deprecate
-  manifestLoader?: CustomManifestLoader;
+  manifestLoader?: CustomManifestLoader<unknown>;
   minRepresentationBitrate? : number; // TODO deprecate
   referenceDateTime? : number;
   representationFilter? : IRepresentationFilter;
@@ -311,12 +311,12 @@ export type CustomSegmentLoader = (
   // returns either the aborting callback or nothing
   (() => void)|void;
 
-export type CustomManifestLoader = (
+export type CustomManifestLoader<T> = (
   // first argument: url of the manifest
-  url : string,
+  url : string|undefined,
 
   // second argument: callbacks
-  callbacks : { resolve : (args : { data : Document|string;
+  callbacks : { resolve : (args : { data : T;
                                     sendingTime? : number;
                                     receivingTime? : number;
                                     size? : number;

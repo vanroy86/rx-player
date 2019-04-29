@@ -55,7 +55,7 @@ const { DEFAULT_AUTO_PLAY,
 export { IKeySystemOption };
 
 export interface ITransportOptions { aggressiveMode? : boolean;
-                                     manifestLoader? : CustomManifestLoader;
+                                     manifestLoader? : CustomManifestLoader<unknown>;
                                      segmentLoader? : CustomSegmentLoader;
                                      representationFilter? : IRepresentationFilter;
                                      referenceDateTime? : number; }

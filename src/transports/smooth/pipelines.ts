@@ -47,7 +47,7 @@ import {
   ITransportOptions,
   ITransportPipelines,
 } from "../types";
-import generateManifestLoader from "../utils/manifest_loader";
+import generateManifestLoader from "../utils/document_manifest_loader";
 import extractTimingsInfos from "./extract_timings_infos";
 import { patchSegment } from "./isobmff";
 import generateSegmentLoader from "./segment_loader";

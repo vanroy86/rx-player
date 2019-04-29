@@ -37,7 +37,7 @@ import {
   ITransportOptions,
   ITransportPipelines,
 } from "../types";
-import generateManifestLoader from "../utils/manifest_loader";
+import generateManifestLoader from "../utils/document_manifest_loader";
 import generateSegmentLoader from "./generate_segment_loader";
 import {
   imageLoader,
@@ -96,11 +96,9 @@ export default function(
                                                      "text/xml") :
                      response.responseData as Document;
 
-      const parsedManifest = dashManifestParser(data, {
-        url,
-        referenceDateTime,
-        externalClockOffset,
-      });
+      const parsedManifest = dashManifestParser(data, { url,
+                                                        referenceDateTime,
+                                                        externalClockOffset });
       return loadExternalResources(parsedManifest);
 
       function loadExternalResources(
