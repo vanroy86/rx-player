@@ -55,7 +55,7 @@ export { IKeySystemOption };
 
 export interface ITransportOptions {
   aggressiveMode? : boolean;
-  manifestLoader? : ICustomManifestLoader;
+  manifestLoader? : ICustomManifestLoader<unknown>;
   segmentLoader? : ICustomSegmentLoader;
   representationFilter? : IRepresentationFilter;
   referenceDateTime? : number;

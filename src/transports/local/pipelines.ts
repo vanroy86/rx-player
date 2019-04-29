@@ -37,6 +37,7 @@ import {
   ITransportOptions,
   ITransportPipelines,
 } from "../types";
+import callCustomManifestLoader from "../utils/call_custom_manifest_loader";
 import loadSegment from "./load_segment";
 
 /**
@@ -62,10 +63,20 @@ function segmentLoader(
 export default function getLocalManifestPipelines(
   options : ITransportOptions = {}
 ) : ITransportPipelines {
+  const customManifestLoader = options.manifestLoader;
 
   const manifestPipeline = {
-    loader() : never {
-      throw new Error("An local Manifest is not loadable.");
+    loader() : ILoaderObservable<ILocalManifest> {
+      if (customManifestLoader == null) {
+        throw new Error("A local Manifest is not loadable through regular HTTP " +
+          "calls. You have to set a `customManifestLoader` when calling `loadVideo`");
+      }
+      return callCustomManifestLoader<ILocalManifest>(
+        customManifestLoader,
+        () : never => {
+          throw new Error(
+          "Cannot fallback from the customManifestLoader of a `local` transport");
+        });
     },
 
     parser({ response } : IManifestParserArguments) : IManifestParserObservable {
