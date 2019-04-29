@@ -205,6 +205,7 @@ const URLs = [
 const manifestInfos = {
   url: BASE_URL + "Manifest_without_timings.mpd",
   transport: "dash",
+  isDynamic: true,
   isLive: true,
   availabilityStartTime: 0,
   periods: [

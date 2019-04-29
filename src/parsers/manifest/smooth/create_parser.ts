@@ -548,6 +548,7 @@ function createSmoothStreamingParser(
     const manifest = {
       id: "gen-smooth-manifest-" + generateManifestID(),
       isLive,
+      isDynamic: isLive,
       periods: [{
         id: "gen-smooth-period-0",
         duration,

@@ -98,6 +98,7 @@ const URLs = [
 const manifestInfos = {
   url: baseURL + "dash.mpd",
   transport: "dash",
+  isDynamic: false,
   isLive: false,
   duration: 60.022,
   minimumPosition: 0,

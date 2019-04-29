@@ -307,15 +307,16 @@ can be either:
 
   - ``fromLastPosition`` (``Number``): relative position from the maximum
     possible one, in seconds. Should be a negative number:
-      - for live contents, it is the difference between the starting position
-        and the live edge (as defined by the manifest)
-      - for non-live contents, it is the difference between the starting
-        position and the end position of the content.
+      - for dynamic (e.g. live) contents, it is the difference between the
+        starting position and the currently last possible position, as defined
+        by the manifest.
+      - for VoD contents, it is the difference between the starting position and
+        the end position of the content.
 
   - ``percentage`` (``Number``): percentage of the wanted position. ``0`` being
     the minimum position possible (0 for static content, buffer depth for live
     contents) and ``100`` being the maximum position possible (``duration`` for
-    static content, live edge for live contents).
+    VoD content, last currently possible position for dynamic contents).
 
 
 Note: Only one of those properties will be considered, in the same order of
@@ -325,19 +326,20 @@ If the value set is inferior to the minimum possible position, the minimum
 possible position will be used instead. If it is superior to the maximum
 possible position, the maximum will be used instead as well.
 
-#### Notes for live contents
-For live contents, ``startAt`` could work not as expected:
+#### Notes for dynamic contents
+
+For dynamic contents, ``startAt`` could work not as expected:
 
   - Depending on the type of Manifest, it will be more or less precize to guess
-    the live edge of the content. This will mostly affect the
+    the current last position of the content. This will mostly affect the
     ``fromLastPosition`` option.
 
   - If the Manifest does not allow to go far enough in the past (not enough
     buffer, server-side) to respect the position wanted, the maximum buffer
     depth will be used as a starting time instead.
 
-  - If the Manifest does not allow to go far enough in the future (live edge
-    sooner) to respect the position wanted, the live edge will be used to define
+  - If the Manifest does not allow to go far enough in the future to respect the
+    position wanted, the current last available position will be used to define
     the starting time instead.
 
 
@@ -376,8 +378,7 @@ player.loadVideo({
 player.loadVideo({
   // ...
   startAt: {
-    fromLastPosition: -60 // 1 minute before the end (before the live edge
-                          // for live contents)
+    fromLastPosition: -60 // 1 minute before the end
   }
 })
 ```
@@ -416,14 +417,14 @@ considered stable:
     them.
     More infos on it can be found [here](./plugins.md#representationFilter).
 
-  - ``aggressiveMode`` (``Boolean``): If set to true, we will download live
+  - ``aggressiveMode`` (``Boolean``): If set to true, we will download dynamic
     contents in what we call the "aggressiveMode".
 
     In that mode, we request segments we guess will be available without being
     absolutely sure they had time to be generated. For the moment, this mode has
     only an effect for Smooth streaming contents.
 
-    The upside is that you will have more segments close to the live edge.
+    The upside is that you will have the last segments sooner.
 
     The downside is that requests for segments which did not had time to
     generate will trigger a `NetworkError`. Depending on your other settings
@@ -437,10 +438,6 @@ considered stable:
     January 2010 at midnight, you can set the `referenceDateTime` to
     `new Date(2010-01-30) / 1000`. This value is useful to communicate back to
     you the "live time", for example through the `getWallClockTime` method.
-
-    This will only be taken into account for live contents, and if the
-    Manifest / MPD does not already contain an offset (example: an
-    availabilityStartTime in a DASH MPD).
 
 
 

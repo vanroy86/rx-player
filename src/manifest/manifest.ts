@@ -51,7 +51,8 @@ interface ISupplementaryTextTrack {
 interface IManifestArguments {
   // required
   id : string; // Unique ID for the manifest.
-  isLive : boolean; // If true, this Manifest describes a content not finished yet.
+  isDynamic : boolean; // If true, this Manifest can still evolve
+  isLive : boolean; // If true, this Manifest describes a "live" content
   periods : IPeriodArguments[]; // Periods contained in this manifest.
   transportType : string; // "smooth", "dash" etc.
 
@@ -109,10 +110,15 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
   // a specific period in time.
   public readonly periods : Period[];
 
-  // If true, this Manifest describes a content still running live.
-  // If false, this Manifest describes a finished content.
-  // At the moment this specificity cannot change with time.
-  // TODO Handle that case?
+  // If true, the Manifest can evolve over time. New content can be downloaded,
+  // properties of the manifest can be changed.
+  // @type {Boolean}
+  public isDynamic : boolean;
+
+  // If true, this Manifest describes a live content.
+  // A live content is a specific kind of dynamic content where you want to play
+  // as close as possible to the maximum position.
+  // E.g., a TV channel is a live content.
   public isLive : boolean;
 
   // Every URI linking to that Manifest, used for refreshing it.
@@ -194,6 +200,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     /* tslint:enable:deprecation */
 
     this.minimumTime = args.minimumTime;
+    this.isDynamic = args.isDynamic;
     this.isLive = args.isLive;
     this.uris = args.uris || [];
 
@@ -203,8 +210,8 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.maximumTime = args.maximumTime;
     this.baseURL = args.baseURL;
 
-    if (!args.isLive && args.duration == null) {
-      log.warn("Manifest: non live content and duration is null.");
+    if (!args.isDynamic && args.duration == null) {
+      log.warn("Manifest: non dynamic content and duration is null.");
     }
     this._duration = args.duration;
 
@@ -324,6 +331,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.availabilityStartTime = newManifest.availabilityStartTime;
     this.baseURL = newManifest.baseURL;
     this.id = newManifest.id;
+    this.isDynamic = newManifest.isDynamic;
     this.isLive = newManifest.isLive;
     this.lifetime = newManifest.lifetime;
     this.maximumTime = newManifest.maximumTime;
@@ -387,7 +395,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @returns {number}
    */
   public getMaximumPosition() : number {
-    if (!this.isLive) {
+    if (!this.isDynamic) {
       const duration = this.getDuration();
       return duration == null ? Infinity : duration;
     }

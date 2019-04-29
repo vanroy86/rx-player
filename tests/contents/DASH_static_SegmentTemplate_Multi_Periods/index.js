@@ -65,6 +65,7 @@ const URLs = [
 const manifestInfos = {
   url: "http://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live-periods/mp4-live-periods-mpd.mpd",
   transport: "dash",
+  isDynamic: false,
   isLive: false,
   duration: 240,
   minimumPosition: 0,

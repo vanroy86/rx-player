@@ -70,9 +70,8 @@ const { DEFAULT_MAX_PIPELINES_RETRY_ON_ERROR,
 export interface IPeriodBufferClockTick {
   currentTime : number; // the current position we are in the video in s
   duration : number; // duration of the HTMLMediaElement
-  isLive : boolean; // If true, we're playing a live content
-  liveGap? : number; // gap between the current position and the live edge of
-                     // the content. Not set for non-live contents
+  liveGap? : number; // gap between the current position and the edge of a
+                     // dynamic content. Not set for static contents
   readyState : number; // readyState of the HTMLMediaElement
   speed : number; // playback rate at which the content plays
   stalled : object|null; // if set, the player is currently stalled

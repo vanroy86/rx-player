@@ -54,8 +54,7 @@ export default function createBufferClock(
     observableCombineLatest([initClock$, speed$])
       .pipe(map(([tick, speed]) => {
         return objectAssign({
-          isLive: manifest.isLive,
-          liveGap: manifest.isLive ?
+          liveGap: manifest.isDynamic ?
             manifest.getMaximumPosition() - tick.currentTime :
             Infinity,
 

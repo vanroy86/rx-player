@@ -82,6 +82,7 @@ const URLs = [
 const manifestInfos = {
   url: "http://demo.unified-streaming.com/video/ateam/ateam.ism/dash/ateam.mpd",
   transport: "dash",
+  isDynamic: false,
   isLive: false,
   duration: 101.568367,
   minimumPosition: 0,

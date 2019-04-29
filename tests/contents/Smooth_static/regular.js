@@ -69,6 +69,7 @@ const URLs = [
 const manifestInfos = {
   url: baseURL + "Manifest",
   transport: "smooth",
+  isDynamic: false,
   isLive: false,
   duration: 75.0079999,
   minimumPosition: 0,

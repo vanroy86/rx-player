@@ -20,8 +20,7 @@ import {
 } from "../types";
 
 /**
- * Returns "last time of reference" from the adaptation given, considering a
- * live content.
+ * Returns "last time of reference" from the adaptation given.
  * Undefined if a time could not be found.
  *
  * We consider the earliest last time from every representations in the given
@@ -61,7 +60,6 @@ function getLastTimeReferenceFromAdaptation(
 }
 
 /**
- * Get presentation live gap from manifest informations.
  * @param {Object} manifest
  * @returns {number}
  */
@@ -69,7 +67,7 @@ export default function getLastTimeReference(
   manifest: IParsedManifest
 ) : number|undefined {
   if (manifest.periods.length === 0) {
-    throw new Error("DASH Parser: no period available for a live content");
+    throw new Error("DASH Parser: no period available in the content");
   }
   const lastPeriodAdaptations =
     manifest.periods[manifest.periods.length - 1].adaptations;
