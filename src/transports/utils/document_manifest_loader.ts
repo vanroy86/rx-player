@@ -41,7 +41,7 @@ function regularManifestLoader(url? : string) : IManifestLoaderObservable<Docume
  */
 const manifestPreLoader = (
   options: { customManifestLoader?: CustomManifestLoader<any> }
-) => (url: string) : IManifestLoaderObservable<Document|string> => {
+) => (url?: string) : IManifestLoaderObservable<Document|string> => {
     const { customManifestLoader } = options;
     if (!customManifestLoader) {
       return regularManifestLoader(url);
