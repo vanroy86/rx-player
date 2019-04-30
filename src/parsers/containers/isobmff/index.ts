@@ -175,6 +175,11 @@ function getSegmentsFromSidx(
     offset += refSize;
   }
 
+  const lastSegment = segments[segments.length - 1];
+  if (lastSegment && lastSegment.range) {
+    lastSegment.range[1] = Infinity;
+  }
+
   return segments;
 }
 
