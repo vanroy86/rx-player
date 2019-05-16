@@ -71,6 +71,9 @@ const PLAYER = ({ $destroy, state }, { videoElement, textTrackElement }) => {
     },
 
     LOAD: (arg) => {
+      if (arg.wantedBufferAhead != null) {
+        player.setWantedBufferAhead(arg.wantedBufferAhead);
+      }
       player.loadVideo(Object.assign({
         textTrackElement,
         networkConfig: {

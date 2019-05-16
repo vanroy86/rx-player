@@ -18,6 +18,7 @@ function ControlBar({
   currentTime,
   duration,
   toggleSettings,
+  toggleInfos,
   stopVideo,
 }) {
   const positionElement = (() => {
@@ -49,6 +50,12 @@ function ControlBar({
         />
         { positionElement }
         <div className="controls-right-side">
+          <Button
+            disabled={!isContentLoaded}
+            className='settings-button'
+            onClick={toggleInfos}
+            value={String.fromCharCode(0xf013)}
+          />
           <Button
             disabled={!isContentLoaded}
             className='control-button'

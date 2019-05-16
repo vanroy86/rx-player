@@ -101,6 +101,7 @@ body {
   background-position: calc(100% - 8px) 50%;
 
   border: 1px solid #d1d1d1;
+  border-radius: 3px;
   padding: 2px 18px 2px 5px;
 }
 
@@ -112,7 +113,6 @@ body {
 .choice-input > select {
   display: flex;
   background-color: white;
-  border-radius: 3px;
 }
 
 .choice-input.white-select select {
@@ -141,7 +141,7 @@ body {
   align-items: center;
 }
 
-.text-input {
+.choice-input.text-input {
   font-family: CanalDemiRomain, "Open Sans", sans-serif;
   font-size: 1rem;
   width: 100%;
@@ -343,13 +343,11 @@ body {
 
 .option-panel {
   background-color: white;
-  position: absolute;
   padding: 5px 10px 5px 20px;
   border-radius: 3px;
-  z-index: 101;
-  transition: all 200ms;
+  transition: all 500ms;
+  display: none;
   opacity: 0;
-  transform: translate(-7px, 42px);
   pointer-events: none;
 }
 
@@ -360,10 +358,24 @@ body {
 }
 
 .option-panel.fade-in-out {
+  display: block;
   opacity: 1;
-  transform: translate(-7px, 50px);
   pointer-events: auto;
   box-shadow: 0px 0px 20px 4px #0000001a;
+}
+
+.option-panel.input {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+  margin: 10px;
+}
+
+.option-panel.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .choice-input-button-wrapper {
@@ -674,7 +686,6 @@ body {
   margin: 10px;
 }
 
-/* The switch - the box around the slider */
 .switch {
   position: relative;
   display: inline-block;
@@ -683,14 +694,12 @@ body {
   margin: 10px;
 }
 
-/* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* The slider */
 .slider {
   position: absolute;
   cursor: pointer;

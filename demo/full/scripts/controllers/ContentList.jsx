@@ -80,12 +80,19 @@ class ContentList extends React.Component {
       manifestUrl: "",
       drm: DRM_TYPES[0],
       autoPlay: true,
+      htmlTextTrackMode: true,
+      showOptions: false,
+      wantedBufferAhead: 30,
     };
   }
 
   loadContent(content) {
     const { loadVideo, stopVideo } = this.props;
-    const { autoPlay } = this.state;
+    const {
+      autoPlay,
+      htmlTextTrackMode,
+      wantedBufferAhead,
+    } = this.state;
     if (content == null) {
       stopVideo();
       return;
@@ -105,9 +112,10 @@ class ContentList extends React.Component {
           url,
           transport,
           autoPlay,
+          textTrackMode: htmlTextTrackMode ? "html" : "native",
+          wantedBufferAhead,
           supplementaryImageTracks,
           supplementaryTextTracks,
-          textTrackMode: "html",
           keySystems,
         });
       });
@@ -176,10 +184,13 @@ class ContentList extends React.Component {
       displayDRMSettings,
       drm,
       hasTextInput,
+      htmlTextTrackMode,
       licenseServerUrl,
       manifestUrl,
       serverCertificateUrl,
+      showOptions,
       transportType,
+      wantedBufferAhead,
     } = this.state;
     const contentsToSelect = CONTENTS_PER_TYPE[transportType];
 
@@ -218,14 +229,33 @@ class ContentList extends React.Component {
       this.setState({ serverCertificateUrl: evt.target.value });
 
     const onDisplayDRMSettings = (evt) =>
-      this.onDisplayDRMSettings(evt);
+      this.setState({ serverCertificateUrl: evt.target.value });
+
+    const onDRMTypeClick = (type) => {
+      this.setState({ drm: type });
+    };
+
+    const onClickOptions = () => {
+      this.setState({ showOptions: !showOptions });
+    };
 
     const onAutoPlayClick = (evt) => {
       this.onAutoPlayClick(evt);
     };
 
-    const onDRMTypeClick = (type) => {
-      this.setState({ drm: type });
+    const onTextTrackModeChange = evt => {
+      const index = +evt.target.value;
+      if (index >= 0) {
+        this.setState({ htmltexttrackmode: index === 0 });
+      }
+    };
+
+    const WANTED_BUFFER_AHEADS = [10, 20, 30, 60, 120];
+    const onWantedBufferAheadChange = evt => {
+      const index = +evt.target.value;
+      if (index >= 0) {
+        this.setState({ wantedBufferAhead: WANTED_BUFFER_AHEADS[index] });
+      }
     };
 
     const shouldDisableEncryptedContent = !HAS_EME_APIs && !IS_HTTPS;
@@ -239,6 +269,9 @@ class ContentList extends React.Component {
           value={type}
         />);
     };
+
+    const optionsButtonClassName = "TODO";
+    const optionPanelClassName = "TODO";
 
     return (
       <div className="choice-inputs-wrapper">
@@ -257,13 +290,11 @@ class ContentList extends React.Component {
             />
           </div>
           <div className="choice-input-button-wrapper">
-            <div class="auto-play">
-              AutoPlay
-              <label class="input switch">
-                <input type="checkbox" checked={autoPlay} onChange={onAutoPlayClick} />
-                <span class="slider round"></span>
-              </label>
-            </div>
+            <Button
+              className={optionsButtonClassName}
+              onClick={onClickOptions}
+              value="Options"
+            />
             <Button
               className="choice-input-button load-button"
               onClick={onClickLoad}
@@ -307,6 +338,11 @@ class ContentList extends React.Component {
                           {generateDRMButtons()}
                         </div>
                         <div>
+                          <Select
+                            className="choice-input white-select"
+                            onChange={onDRMTypeClick}
+                            options={DRM_TYPES}
+                          />
                           <TextInput
                             className="choice-input text-input"
                             onChange={onLicenseServerInput}
@@ -327,9 +363,93 @@ class ContentList extends React.Component {
               </div>
             ) : null
         }
+        {
+          showOptions ?
+            <div class={optionPanelClassName}>
+              <tr>
+                <td>Auto Play</td>
+                <td>
+                  <OptionPanelCheckBox
+                    checked={autoPlay}
+                    onChange={onAutoPlayClick} />
+                </td>
+              </tr>
+              <tr>
+                <td>Text track mode</td>
+                <td>
+                  <OptionPanelSelect
+                    onChange={onTextTrackModeChange}
+                    options={["HTML", "native"]}
+                    selected={htmlTextTrackMode ? 0 : 1} />
+                </td>
+              </tr>
+              <tr>
+                <td>Wanted buffer</td>
+                <td>
+                  <OptionPanelSelect
+                    options={WANTED_BUFFER_AHEADS}
+                    onChange={onWantedBufferAheadChange}
+                    selected={
+                      Math.max(
+                        WANTED_BUFFER_AHEADS.indexOf(wantedBufferAhead),
+                        0)
+                    } />
+                </td>
+              </tr>
+              <tr>
+                <td>Manual bitrate switch</td>
+                <td>
+                  <OptionPanelSelect
+                    options={["direct", "smooth"]}
+                    selected={"direct"}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Manifest retry</td>
+                <td>
+                  <OptionPanelSelect
+                    options={["Infinity", "0", "1", "2", "3", "4"]}
+                    selected={"Infinity"}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Segment retry</td>
+                <td>
+                  <OptionPanelSelect
+                    options={["Infinity", "0", "1", "2", "3", "4"]}
+                    selected={"Infinity"}
+                  />
+                </td>
+              </tr>
+            </div> : null
+        }
       </div>
     );
   }
+}
+
+function OptionPanelCheckBox({ checked, onChange }) {
+  return (
+    <label class="input switch">
+      <input type="checkbox" checked={checked} onChange={onChange} />
+      <span class="slider round"></span>
+    </label>
+  );
+}
+
+function OptionPanelSelect({ options, selected, onChange }) {
+  return (
+    <label class="input select">
+      <Select
+        className="white-select"
+        onChange={onChange}
+        options={options}
+        selected={selected}
+      />
+    </label>
+  );
 }
 
 export default ContentList;
