@@ -31,6 +31,7 @@ import {
   switchMap,
   takeUntil,
   tap,
+  withLatestFrom,
 } from "rxjs/operators";
 import config from "../../config";
 import { ICustomError, MediaError } from "../../errors";
@@ -217,26 +218,29 @@ export default function Stream({
     const initialTime = getInitialTime(manifest, startAt);
     log.debug("initial time calculated:", initialTime);
 
-    const reloadStreamSubject$ = new Subject<boolean>();
+    const reloadStreamSubject$ = new Subject<number|null>();
 
     const reloadStreamAfterMediaError$: Observable<never> = mediaErrorManager$.pipe(
-      tap(({ fatal, errorDetail }) => {
+      withLatestFrom(clock$),
+      tap(([{ fatal, errorDetail }, { currentTime }]) => {
         if (fatal || reloadedStreamBecauseOfMediaErrors > 3) {
           log.error(`stream: media element MEDIA_ERR(${errorDetail})`);
           throw new MediaError(errorDetail, null, true);
         }
         reloadedStreamBecauseOfMediaErrors++;
         log.warn("stream: relaunching stream after MEDIA_ERR_DECODE");
-        reloadStreamSubject$.next(true);
+        reloadStreamSubject$.next(currentTime);
       }),
       ignoreElements()
     );
 
     const onStreamLoaderEvent = streamLoaderEventProcessor(reloadStreamSubject$);
     const reloadStream$ : Observable<IStreamEvent> = reloadStreamSubject$.pipe(
-      switchMap((reloadCauseOfError) => {
-        const currentPosition = mediaElement.currentTime;
-        const autoPlayWhenReload = reloadCauseOfError || !mediaElement.paused;
+      switchMap((lastPositionWhenError) => {
+        const currentPosition = lastPositionWhenError != null ?
+          lastPositionWhenError : mediaElement.currentTime;
+        const autoPlayWhenReload =
+          (lastPositionWhenError != null) || !mediaElement.paused;
         return openMediaSource(mediaElement).pipe(
           mergeMap(newMS =>
               loadStream(newMS, currentPosition, autoPlayWhenReload)),
@@ -270,7 +274,7 @@ export default function Stream({
  * @returns {Function}
  */
 function streamLoaderEventProcessor(
-  reloadStreamSubject$ : Subject<boolean>
+  reloadStreamSubject$ : Subject<number|null>
 ) : (evt : IStreamLoaderEvent) => IStreamEvent {
   /**
    * React to StreamLoader events.
@@ -279,7 +283,7 @@ function streamLoaderEventProcessor(
    */
   return function onStreamLoaderEvent(evt : IStreamLoaderEvent) : IStreamEvent {
     if (evt.type === "needs-stream-reload") {
-      reloadStreamSubject$.next(false);
+      reloadStreamSubject$.next(null);
     }
     return evt;
   };
