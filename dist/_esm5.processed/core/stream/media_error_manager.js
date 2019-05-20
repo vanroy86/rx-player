@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 import { fromEvent as observableFromEvent } from "rxjs";
-import { mergeMap } from "rxjs/operators";
-import { MediaError } from "../../errors";
-import log from "../../log";
+import { map } from "rxjs/operators";
 /**
  * Returns an observable which throws the right MediaError as soon an "error"
  * event is received through the media element.
@@ -26,7 +24,7 @@ import log from "../../log";
  */
 export default function MediaErrorManager(mediaElement) {
     return observableFromEvent(mediaElement, "error")
-        .pipe(mergeMap(function () {
+        .pipe(map(function () {
         var errorCode = mediaElement.error && mediaElement.error.code;
         var errorDetail;
         switch (errorCode) {
@@ -46,7 +44,9 @@ export default function MediaErrorManager(mediaElement) {
                 errorDetail = "MEDIA_ERR_UNKNOWN";
                 break;
         }
-        log.error("stream: media element MEDIA_ERR(" + errorDetail + ")");
-        throw new MediaError(errorDetail, null, true);
+        return {
+            fatal: errorCode !== 3,
+            errorDetail: errorDetail,
+        };
     }));
 }

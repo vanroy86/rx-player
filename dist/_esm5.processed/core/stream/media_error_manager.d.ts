@@ -21,4 +21,7 @@ import { Observable } from "rxjs";
  * @param {HTMLMediaElement} mediaElement
  * @returns {Observable}
  */
-export default function MediaErrorManager(mediaElement: HTMLMediaElement): Observable<never>;
+export default function MediaErrorManager(mediaElement: HTMLMediaElement): Observable<{
+    fatal: boolean;
+    errorDetail: string;
+}>;

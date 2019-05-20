@@ -15,8 +15,9 @@
  */
 import objectAssign from "object-assign";
 import { combineLatest as observableCombineLatest, concat as observableConcat, merge as observableMerge, of as observableOf, Subject, } from "rxjs";
-import { map, mergeMap, startWith, switchMap, takeUntil, } from "rxjs/operators";
+import { ignoreElements, map, mergeMap, startWith, switchMap, takeUntil, tap, } from "rxjs/operators";
 import config from "../../config";
+import { MediaError } from "../../errors";
 import log from "../../log";
 import throttle from "../../utils/rx-throttle";
 import ABRManager from "../abr";
@@ -56,6 +57,7 @@ function getManifestPipelineOptions(networkConfig) {
  */
 export default function Stream(_a) {
     var adaptiveOptions = _a.adaptiveOptions, autoPlay = _a.autoPlay, bufferOptions = _a.bufferOptions, clock$ = _a.clock$, keySystems = _a.keySystems, mediaElement = _a.mediaElement, networkConfig = _a.networkConfig, speed$ = _a.speed$, startAt = _a.startAt, textTrackOptions = _a.textTrackOptions, transport = _a.transport, url = _a.url;
+    var reloadedStreamBecauseOfMediaErrors = 0;
     // Subject through which warnings will be sent
     var warning$ = new Subject();
     // Fetch and parse the manifest from the URL given.
@@ -99,16 +101,28 @@ export default function Stream(_a) {
         var initialTime = getInitialTime(manifest, startAt);
         log.debug("initial time calculated:", initialTime);
         var reloadStreamSubject$ = new Subject();
+        var reloadStreamAfterMediaError$ = mediaErrorManager$.pipe(tap(function (_a) {
+            var fatal = _a.fatal, errorDetail = _a.errorDetail;
+            if (fatal || reloadedStreamBecauseOfMediaErrors > 3) {
+                log.error("stream: media element MEDIA_ERR(" + errorDetail + ")");
+                throw new MediaError(errorDetail, null, true);
+            }
+            reloadedStreamBecauseOfMediaErrors++;
+            log.warn("stream: relaunching stream after MEDIA_ERR_DECODE");
+            reloadStreamSubject$.next(true);
+        }), ignoreElements());
         var onStreamLoaderEvent = streamLoaderEventProcessor(reloadStreamSubject$);
-        var reloadStream$ = reloadStreamSubject$.pipe(switchMap(function () {
+        var reloadStream$ = reloadStreamSubject$.pipe(switchMap(function (reloadCauseOfError) {
             var currentPosition = mediaElement.currentTime;
-            var isPaused = mediaElement.paused;
-            return openMediaSource(mediaElement).pipe(mergeMap(function (newMS) { return loadStream(newMS, currentPosition, !isPaused); }), map(onStreamLoaderEvent), startWith(EVENTS.reloadingStream()));
+            var autoPlayWhenReload = reloadCauseOfError || !mediaElement.paused;
+            return openMediaSource(mediaElement).pipe(mergeMap(function (newMS) {
+                return loadStream(newMS, currentPosition, autoPlayWhenReload);
+            }), map(onStreamLoaderEvent), startWith(EVENTS.reloadingStream()));
         }));
         var initialLoad$ = observableConcat(observableOf(EVENTS.manifestReady(abrManager, manifest)), loadStream(mediaSource, initialTime, autoPlay).pipe(takeUntil(reloadStreamSubject$), map(onStreamLoaderEvent)));
-        return observableMerge(initialLoad$, reloadStream$);
+        return observableMerge(reloadStreamAfterMediaError$, initialLoad$, reloadStream$);
     }));
-    return observableMerge(stream$, mediaErrorManager$, emeManager$, warning$.pipe(map(EVENTS.warning)));
+    return observableMerge(stream$, emeManager$, warning$.pipe(map(EVENTS.warning)));
 }
 /**
  * Generate function reacting to StreamLoader events.
@@ -123,7 +137,7 @@ function streamLoaderEventProcessor(reloadStreamSubject$) {
      */
     return function onStreamLoaderEvent(evt) {
         if (evt.type === "needs-stream-reload") {
-            reloadStreamSubject$.next();
+            reloadStreamSubject$.next(false);
         }
         return evt;
     };
