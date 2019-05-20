@@ -24,14 +24,16 @@ import {
   Subject,
 } from "rxjs";
 import {
+  ignoreElements,
   map,
   mergeMap,
   startWith,
   switchMap,
   takeUntil,
+  tap,
 } from "rxjs/operators";
 import config from "../../config";
-import { ICustomError } from "../../errors";
+import { ICustomError, MediaError } from "../../errors";
 import log from "../../log";
 import throttle from "../../utils/rx-throttle";
 import ABRManager, {
@@ -154,6 +156,8 @@ export default function Stream({
   transport,
   url,
 } : IStreamOptions) : Observable<IStreamEvent> {
+  let reloadedStreamBecauseOfMediaErrors = 0;
+
   // Subject through which warnings will be sent
   const warning$ = new Subject<Error|ICustomError>();
 
@@ -213,14 +217,29 @@ export default function Stream({
     const initialTime = getInitialTime(manifest, startAt);
     log.debug("initial time calculated:", initialTime);
 
-    const reloadStreamSubject$ = new Subject<void>();
+    const reloadStreamSubject$ = new Subject<boolean>();
+
+    const reloadStreamAfterMediaError$: Observable<never> = mediaErrorManager$.pipe(
+      tap(({ fatal, errorDetail }) => {
+        if (fatal || reloadedStreamBecauseOfMediaErrors > 3) {
+          log.error(`stream: media element MEDIA_ERR(${errorDetail})`);
+          throw new MediaError(errorDetail, null, true);
+        }
+        reloadedStreamBecauseOfMediaErrors++;
+        log.warn("stream: relaunching stream after MEDIA_ERR_DECODE");
+        reloadStreamSubject$.next(true);
+      }),
+      ignoreElements()
+    );
+
     const onStreamLoaderEvent = streamLoaderEventProcessor(reloadStreamSubject$);
     const reloadStream$ : Observable<IStreamEvent> = reloadStreamSubject$.pipe(
-      switchMap(() => {
+      switchMap((reloadCauseOfError) => {
         const currentPosition = mediaElement.currentTime;
-        const isPaused = mediaElement.paused;
+        const autoPlayWhenReload = reloadCauseOfError || !mediaElement.paused;
         return openMediaSource(mediaElement).pipe(
-          mergeMap(newMS => loadStream(newMS, currentPosition, !isPaused)),
+          mergeMap(newMS =>
+              loadStream(newMS, currentPosition, autoPlayWhenReload)),
           map(onStreamLoaderEvent),
           startWith(EVENTS.reloadingStream())
         );
@@ -235,12 +254,11 @@ export default function Stream({
       )
     );
 
-    return observableMerge(initialLoad$, reloadStream$);
+    return observableMerge(reloadStreamAfterMediaError$, initialLoad$, reloadStream$);
   }));
 
   return observableMerge(
     stream$,
-    mediaErrorManager$,
     emeManager$,
     warning$.pipe(map(EVENTS.warning))
   );
@@ -252,7 +270,7 @@ export default function Stream({
  * @returns {Function}
  */
 function streamLoaderEventProcessor(
-  reloadStreamSubject$ : Subject<void>
+  reloadStreamSubject$ : Subject<boolean>
 ) : (evt : IStreamLoaderEvent) => IStreamEvent {
   /**
    * React to StreamLoader events.
@@ -261,7 +279,7 @@ function streamLoaderEventProcessor(
    */
   return function onStreamLoaderEvent(evt : IStreamLoaderEvent) : IStreamEvent {
     if (evt.type === "needs-stream-reload") {
-      reloadStreamSubject$.next();
+      reloadStreamSubject$.next(false);
     }
     return evt;
   };
