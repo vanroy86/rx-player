@@ -15,7 +15,7 @@
  */
 import objectAssign from "object-assign";
 import { combineLatest as observableCombineLatest, concat as observableConcat, merge as observableMerge, of as observableOf, Subject, } from "rxjs";
-import { ignoreElements, map, mergeMap, startWith, switchMap, takeUntil, tap, } from "rxjs/operators";
+import { ignoreElements, map, mergeMap, startWith, switchMap, takeUntil, tap, withLatestFrom, } from "rxjs/operators";
 import config from "../../config";
 import { MediaError } from "../../errors";
 import log from "../../log";
@@ -101,20 +101,21 @@ export default function Stream(_a) {
         var initialTime = getInitialTime(manifest, startAt);
         log.debug("initial time calculated:", initialTime);
         var reloadStreamSubject$ = new Subject();
-        var reloadStreamAfterMediaError$ = mediaErrorManager$.pipe(tap(function (_a) {
-            var fatal = _a.fatal, errorDetail = _a.errorDetail;
+        var reloadStreamAfterMediaError$ = mediaErrorManager$.pipe(withLatestFrom(clock$), tap(function (_a) {
+            var _b = _a[0], fatal = _b.fatal, errorDetail = _b.errorDetail, currentTime = _a[1].currentTime;
             if (fatal || reloadedStreamBecauseOfMediaErrors > 3) {
                 log.error("stream: media element MEDIA_ERR(" + errorDetail + ")");
                 throw new MediaError(errorDetail, null, true);
             }
             reloadedStreamBecauseOfMediaErrors++;
             log.warn("stream: relaunching stream after MEDIA_ERR_DECODE");
-            reloadStreamSubject$.next(true);
+            reloadStreamSubject$.next(currentTime);
         }), ignoreElements());
         var onStreamLoaderEvent = streamLoaderEventProcessor(reloadStreamSubject$);
-        var reloadStream$ = reloadStreamSubject$.pipe(switchMap(function (reloadCauseOfError) {
-            var currentPosition = mediaElement.currentTime;
-            var autoPlayWhenReload = reloadCauseOfError || !mediaElement.paused;
+        var reloadStream$ = reloadStreamSubject$.pipe(switchMap(function (lastPositionWhenError) {
+            var currentPosition = lastPositionWhenError != null ?
+                lastPositionWhenError : mediaElement.currentTime;
+            var autoPlayWhenReload = (lastPositionWhenError != null) || !mediaElement.paused;
             return openMediaSource(mediaElement).pipe(mergeMap(function (newMS) {
                 return loadStream(newMS, currentPosition, autoPlayWhenReload);
             }), map(onStreamLoaderEvent), startWith(EVENTS.reloadingStream()));
@@ -137,7 +138,7 @@ function streamLoaderEventProcessor(reloadStreamSubject$) {
      */
     return function onStreamLoaderEvent(evt) {
         if (evt.type === "needs-stream-reload") {
-            reloadStreamSubject$.next(false);
+            reloadStreamSubject$.next(null);
         }
         return evt;
     };
