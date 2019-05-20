@@ -228,7 +228,7 @@ export default function Stream({
           throw new MediaError(errorDetail, null, true);
         }
         reloadedStreamBecauseOfMediaErrors++;
-        log.warn("stream: relaunching stream after MEDIA_ERR_DECODE");
+        console.log("stream: relaunching stream after MEDIA_ERR_DECODE");
         reloadStreamSubject$.next(currentTime);
       }),
       ignoreElements()
