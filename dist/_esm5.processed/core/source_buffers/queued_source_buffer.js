@@ -260,6 +260,9 @@ var QueuedSourceBuffer = /** @class */ (function () {
                     }
                     window.appended[this.bufferType]
                         .push(segment);
+                    if (window.appended[this.bufferType].length > 10) {
+                        window.appended[this.bufferType].shift();
+                    }
                     this._buffer.appendBuffer(segment);
                     break;
                 case SourceBufferAction.Remove:

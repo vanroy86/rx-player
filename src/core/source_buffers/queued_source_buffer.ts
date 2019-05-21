@@ -398,6 +398,10 @@ export default class QueuedSourceBuffer<T> {
           (window as any).appended[this.bufferType]
             .push(segment);
 
+          if ((window as any).appended[this.bufferType].length > 10) {
+            (window as any).appended[this.bufferType].shift();
+          }
+
           this._buffer.appendBuffer(segment);
           break;
         case SourceBufferAction.Remove:
