@@ -61,6 +61,7 @@ function request(options) {
                 }
             }
         }
+        xhr.setRequestHeader("Cache-Control", "no-cache");
         var sentTime = performance.now();
         xhr.onerror = function onXHRError() {
             var errorCode = RequestErrorTypes.ERROR_EVENT;
