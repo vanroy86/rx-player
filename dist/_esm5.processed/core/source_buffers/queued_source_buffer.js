@@ -252,6 +252,14 @@ var QueuedSourceBuffer = /** @class */ (function () {
                         this._buffer.timestampOffset = newTimestampOffset;
                     }
                     log.debug("pushing data to source buffer", queueItem.args);
+                    if (window.appended == null) {
+                        window.appended = {
+                            video: [],
+                            audio: [],
+                        };
+                    }
+                    window.appended[this.bufferType]
+                        .push(segment);
                     this._buffer.appendBuffer(segment);
                     break;
                 case SourceBufferAction.Remove:

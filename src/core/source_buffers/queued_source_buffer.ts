@@ -389,6 +389,15 @@ export default class QueuedSourceBuffer<T> {
           }
 
           log.debug("pushing data to source buffer", queueItem.args);
+          if ((window as any).appended == null) {
+            (window as any).appended = {
+              video: [],
+              audio: [],
+            };
+          }
+          (window as any).appended[this.bufferType]
+            .push(segment);
+
           this._buffer.appendBuffer(segment);
           break;
         case SourceBufferAction.Remove:
