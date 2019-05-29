@@ -59,7 +59,7 @@ export function setDurationToMediaSource(
  * @param {MediaSource|null|undefined} mediaSource
  * @param {string|null|undefined} mediaSourceURL
  */
-function resetMediaSource(
+export function resetMediaSource(
   mediaElement : HTMLMediaElement,
   mediaSource? : MediaSource|null,
   mediaSourceURL? : string|null
