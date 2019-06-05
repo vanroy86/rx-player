@@ -14,50 +14,25 @@
  * limitations under the License.
  */
 
-import { Observable ,  Observer } from "rxjs";
+import {
+  Observable,
+} from "rxjs";
 import config from "../../config";
-// import { RequestError, RequestErrorTypes } from "../../errors";
+import {
+  RequestError,
+  RequestErrorTypes
+} from "../../errors";
+import log from "../../log";
+import {
+  IRequestDataChunk,
+  IRequestOptions,
+  IRequestProgress,
+  IRequestResponse,
+} from "./types";
 
 const { DEFAULT_REQUEST_TIMEOUT } = config;
 
 // const DEFAULT_RESPONSE_TYPE : XMLHttpRequestResponseType = "json";
-
-// Interface for "progress" events
-export interface IRequestProgress {
-  type : "progress";
-  value : {
-    currentTime : number;
-    duration : number;
-    size : number;
-    sendingTime : number;
-    url : string;
-    totalSize? : number;
-  };
-}
-
-// Interface for "response" events
-export interface IRequestResponse<T, U> {
-  type : "response";
-  value : {
-    duration : number;
-    receivedTime : number;
-    responseData : T;
-    responseType : U;
-    sendingTime : number;
-    size : number;
-    status : number;
-    url : string;
-  };
-}
-
-// Arguments for the "request" utils
-export interface IRequestOptions<T, U> {
-  url : string;
-  headers? : { [ header: string ] : string }|null;
-  responseType? : T;
-  timeout? : number;
-  ignoreProgressEvents? : U;
-}
 
 // /**
 //  * @param {string} data
@@ -73,122 +48,219 @@ export interface IRequestOptions<T, U> {
 
 //
 // overloading to the max
-function request(options :
-  IRequestOptions<undefined|null|""|"text", false|undefined>
-) : Observable<IRequestResponse<string, "text">|IRequestProgress>;
-function request(options : IRequestOptions<undefined|null|""|"text", true>) :
+function fetchRequest(options:
+  IRequestOptions<undefined | null | "" | "text", false | undefined>
+): Observable<IRequestResponse<string, "text"> | IRequestProgress>;
+function fetchRequest(options: IRequestOptions<undefined | null | "" | "text", true>):
   Observable<IRequestResponse<string, "text">>;
-function request(options : IRequestOptions<"arraybuffer", false|undefined>) :
-  Observable<IRequestResponse<ArrayBuffer, "arraybuffer">|IRequestProgress>;
-function request(options : IRequestOptions<"arraybuffer", true>) :
+function fetchRequest(options: IRequestOptions<"arraybuffer", false | undefined>):
+  Observable<
+    IRequestResponse<ArrayBuffer, "arraybuffer"> |
+    IRequestDataChunk<ArrayBuffer, "arraybuffer"> |
+    IRequestProgress
+  >;
+function fetchRequest(options: IRequestOptions<"arraybuffer", true>):
   Observable<IRequestResponse<ArrayBuffer, "arraybuffer">>;
-function request(options : IRequestOptions<"document", false|undefined>) :
-  Observable<IRequestResponse<Document, "document">|IRequestProgress>;
-function request(options : IRequestOptions<"document", true>) :
+function fetchRequest(options: IRequestOptions<"document", false | undefined>):
+  Observable<IRequestResponse<Document, "document"> | IRequestProgress>;
+function fetchRequest(options: IRequestOptions<"document", true>):
   Observable<IRequestResponse<Document, "document">>;
-function request(options : IRequestOptions<"json", false|undefined>) :
-  Observable<IRequestResponse<object, "json">|IRequestProgress>;
-function request(options : IRequestOptions<"json", true>) :
+function fetchRequest(options: IRequestOptions<"json", false | undefined>):
+  Observable<IRequestResponse<object, "json"> | IRequestProgress>;
+function fetchRequest(options: IRequestOptions<"json", true>):
   Observable<IRequestResponse<object, "json">>;
-function request(options : IRequestOptions<"blob", false|undefined>) :
-  Observable<IRequestResponse<Blob, "blob">|IRequestProgress>;
-function request(options : IRequestOptions<"blob", true>) :
+function fetchRequest(options: IRequestOptions<"blob", false | undefined>):
+  Observable<IRequestResponse<Blob, "blob"> | IRequestProgress>;
+function fetchRequest(options: IRequestOptions<"blob", true>):
   Observable<IRequestResponse<Blob, "blob">>;
-function request<T>(
-  options : IRequestOptions<
-    XMLHttpRequestResponseType|null|undefined, false|undefined
+function fetchRequest<T>(
+  options: IRequestOptions<
+    XMLHttpRequestResponseType | null | undefined, false | undefined
   >
-) : Observable<
-  IRequestResponse<T, XMLHttpRequestResponseType>|IRequestProgress
+): Observable<
+  IRequestResponse<T, XMLHttpRequestResponseType> | IRequestProgress
 >;
-function request<T>(
-  options : IRequestOptions<XMLHttpRequestResponseType|null|undefined, true>
-) : Observable<IRequestResponse<T, XMLHttpRequestResponseType>>;
+function fetchRequest<T>(
+  options: IRequestOptions<XMLHttpRequestResponseType | null | undefined, true>
+): Observable<IRequestResponse<T, XMLHttpRequestResponseType>>;
 
-function request<T>(
-  options : IRequestOptions<
-    XMLHttpRequestResponseType|null|undefined, boolean|undefined
+function fetchRequest<T>(
+  options: IRequestOptions<
+    XMLHttpRequestResponseType | null | undefined, boolean | undefined
   >
-) : Observable<
-  IRequestResponse<T, XMLHttpRequestResponseType>|IRequestProgress
+): Observable<
+  IRequestResponse<T, XMLHttpRequestResponseType> |
+  IRequestProgress |
+  IRequestDataChunk<T, XMLHttpRequestResponseType>
 > {
-  const headers : Headers =
+  const headers: Headers =
     typeof (window as any).Headers === "function" ?
       new (window as any).Headers() : null;
-  const abortController : AbortController =
-    typeof (window as any).AbortController === "function" ?
-      new (window as any).AbortController() : null;
 
-  return Observable.create((
-    obs : Observer<IRequestResponse<T, string>|IRequestProgress>
-  ) => {
-    if (options.headers != null) {
-      const headerNames = Object.keys(options.headers);
-      for (let i = 0; i < headerNames.length; i++) {
-        const headerName = headerNames[i];
-        headers.append(headerName, options.headers[headerName]);
+  if (options.headers != null) {
+    const headerNames = Object.keys(options.headers);
+    for (let i = 0; i < headerNames.length; i++) {
+      const headerName = headerNames[i];
+      headers.append(headerName, options.headers[headerName]);
+    }
+  }
+
+  let timeouted = false;
+
+  const sendingTime = performance.now();
+  let lastSentTime = sendingTime;
+  let isDone = false;
+
+  return new Observable((obs) => {
+    const abortController: AbortController | null =
+      typeof (window as any).AbortController === "function" ?
+        new (window as any).AbortController() : null;
+
+    /**
+     * Abort current request by triggering AbortController signal.
+     * @returns {void}
+     */
+    function abortRequest(): void {
+      if (!isDone) {
+        if (abortController) {
+          return abortController.abort();
+        }
+        log.warn("Fetch Request: AbortController API not available.");
       }
     }
 
-    // let timeouted = false;
     const timeout = window.setTimeout(() => {
-      // timeouted = true;
-      abortController.abort();
-    }, options.timeout == null ? options.timeout : DEFAULT_REQUEST_TIMEOUT);
+      timeouted = true;
+      abortRequest();
+    }, options.timeout == null ? DEFAULT_REQUEST_TIMEOUT : options.timeout);
 
-    const sendingTime = performance.now();
-    fetch(options.url, {
-      headers,
-      method: "GET",
-      signal: abortController.signal,
-    }).then((response) => {
+    /* tslint:disable no-floating-promises */
+    fetch(
+      options.url, {
+        headers,
+        method: "GET",
+        signal: abortController ? abortController.signal : undefined,
+      }
+    ).then((response) => {
+      if (response.status >= 300) {
+        const errorCode = RequestErrorTypes.ERROR_EVENT;
+        obs.error(new RequestError(response, response.url, errorCode));
+      }
       if (timeout != null) {
         clearTimeout(timeout);
       }
 
-      const responseType = !options.responseType || options.responseType === "document" ?
-        "text" : options.responseType;
-      return (() => {
-        switch (responseType) {
-          case "arraybuffer":
-            return response.arrayBuffer();
-          case "json":
-            return response.json();
-          case "blob":
-            return response.blob();
-          case "text":
-            return response.text();
-        }
-      })().then(responseData => {
-        const receivedTime = performance.now();
-        obs.next({
-          type: "response",
-          value: {
-            responseType,
-            status: response.status,
-            url: response.url,
-            sendingTime,
-            receivedTime,
-            duration: receivedTime - sendingTime,
-            size: responseData instanceof ArrayBuffer ?
-            responseData.byteLength : 0,
-            responseData,
-          },
-        });
-        obs.complete();
-      });
-    // }).catch((e) => {
-    //   if (timeouted) {
-    //     const errorCode = RequestErrorTypes.TIMEOUT;
-    //     obs.error(new RequestError(xhr /* TODO */, url, errorCode));
-    //     return;
-    //   }
-    });
+      const responseType =
+        !options.responseType || options.responseType === "document" ?
+          "text" : options.responseType;
 
-      return () => {
-        // canceled = true;
-        abortController.abort();
-      };
+      if (
+        responseType === "arraybuffer" &&
+        response.body
+      ) {
+        const reader = response.body.getReader();
+
+        /**
+         * Read last bytes from readable bytstream.
+         * @return {Observable}
+         */
+        function readBuffer() {
+          reader.read().then((data) => {
+            handleFetchedBytes(data);
+          }).catch((e) => {
+            obs.error(e);
+          });
+        }
+
+        /**
+         * Handle fetched bytes from response's reader
+         * @param {Object} chunk
+         * @return {Observable}
+         */
+        function handleFetchedBytes(
+          chunk: { done: boolean; value: Uint8Array }
+        ) {
+          const receivedTime = performance.now();
+          const duration = receivedTime - lastSentTime;
+          lastSentTime = receivedTime;
+          const { value, done } = chunk;
+          if (!done) {
+            if (value != null && responseType === "arraybuffer") {
+              const _response: IRequestDataChunk<ArrayBuffer, "arraybuffer"> = {
+                type: "dataChunk" as "dataChunk",
+                value: {
+                  responseType,
+                  status: response.status,
+                  url: response.url,
+                  sendingTime,
+                  receivedTime,
+                  duration,
+                  size: value.length,
+                  responseData: value.buffer,
+                },
+              };
+              obs.next(_response as any); // XXX TODO
+              readBuffer();
+            }
+          } else {
+            isDone = true;
+            obs.complete();
+          }
+        }
+
+        readBuffer();
+      } else {
+        return (() => {
+          switch (responseType) {
+            case "arraybuffer":
+              return response.arrayBuffer();
+            case "json":
+              return response.json();
+            case "blob":
+              return response.blob();
+            case "text":
+              return response.text();
+          }
+        })().then((responseData) => {
+          const receivedTime = performance.now();
+          obs.next({
+            type: "response" as "response",
+            value: {
+              responseType,
+              status: response.status,
+              url: response.url,
+              sendingTime,
+              receivedTime,
+              duration: receivedTime - sendingTime,
+              size: responseData instanceof ArrayBuffer ?
+                responseData.byteLength : 0,
+              responseData,
+            },
+          });
+        });
+      }
+      // XXX TODO how to handle HTTP errors ?
+    }).catch((e) => {
+      if (timeouted) {
+        const errorCode = RequestErrorTypes.TIMEOUT;
+        obs.error(new RequestError({ status: 0 },
+          options.url,
+          errorCode)); // XXX TODO
+        return;
+      } else if (e.message === "Failed to fetch") {
+        obs.error(new RequestError({ status: 404 },
+          options.url,
+          RequestErrorTypes.ERROR_EVENT));
+        return;
+      }
+      obs.complete();
+      return;
+    });
+    /* tslint:disable no-floating-promises */
+
+    return () => {
+      abortRequest();
+    };
   });
 }
 
@@ -204,4 +276,4 @@ export function fetchIsSupported() {
   );
 }
 
-export default request;
+export default fetchRequest;

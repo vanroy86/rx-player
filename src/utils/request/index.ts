@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import xhrRequest, {
+import request from "./request";
+import {
   IRequestOptions,
   IRequestProgress,
-  IRequestResponse,
-} from "./xhr_request";
+  IRequestResponse
+} from "./types";
 
-export default xhrRequest;
+export default request;
 export {
   IRequestOptions,
   IRequestProgress,

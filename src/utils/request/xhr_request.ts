@@ -17,39 +17,15 @@
 import { Observable } from "rxjs";
 import config from "../../config";
 import { RequestError, RequestErrorTypes } from "../../errors";
+import {
+  IRequestOptions,
+  IRequestProgress,
+  IRequestResponse
+} from "./types";
 
 const { DEFAULT_REQUEST_TIMEOUT } = config;
 
 const DEFAULT_RESPONSE_TYPE : XMLHttpRequestResponseType = "json";
-
-// Interface for "progress" events
-export interface IRequestProgress { type : "progress";
-                                    value : { currentTime : number;
-                                              duration : number;
-                                              size : number;
-                                              sendingTime : number;
-                                              url : string;
-                                              totalSize? : number; };
-}
-
-// Interface for "response" events
-export interface IRequestResponse<T, U> { type : "response";
-                                          value : { duration : number;
-                                                    receivedTime : number;
-                                                    responseData : T;
-                                                    responseType : U;
-                                                    sendingTime : number;
-                                                    size : number;
-                                                    status : number;
-                                                    url : string; }; }
-
-// Arguments for the "request" utils
-export interface IRequestOptions<T, U> { url : string;
-                                         headers? : { [ header: string ] : string } |
-                                                    null;
-                                         responseType? : T;
-                                         timeout? : number;
-                                         sendProgressEvents? : U; }
 
 /**
  * @param {string} data
