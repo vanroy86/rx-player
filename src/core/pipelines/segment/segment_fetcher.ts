@@ -112,6 +112,7 @@ export default function createSegmentFetcher<T>(
   return function fetchSegment(
     content : ISegmentLoaderArguments
   ) : Observable<IFetchedSegment<T>> {
+    const metricsAggregation: Array<{ size: number; duration: number }> = [];
     return segmentLoader(content).pipe(
 
       tap((arg) => {
@@ -126,9 +127,10 @@ export default function createSegmentFetcher<T>(
 
             // format it for ABR Handling
             if (size != null && duration != null) {
-              network$.next({ type: bufferType,
-                              value: { size,
-                                       duration } });
+              metricsAggregation.push({
+                size,
+                duration,
+              });
             }
             break;
           }
@@ -180,6 +182,21 @@ export default function createSegmentFetcher<T>(
       ),
 
       finalize(() => {
+        const { totalSize, totalDuration } =
+        metricsAggregation.reduce((acc, { size, duration }) => {
+          acc.totalSize += size;
+          acc.totalDuration += duration;
+          return acc;
+        }, { totalSize: 0, totalDuration: 0 });
+
+        network$.next({
+          type: bufferType,
+          value: {
+            size: totalSize,
+            duration: totalDuration,
+          },
+        });
+
         if (request$ != null) {
           if (id != null) {
             request$.next({ type: bufferType,
@@ -200,14 +217,16 @@ export default function createSegmentFetcher<T>(
           parse(init? : ISegmentTimingInfos) : Observable<IParsedSegment<T>> {
             const parserArg = objectAssign({ response: response.value, init }, content);
             return segmentParser(parserArg)
-              .pipe(catchError((error: Error) => {
-                const formattedError = isKnownError(error) ?
-                                         error :
-                                         new OtherError("PIPELINE_PARSING_ERROR",
-                                                        error.toString(),
-                                                        true);
-                  throw formattedError;
-              }));
+              .pipe(
+                catchError((error: Error) => {
+                  const formattedError = isKnownError(error) ?
+                                           error :
+                                           new OtherError("PIPELINE_PARSING_ERROR",
+                                                          error.toString(),
+                                                          true);
+                    throw formattedError;
+                })
+              );
           },
         };
       }),

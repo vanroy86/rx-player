@@ -187,7 +187,7 @@ export default function RepresentationBuffer<T>({
 
   // Keep track of downloaded segments currently awaiting to be appended to the
   // SourceBuffer.
-  const sourceBufferWaitingQueue = new SimpleSet();
+  const loadedButNoBufferedSegments = new SimpleSet();
 
   const status$ = observableCombineLatest([
     clock$,
@@ -267,6 +267,8 @@ export default function RepresentationBuffer<T>({
           startQueue$.complete(); // complete the downloading queue
           return observableOf({ type: "terminated" as "terminated" });
         } else if (currentSegmentRequest.priority !== mostNeededSegment.priority) {
+          log.debug("Buffer: updating current request priority and terminate.",
+                    bufferType);
           const { request$ } = currentSegmentRequest;
           segmentFetcher.updatePriority(request$, mostNeededSegment.priority);
           currentSegmentRequest.priority = mostNeededSegment.priority;
@@ -331,9 +333,24 @@ export default function RepresentationBuffer<T>({
   // Buffer Queue:
   //   - download every segments queued sequentially
   //   - append them to the SourceBuffer
-  const bufferQueue$ = startQueue$.pipe(
-    switchMap(() => downloadQueue.length ? loadSegmentsFromQueue() : EMPTY),
-    mergeMap(appendSegment)
+  const loadingQueue$ = startQueue$.pipe(
+    switchMap(() => {
+      currentSegmentRequest = null;
+      return downloadQueue.length ? loadSegmentsFromQueue() :
+                                    EMPTY;
+    })
+  );
+
+  const bufferQueue$ = loadingQueue$.pipe(mergeMap((loadSegment) => {
+      return appendSegment(loadSegment).pipe(
+        tap(() => {
+          const { segment } = loadSegment;
+          if (loadedButNoBufferedSegments.test(segment.id)) {
+            loadedButNoBufferedSegments.remove(segment.id);
+          }
+        })
+      );
+    })
   );
 
   return observableMerge(status$, bufferQueue$).pipe(share());
@@ -357,13 +374,17 @@ export default function RepresentationBuffer<T>({
         }
 
         const { segment, priority } = currentNeededSegment;
+        console.log("!!! Want to load ", segment.id);
         const context = { manifest, period, adaptation, representation, segment };
-        const request$ = segmentFetcher.createRequest(context, priority);
+        const request$ = segmentFetcher.createRequest(context, priority).pipe(
+          finalize(() => {
+            loadedButNoBufferedSegments.add(segment.id);
+          })
+        );
 
         currentSegmentRequest = { segment, priority, request$ };
         const response$ = request$.pipe(
           mergeMap((fetchedSegment) => {
-            currentSegmentRequest = null;
             const initInfos = initSegmentObject &&
                               initSegmentObject.segmentInfos ||
                               undefined;
@@ -372,7 +393,10 @@ export default function RepresentationBuffer<T>({
           map((args) => ({ segment, value: args }))
         );
 
-        return observableConcat(response$, requestNextSegment$);
+        return observableConcat(
+          response$,
+          requestNextSegment$
+        );
       });
 
     return requestNextSegment$
@@ -410,8 +434,6 @@ export default function RepresentationBuffer<T>({
         codec,
       });
 
-      sourceBufferWaitingQueue.add(segment.id);
-
       return append$.pipe(
         mapTo(EVENTS.addedSegment(bufferType, segment, segmentData)),
         tap(() => { // add to SegmentBookkeeper
@@ -428,10 +450,8 @@ export default function RepresentationBuffer<T>({
                                    segment,
                                    start,
                                    end);
-        }),
-        finalize(() => { // remove from queue
-          sourceBufferWaitingQueue.remove(segment.id);
-        }));
+        })
+      );
     });
   }
 
@@ -449,6 +469,6 @@ export default function RepresentationBuffer<T>({
                          content,
                          segmentBookkeeper,
                          neededRange,
-                         sourceBufferWaitingQueue);
+                         loadedButNoBufferedSegments);
   }
 }

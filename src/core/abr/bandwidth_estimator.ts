@@ -33,8 +33,19 @@ export default class BandwidthEstimator {
   private _fastEWMA : EWMA;
   private _slowEWMA : EWMA;
   private _bytesSampled : number;
+  private _minimumChunkSize : number;
+  private _minimumTotalBytes : number;
 
-  constructor() {
+  constructor(lowLatencyMode: boolean) {
+
+    this._minimumChunkSize = lowLatencyMode ?
+      ABR_MINIMUM_CHUNK_SIZE.LOW_LATENCY_MODE :
+      ABR_MINIMUM_CHUNK_SIZE.DEFAULT;
+
+    this._minimumTotalBytes = lowLatencyMode ?
+      ABR_MINIMUM_TOTAL_BYTES.LOW_LATENCY_MODE :
+      ABR_MINIMUM_CHUNK_SIZE.DEFAULT;
+
     /**
      * A fast-moving average.
      * @private
@@ -63,7 +74,7 @@ export default class BandwidthEstimator {
    *   request.
    */
   public addSample(durationInMs : number, numberOfBytes : number) : void {
-    if (numberOfBytes < ABR_MINIMUM_CHUNK_SIZE) {
+    if (numberOfBytes < this._minimumChunkSize) {
       return;
     }
 
@@ -80,7 +91,7 @@ export default class BandwidthEstimator {
    * @returns {Number|undefined}
    */
   public getEstimate() : number|undefined {
-    if (this._bytesSampled < ABR_MINIMUM_TOTAL_BYTES) {
+    if (this._bytesSampled < this._minimumTotalBytes) {
       return undefined;
     }
 

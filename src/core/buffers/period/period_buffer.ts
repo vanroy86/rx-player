@@ -95,6 +95,7 @@ export interface IPeriodBufferArguments {
              segmentRetry? : number;
              textTrackOptions? : ITextTrackSourceBufferOptions; };
   wantedBufferAhead$ : Observable<number>;
+  lowLatencyMode : boolean;
 }
 
 /**
@@ -117,6 +118,7 @@ export default function PeriodBuffer({
   sourceBuffersManager,
   options,
   wantedBufferAhead$,
+  lowLatencyMode,
 } : IPeriodBufferArguments) : Observable<IPeriodBufferEvent> {
   const { period } = content;
 
@@ -192,6 +194,11 @@ export default function PeriodBuffer({
   ) : Observable<IAdaptationBufferEvent<T>|IBufferWarningEvent> {
     const { manifest } = content;
     const segmentBookkeeper = segmentBookkeepers.get(qSourceBuffer);
+    if ((window as any).sb == null) {
+      (window as any).sb = {};
+    }
+    (window as any).sb[adaptation.type] = segmentBookkeeper;
+    // (window as any).segmentBookkeepers[adaptation.type] = segmentBookkeeper;
     const pipelineOptions = getPipelineOptions(
       bufferType, options.segmentRetry, options.offlineRetry);
     const pipeline = segmentPipelinesManager
@@ -204,14 +211,16 @@ export default function PeriodBuffer({
                           { bufferGap: getLeftSizeOfRange(buffered,
                                                           tick.currentTime) });
     }));
-    return AdaptationBuffer(adaptationBufferClock$,
-                            qSourceBuffer,
-                            segmentBookkeeper,
-                            pipeline,
-                            wantedBufferAhead$,
-                            { manifest, period, adaptation },
-                            abrManager,
-                            options
+    return AdaptationBuffer(
+      adaptationBufferClock$,
+      qSourceBuffer,
+      segmentBookkeeper,
+      pipeline,
+      wantedBufferAhead$,
+      { manifest, period, adaptation },
+      abrManager,
+      options,
+      lowLatencyMode
     ).pipe(catchError((error : Error) => {
       // non native buffer should not impact the stability of the
       // player. ie: if a text buffer sends an error, we want to

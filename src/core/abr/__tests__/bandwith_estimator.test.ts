@@ -18,12 +18,12 @@ import BandwidthEstimator from "../bandwidth_estimator";
 
 describe("ABR - BandwidthEstimator", () => {
   it("should return undefined if no sample has been added yet", () => {
-    const bwEstimator = new BandwidthEstimator();
+    const bwEstimator = new BandwidthEstimator(false);
     expect(bwEstimator.getEstimate()).toBe(undefined);
   });
 
   it("should return undefined if not enough bytes has been received", () => {
-    const bwEstimator = new BandwidthEstimator();
+    const bwEstimator = new BandwidthEstimator(false);
     bwEstimator.addSample(800, 10);
     expect(bwEstimator.getEstimate()).toBe(undefined);
     bwEstimator.addSample(800, 10);
@@ -37,7 +37,7 @@ describe("ABR - BandwidthEstimator", () => {
   /* tslint:disable max-line-length */
   it("should calculate bitrate in function of consecutive request' durations and size", () => {
   /* tslint:enable max-line-length */
-    const bwEstimator = new BandwidthEstimator();
+    const bwEstimator = new BandwidthEstimator(false);
     bwEstimator.addSample(8000, 1000000);
     expect(bwEstimator.getEstimate()).toBe(1000000);
     bwEstimator.addSample(4000, 1000000);
@@ -49,7 +49,7 @@ describe("ABR - BandwidthEstimator", () => {
   });
 
   it("should reset the estimation when reset is called", () => {
-    const bwEstimator = new BandwidthEstimator();
+    const bwEstimator = new BandwidthEstimator(false);
     bwEstimator.addSample(8000, 1000000);
     bwEstimator.addSample(4000, 1000000);
     bwEstimator.addSample(1000, 1000000);
@@ -61,7 +61,7 @@ describe("ABR - BandwidthEstimator", () => {
   });
 
   it("should estimate a low bitrate quicker than a higher one", () => {
-    const bwEstimator = new BandwidthEstimator();
+    const bwEstimator = new BandwidthEstimator(false);
 
     // 1st test:
     // we raise the bitrate from 1 mega to 2 mega

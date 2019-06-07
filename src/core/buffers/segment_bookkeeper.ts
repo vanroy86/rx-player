@@ -52,8 +52,9 @@ interface IBufferedSegment {
  */
 export default class SegmentBookkeeper {
   public inventory : IBufferedSegment[];
+  private _minimumSegmentSize : number;
 
-  constructor() {
+  constructor(hasLowLatencyChunks: boolean) {
     /**
      * The inventory keep track of all the segments which should be currently
      * in the browser's memory.
@@ -62,6 +63,8 @@ export default class SegmentBookkeeper {
      * @type {Array.<Object>}
      */
     this.inventory = [];
+    this._minimumSegmentSize = hasLowLatencyChunks ? MINIMUM_SEGMENT_SIZE.lowLatency :
+                                                     MINIMUM_SEGMENT_SIZE.default;
   }
 
   /**
@@ -95,7 +98,7 @@ export default class SegmentBookkeeper {
       const { start: rangeStart, end: rangeEnd } = ranges[i];
 
       // if current TimeRange is too small to contain a segment, go to next one
-      if (rangeEnd - rangeStart < MINIMUM_SEGMENT_SIZE) {
+      if (rangeEnd - rangeStart < this._minimumSegmentSize) {
         continue;
       }
 
@@ -111,7 +114,7 @@ export default class SegmentBookkeeper {
              // TODO better way to indicate to typescript that all is well here
             (takeFirstSet(thisSegment.bufferedEnd, thisSegment.end) as number
               - rangeStart
-            ) < MINIMUM_SEGMENT_SIZE
+            ) < this._minimumSegmentSize
       ) {
         thisSegment = inventory[++inventoryIndex];
       }
@@ -153,7 +156,7 @@ export default class SegmentBookkeeper {
 
           // TODO better way to indicate to typescript that all is well here
           (takeFirstSet(thisSegment.bufferedStart, thisSegment.start) as number)
-            >= MINIMUM_SEGMENT_SIZE
+            >= this._minimumSegmentSize
       ) {
         // set the bufferedStart of the first segment in that range
         if (
@@ -186,7 +189,7 @@ export default class SegmentBookkeeper {
                  rangeEnd -
                     // TODO better way to indicate to typescript that all is well here
                    (takeFirstSet(thisSegment.bufferedStart, thisSegment.start) as number)
-                ) >= MINIMUM_SEGMENT_SIZE
+                ) >= this._minimumSegmentSize
         ) {
           const prevSegment = inventory[inventoryIndex - 1];
 
@@ -478,10 +481,41 @@ export default class SegmentBookkeeper {
     const { time, duration, timescale } = segmentInfos;
     const { inventory } = this;
 
-    for (let i = inventory.length - 1; i >= 0; i--) {
-      const currentSegmentI = inventory[i];
-      const prevSegmentI = inventory[i - 1];
-      const nextSegmentI = inventory[i + 1];
+    const segmentInventory = inventory.reduce(
+      (acc: IBufferedSegment[],
+       val: IBufferedSegment) => {
+      const lastSegment = acc[acc.length - 1];
+      if (lastSegment == null) {
+        acc.push(val);
+      } else {
+        if (lastSegment.infos.segment.id === val.infos.segment.id &&
+          lastSegment.infos.representation.id === val.infos.representation.id &&
+            val.start <= lastSegment.end
+        ) {
+          const isComplete = lastSegment.infos.segment.duration ?
+            Math.abs((val.end - lastSegment.start) -
+              lastSegment.infos.segment.duration / lastSegment.infos.segment.timescale) :
+            undefined;
+
+          const newSegment = { start: lastSegment.start,
+            end: val.end,
+            bufferedStart: lastSegment.bufferedStart,
+            bufferedEnd: val.bufferedEnd,
+            infos: lastSegment.infos,
+            isComplete,
+          };
+          acc.splice(acc.length - 1, 1, newSegment);
+        } else {
+          acc.push(val);
+        }
+      }
+      return acc;
+    }, [] as IBufferedSegment[]);
+
+    for (let i = segmentInventory.length - 1; i >= 0; i--) {
+      const currentSegmentI = segmentInventory[i];
+      const prevSegmentI = segmentInventory[i - 1];
+      const nextSegmentI = segmentInventory[i + 1];
 
       const segment = currentSegmentI.infos.segment;
 

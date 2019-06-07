@@ -469,6 +469,13 @@ export default class QueuedSourceBuffer<T> {
           if (isInit) {
             this._lastInitSegment = segment;
           }
+
+          if ((window as any).SOURCE_BUFFER == null) {
+            (window as any).SOURCE_BUFFER = { video: [], audio: [] };
+          }
+
+          (window as any).SOURCE_BUFFER[this.bufferType].push(segment);
+
           this._sourceBuffer.appendBuffer(segment);
           break;
         case SourceBufferAction.Remove:

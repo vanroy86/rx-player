@@ -149,6 +149,7 @@ export interface ILoadVideoOptions {
   hideNativeSubtitle? : boolean;
   textTrackElement? : HTMLElement;
   manualBitrateSwitchingMode? : "seamless"|"direct";
+  lowLatencyMode? : boolean;
 }
 
 interface IParsedLoadVideoOptionsBase {
@@ -164,6 +165,7 @@ interface IParsedLoadVideoOptionsBase {
   defaultTextTrack : ITextTrackPreference|null|undefined;
   startAt : IParsedStartAtOption|undefined;
   manualBitrateSwitchingMode : "seamless"|"direct";
+  lowLatencyMode : boolean;
 }
 
 interface IParsedLoadVideoOptionsNative
@@ -472,29 +474,34 @@ function parseLoadVideoOptions(
     }
   }
 
-  const networkConfig = options.networkConfig == null ?
-    {} :
-    { manifestRetry: options.networkConfig.manifestRetry,
-      offlineRetry: options.networkConfig.offlineRetry,
-      segmentRetry: options.networkConfig.segmentRetry };
+  const lowLatencyMode = options.lowLatencyMode || false;
+
+  const networkConfig = options.networkConfig == null ? {} : {
+    manifestRetry: options.networkConfig.manifestRetry,
+    offlineRetry: options.networkConfig.offlineRetry,
+    segmentRetry: options.networkConfig.segmentRetry,
+  };
 
   // TODO without cast
   /* tslint:disable no-object-literal-type-assertion */
-  return { autoPlay,
-           defaultAudioTrack,
-           defaultTextTrack,
-           hideNativeSubtitle,
-           keySystems,
-           manualBitrateSwitchingMode,
-           networkConfig,
-           startAt,
-           supplementaryImageTracks,
-           supplementaryTextTracks,
-           textTrackElement,
-           textTrackMode,
-           transport,
-           transportOptions,
-           url } as IParsedLoadVideoOptions;
+  return {
+    autoPlay,
+    defaultAudioTrack,
+    defaultTextTrack,
+    hideNativeSubtitle,
+    keySystems,
+    manualBitrateSwitchingMode,
+    networkConfig,
+    startAt,
+    supplementaryImageTracks,
+    supplementaryTextTracks,
+    textTrackElement,
+    textTrackMode,
+    transport,
+    transportOptions,
+    url,
+    lowLatencyMode,
+  } as IParsedLoadVideoOptions;
   /* tslint:enable no-object-literal-type-assertion */
 }
 

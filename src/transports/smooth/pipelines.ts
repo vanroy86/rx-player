@@ -18,7 +18,10 @@ import {
   Observable,
   of as observableOf,
 } from "rxjs";
-import { map } from "rxjs/operators";
+import {
+  filter,
+  map,
+} from "rxjs/operators";
 import features from "../../features";
 import log from "../../log";
 import Manifest, {
@@ -28,7 +31,7 @@ import Manifest, {
 import { getMDAT } from "../../parsers/containers/isobmff";
 import createSmoothManifestParser from "../../parsers/manifest/smooth";
 import assert from "../../utils/assert";
-import request from "../../utils/request";
+import request, { IRequestResponse } from "../../utils/request";
 import stringFromUTF8 from "../../utils/string_from_utf8";
 import warnOnce from "../../utils/warn_once";
 import {
@@ -101,6 +104,8 @@ export default function(
           url: replaceToken(url, ""),
           responseType: "document",
         }).pipe(
+          filter((r): r is IRequestResponse<Document, "document"> =>
+            !!r && r.type === "response"), // XXX TODO why should I filter here ?
           map(({ value }) : string => {
             const extractedURL = extractISML(value.responseData);
             if (!extractedURL) {

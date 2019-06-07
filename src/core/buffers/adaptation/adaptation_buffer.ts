@@ -108,7 +108,8 @@ export default function AdaptationBuffer<T>(
   content : { manifest : Manifest;
               period : Period; adaptation : Adaptation; },
   abrManager : ABRManager,
-  options : { manualBitrateSwitchingMode : "seamless" | "direct" }
+  options : { manualBitrateSwitchingMode : "seamless"|"direct" },
+  lowLatencyMode: boolean
 ) : Observable<IAdaptationBufferEvent<T>> {
   const directManualBitrateSwitching = options.manualBitrateSwitchingMode === "direct";
   const { manifest, period, adaptation } = content;
@@ -124,8 +125,11 @@ export default function AdaptationBuffer<T>(
   }));
 
   const abr$ : Observable<IABREstimation> =
-    abrManager.get$(adaptation.type, abrClock$, adaptation.representations)
-      .pipe(observeOn(asapScheduler), share());
+    abrManager.get$(adaptation.type,
+                    abrClock$,
+                    adaptation.representations,
+                    lowLatencyMode
+    ).pipe(observeOn(asapScheduler), share());
 
   // emit when the current RepresentationBuffer should be stopped right now
   const killCurrentBuffer$ = new Subject<void>();
@@ -160,8 +164,8 @@ export default function AdaptationBuffer<T>(
         }
         const representationChange$ = observableOf(
           EVENTS.representationChange(adaptation.type, period, representation));
-        const representationBuffer$ = createRepresentationBuffer(representation)
-          .pipe(takeUntil(killCurrentBuffer$));
+          const representationBuffer$ = createRepresentationBuffer(representation)
+            .pipe(takeUntil(killCurrentBuffer$));
         return observableConcat(representationChange$, representationBuffer$);
       })),
     newRepresentation$.pipe(map((estimation, i) => {
@@ -195,16 +199,21 @@ export default function AdaptationBuffer<T>(
   ) : Observable<IRepresentationBufferEvent<T>> {
     return observableDefer(() => {
       log.info("Buffer: changing representation", adaptation.type, representation);
-      return RepresentationBuffer({ clock$,
-                                    content: { representation,
-                                               adaptation,
-                                               period,
-                                               manifest },
-                                    queuedSourceBuffer,
-                                    segmentBookkeeper,
-                                    segmentFetcher,
-                                    terminate$: terminateCurrentBuffer$,
-                                    wantedBufferAhead$, });
+      return RepresentationBuffer({
+        clock$,
+        content: {
+          representation,
+          adaptation,
+          period,
+          manifest,
+        },
+        queuedSourceBuffer,
+        segmentBookkeeper,
+        segmentFetcher,
+        terminate$: terminateCurrentBuffer$,
+        wantedBufferAhead$,
+        lowLatencyMode,
+      });
     });
   }
 }

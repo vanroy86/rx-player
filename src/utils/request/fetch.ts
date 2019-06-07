@@ -105,13 +105,12 @@ function fetchRequest<T>(
     }
   }
 
+  return new Observable((obs) => {
   let timeouted = false;
 
   const sendingTime = performance.now();
   let lastSentTime = sendingTime;
-  let isDone = false;
 
-  return new Observable((obs) => {
     const abortController: AbortController | null =
       typeof (window as any).AbortController === "function" ?
         new (window as any).AbortController() : null;
@@ -121,12 +120,10 @@ function fetchRequest<T>(
      * @returns {void}
      */
     function abortRequest(): void {
-      if (!isDone) {
-        if (abortController) {
-          return abortController.abort();
-        }
-        log.warn("Fetch Request: AbortController API not available.");
+      if (abortController) {
+        return abortController.abort();
       }
+      log.warn("Fetch Request: AbortController API not available.");
     }
 
     const timeout = window.setTimeout(() => {
@@ -186,8 +183,8 @@ function fetchRequest<T>(
           const { value, done } = chunk;
           if (!done) {
             if (value != null && responseType === "arraybuffer") {
-              const _response: IRequestDataChunk<ArrayBuffer, "arraybuffer"> = {
-                type: "dataChunk" as "dataChunk",
+              const _response: IRequestResponse<ArrayBuffer, "arraybuffer"> = {
+                type: "response" as "response",
                 value: {
                   responseType,
                   status: response.status,
@@ -203,7 +200,7 @@ function fetchRequest<T>(
               readBuffer();
             }
           } else {
-            isDone = true;
+            console.log("!!! URL", options.url);
             obs.complete();
           }
         }
@@ -253,7 +250,7 @@ function fetchRequest<T>(
           RequestErrorTypes.ERROR_EVENT));
         return;
       }
-      obs.complete();
+      obs.error();
       return;
     });
     /* tslint:disable no-floating-promises */

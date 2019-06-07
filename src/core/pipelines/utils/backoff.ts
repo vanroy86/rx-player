@@ -36,6 +36,11 @@ import { getFuzzedDelay } from "../../../utils/backoff_delay";
  * @returns {Boolean} - If true, the request can be retried.
  */
 function shouldRetry(error : Error) : boolean {
+  if (error instanceof Error &&
+      error.message === "Failed to fetch"
+  ) {
+    return true;
+  }
   if (!(error instanceof RequestError)) {
     return false;
   }
@@ -101,6 +106,7 @@ function downloadingBackoff<T>(
     if (!shouldRetry(error)) {
       throw error;
     }
+
     const currentError = error instanceof RequestError &&
                          isOfflineRequestError(error) ? ERROR_TYPES.OFFLINE :
                                                         ERROR_TYPES.REGULAR;
@@ -120,13 +126,11 @@ function downloadingBackoff<T>(
     if (onRetry) {
       onRetry(error, retryCount);
     }
-
     const delay = Math.min(baseDelay * Math.pow(2, retryCount - 1),
                            maxDelay);
-
     const fuzzedDelay = getFuzzedDelay(delay);
     return observableTimer(fuzzedDelay)
-             .pipe(mergeMap(() => source));
+      .pipe(mergeMap(() => source));
   }));
 }
 

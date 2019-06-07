@@ -667,18 +667,21 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const options = parseLoadVideoOptions(opts);
     log.info("API: Calling loadvideo", options);
 
-    const { autoPlay,
-            defaultAudioTrack,
-            defaultTextTrack,
-            keySystems,
-            manualBitrateSwitchingMode,
-            networkConfig,
-            startAt,
-            supplementaryImageTracks,
-            supplementaryTextTracks,
-            transport,
-            transportOptions,
-            url } = options;
+    const {
+      autoPlay,
+      defaultAudioTrack,
+      defaultTextTrack,
+      keySystems,
+      manualBitrateSwitchingMode,
+      networkConfig,
+      startAt,
+      supplementaryImageTracks,
+      supplementaryTextTracks,
+      transport,
+      transportOptions,
+      url,
+      lowLatencyMode,
+    } = options;
 
     // Perform multiple checks on the given options
     if (!this.videoElement) {
@@ -708,7 +711,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const videoElement = this.videoElement;
 
     // Global clock used for the whole application.
-    const clock$ = createClock(videoElement, { withMediaSource: !isDirectFile });
+    const clock$ = createClock(
+      videoElement, { withMediaSource: !isDirectFile }, lowLatencyMode);
 
     const contentIsStopped$ = observableMerge(
       this._priv_stopCurrentContent$,
@@ -724,9 +728,11 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         throw new Error(`transport "${transport}" not supported`);
       }
 
-      const pipelines = transportFn(objectAssign({ supplementaryTextTracks,
-                                                   supplementaryImageTracks },
-                                                 transportOptions));
+      const pipelines = transportFn(objectAssign({
+        supplementaryTextTracks,
+        supplementaryImageTracks,
+        lowLatencyMode,
+      }, transportOptions));
 
       // Options used by the ABR Manager.
       const adaptiveOptions = {
@@ -769,6 +775,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         startAt,
         textTrackOptions,
         url,
+        lowLatencyMode,
       })
         .pipe(takeUntil(contentIsStopped$))
         .pipe(publish()) as ConnectableObservable<IInitEvent>;

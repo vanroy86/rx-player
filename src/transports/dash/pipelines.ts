@@ -16,10 +16,12 @@
 
 import {
   combineLatest as observableCombineLatest,
+  EMPTY,
   Observable,
   of as observableOf,
 } from "rxjs";
 import {
+  concatMap,
   filter,
   map,
   mergeMap,
@@ -37,7 +39,7 @@ import {
 import parseMPD, {
   IMPDParserResponse,
 } from "../../parsers/manifest/dash";
-import request from "../../utils/request";
+import request, { IRequestResponse } from "../../utils/request";
 import {
   ILoaderObservable,
   ImageParserObservable,
@@ -51,7 +53,10 @@ import {
   SegmentParserObservable,
 } from "../types";
 import generateManifestLoader from "../utils/manifest_loader";
-import getISOBMFFTimingInfos from "./isobmff_timing_infos";
+import getISOBMFFTimingInfos, {
+  getISOBMFFLowLatencyChunks,
+  IChunkRecord,
+} from "./isobmff_infos";
 import {
   loader as TextTrackLoader,
   parser as TextTrackParser,
@@ -64,10 +69,11 @@ import generateSegmentLoader from "./segment_loader";
  * @returns {Observable}
  */
 function requestStringResource(url : string) : Observable<string> {
-  return request({ url,
-                   responseType: "text" })
-  .pipe(
-    filter((e) => e.type === "response"),
+  return request({
+    url,
+    responseType: "text",
+  }).pipe(
+    filter((e): e is IRequestResponse<string, any> => e.type === "response"),
     map((e) => e.value.responseData)
   );
 }
@@ -84,7 +90,9 @@ export default function(
   const manifestLoader = generateManifestLoader({
     customManifestLoader: options.manifestLoader,
   });
-  const segmentLoader = generateSegmentLoader(options.segmentLoader);
+  const lowLatencyMode = !!options.lowLatencyMode;
+  const lowLatencyChunkRecord: IChunkRecord = {};
+  const segmentLoader = generateSegmentLoader(lowLatencyMode, options.segmentLoader);
   const { referenceDateTime } = options;
 
   const manifestPipeline = {
@@ -148,6 +156,7 @@ export default function(
       segment,
       representation,
       response,
+      adaptation,
       init,
     } : ISegmentParserArguments<Uint8Array|ArrayBuffer|null>
     ) : SegmentParserObservable {
@@ -159,40 +168,60 @@ export default function(
           segmentOffset: 0,
         });
       }
-      const segmentData : Uint8Array = responseData instanceof Uint8Array ?
+
+      const segmentData: Uint8Array = responseData instanceof Uint8Array ?
         responseData :
         new Uint8Array(responseData);
-      const indexRange = segment.indexRange;
-      const isWEBM = representation.mimeType === "video/webm" ||
-        representation.mimeType === "audio/webm";
-      const nextSegments = isWEBM ?
-        getSegmentsFromCues(segmentData, 0) :
-        getSegmentsFromSidx(segmentData, indexRange ? indexRange[0] : 0);
 
-      if (!segment.isInit) {
-        const segmentInfos = isWEBM ?
-          {
-            time: segment.time,
-            duration: segment.duration,
-            timescale: segment.timescale,
-          } :
-          getISOBMFFTimingInfos(segment, segmentData, nextSegments, init);
-        const segmentOffset = segment.timestampOffset || 0;
-        return observableOf({ segmentData, segmentInfos, segmentOffset });
+      const contentId = segment.id + adaptation.id + representation.id + adaptation.type;
+
+      const chunks: Uint8Array[] = (() => {
+        if (lowLatencyMode && !segment.isInit) {
+          return getISOBMFFLowLatencyChunks(
+            lowLatencyChunkRecord, segmentData, contentId);
+        }
+        return [segmentData];
+      })();
+
+      if (!chunks.length) {
+        return EMPTY;
       }
 
-      if (nextSegments) {
-        representation.index._addSegments(nextSegments);
-      }
-      const timescale = isWEBM ?
-        getTimeCodeScale(segmentData, 0) :
-        getMDHDTimescale(segmentData);
-      return observableOf({
-        segmentData,
-        segmentInfos: timescale && timescale > 0 ?
-          { time: -1, duration: 0, timescale } : null,
-        segmentOffset: segment.timestampOffset || 0,
-      });
+      return observableOf(...chunks).pipe(
+        concatMap((chunk) => {
+          const indexRange = segment.indexRange;
+          const isWEBM = representation.mimeType === "video/webm" ||
+            representation.mimeType === "audio/webm";
+          const nextSegments = isWEBM ?
+            getSegmentsFromCues(chunk, 0) :
+            getSegmentsFromSidx(chunk, indexRange ? indexRange[0] : 0);
+
+          if (!segment.isInit) {
+            const segmentInfos = isWEBM ?
+              {
+                time: segment.time,
+                duration: segment.duration,
+                timescale: segment.timescale,
+              } :
+              getISOBMFFTimingInfos(segment, chunk, nextSegments, lowLatencyMode, init);
+            const segmentOffset = segment.timestampOffset || 0;
+            return observableOf({ segmentData: chunk, segmentInfos, segmentOffset });
+          }
+
+          if (nextSegments) {
+            representation.index._addSegments(nextSegments);
+          }
+          const timescale = isWEBM ?
+            getTimeCodeScale(chunk, 0) :
+            getMDHDTimescale(chunk);
+          return observableOf({
+            segmentData: chunk,
+            segmentInfos: timescale && timescale > 0 ?
+              { time: -1, duration: 0, timescale } : null,
+            segmentOffset: segment.timestampOffset || 0,
+          });
+        })
+      );
     },
   };
 

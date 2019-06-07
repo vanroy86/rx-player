@@ -108,13 +108,16 @@ export default function BufferOrchestrator(
   abrManager : ABRManager,
   sourceBuffersManager : SourceBuffersManager,
   segmentPipelinesManager : SegmentPipelinesManager<any>,
-  options: { wantedBufferAhead$ : Observable<number>;
-             maxBufferAhead$ : Observable<number>;
-             maxBufferBehind$ : Observable<number>;
-             segmentRetry? : number;
-             offlineRetry? : number;
-             textTrackOptions? : ITextTrackSourceBufferOptions;
-             manualBitrateSwitchingMode : "seamless" | "direct"; }
+  options: {
+    wantedBufferAhead$ : Observable<number>;
+    maxBufferAhead$ : Observable<number>;
+    maxBufferBehind$ : Observable<number>;
+    segmentRetry? : number;
+    offlineRetry? : number;
+    textTrackOptions? : ITextTrackSourceBufferOptions;
+    manualBitrateSwitchingMode : "seamless"|"direct";
+  },
+  lowLatencyMode : boolean
 ) : Observable<IBufferOrchestratorEvent> {
   const { manifest, initialPeriod } = content;
   const { maxBufferAhead$, maxBufferBehind$, wantedBufferAhead$ } = options;
@@ -143,7 +146,7 @@ export default function BufferOrchestrator(
   // Keep track of a unique segmentBookkeeper created per QueuedSourceBuffer.
   const segmentBookkeepers =
     new WeakMapMemory<QueuedSourceBuffer<unknown>, SegmentBookkeeper>(() =>
-      new SegmentBookkeeper());
+      new SegmentBookkeeper(lowLatencyMode));
 
   // trigger warnings when the wanted time is before or after the manifest's
   // segments
@@ -369,18 +372,22 @@ export default function BufferOrchestrator(
     // Will emit when the current buffer should be destroyed.
     const killCurrentBuffer$ = observableMerge(endOfCurrentBuffer$, destroyAll$);
 
-    const periodBuffer$ = PeriodBuffer({ abrManager,
-                                         bufferType,
-                                         clock$,
-                                         content: { manifest, period: basePeriod },
-                                         garbageCollectors,
-                                         segmentBookkeepers,
-                                         segmentPipelinesManager,
-                                         sourceBuffersManager,
-                                         options,
-                                         wantedBufferAhead$, }
-    ).pipe(
-      mergeMap((evt : IPeriodBufferEvent) : Observable<IMultiplePeriodBuffersEvent> => {
+    const periodBuffer$ = PeriodBuffer({
+      abrManager,
+      bufferType,
+      clock$,
+      content: { manifest, period: basePeriod },
+      garbageCollectors,
+      segmentBookkeepers,
+      segmentPipelinesManager,
+      sourceBuffersManager,
+      options,
+      wantedBufferAhead$,
+      lowLatencyMode,
+    }).pipe(
+      mergeMap((
+        evt : IPeriodBufferEvent
+      ) : Observable<IMultiplePeriodBuffersEvent> => {
         const { type } = evt;
         if (type === "full-buffer") {
           const nextPeriod = manifest.getPeriodAfter(basePeriod);

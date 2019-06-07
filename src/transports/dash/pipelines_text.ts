@@ -28,7 +28,7 @@ import {
 import request from "../../utils/request";
 import byteRange from "../utils/byte_range";
 import isMP4EmbeddedTrack from "./is_mp4_embedded_track";
-import getISOBMFFTimingInfos from "./isobmff_timing_infos";
+import getISOBMFFTimingInfos from "./isobmff_infos";
 
 import {
   ILoaderObservable,
@@ -136,7 +136,7 @@ function TextTrackParser({
     }
     segmentInfos = isInit ?
       { time: -1, duration: 0, timescale: segment.timescale } :
-      getISOBMFFTimingInfos(segment, responseData, sidxSegments, init);
+      getISOBMFFTimingInfos(segment, responseData, sidxSegments, null, init);
   } else { // if not MP4
     assert(typeof response.responseData === "string");
     responseData = response.responseData as string;

@@ -62,13 +62,17 @@ const defaultChooserOptions = { limitWidth: {},
  */
 const createChooser = (
   type : IBufferType,
-  options : IRepresentationChoosersOptions
+  options : IRepresentationChoosersOptions,
+  lowLatencyMode : boolean
 ) : RepresentationChooser => {
-  return new RepresentationChooser({ limitWidth$: options.limitWidth[type],
-                                     throttle$: options.throttle[type],
-                                     initialBitrate: options.initialBitrates[type],
-                                     manualBitrate: options.manualBitrates[type],
-                                     maxAutoBitrate: options.maxAutoBitrates[type] });
+  return new RepresentationChooser({
+    limitWidth$: options.limitWidth[type],
+    throttle$: options.throttle[type],
+    initialBitrate: options.initialBitrates[type],
+    manualBitrate: options.manualBitrates[type],
+    maxAutoBitrate: options.maxAutoBitrates[type],
+    lowLatencyMode,
+  });
 };
 
 /**
@@ -148,7 +152,8 @@ export default class ABRManager {
   constructor(
     requests$: Observable<Observable<IRequest>>,
     metrics$: Observable<IMetric>,
-    options : IRepresentationChoosersOptions = defaultChooserOptions
+    options : IRepresentationChoosersOptions = defaultChooserOptions,
+    lowLatencyMode : boolean
   ) {
     // Subject emitting and completing on dispose.
     // Used to clean up every created observables.
@@ -174,7 +179,7 @@ export default class ABRManager {
     metrics$
       .pipe(takeUntil(this._dispose$))
       .subscribe(({ type, value }) => {
-        const chooser = this._lazilyCreateChooser(type);
+        const chooser = this._lazilyCreateChooser(type, lowLatencyMode);
         const { duration, size } = value;
         chooser.addEstimate(duration, size);
       });
@@ -187,7 +192,7 @@ export default class ABRManager {
       )
       .subscribe((request) => {
         const { type, value } = request;
-        const chooser = this._lazilyCreateChooser(type);
+        const chooser = this._lazilyCreateChooser(type, lowLatencyMode);
 
         switch (request.event) {
         case "requestBegin":
@@ -220,9 +225,10 @@ export default class ABRManager {
   public get$(
     type : IBufferType,
     clock$: Observable<IABRClockTick>,
-    representations: Representation[] = []
+    representations: Representation[] = [],
+    lowLatencyMode : boolean
   ) : Observable<IABREstimation> {
-    return this._lazilyCreateChooser(type).get$(clock$, representations);
+    return this._lazilyCreateChooser(type, lowLatencyMode).get$(clock$, representations);
   }
 
   /**
@@ -313,11 +319,14 @@ export default class ABRManager {
    * @param {string} bufferType
    * @returns {Object}
    */
-  private _lazilyCreateChooser(bufferType : IBufferType) : RepresentationChooser {
+  private _lazilyCreateChooser(
+    bufferType : IBufferType,
+    lowLatencyMode : boolean
+  ) : RepresentationChooser {
     if (!this._choosers[bufferType]) {
       log.debug("ABR: Creating new buffer for ", bufferType);
-      this._choosers[bufferType] = createChooser(bufferType,
-                                                 this._chooserInstanceOptions);
+      this._choosers[bufferType] =
+        createChooser(bufferType, this._chooserInstanceOptions, lowLatencyMode);
     }
     return this._choosers[bufferType] as RepresentationChooser;
   }

@@ -39,6 +39,7 @@ export interface IInitialTimeOptions { position? : number;
  */
 export default function getInitialTime(
   manifest : Manifest,
+  lowLatencyMode : boolean,
   startAt? : IInitialTimeOptions
 ) : number {
   if (startAt) {
@@ -77,9 +78,11 @@ export default function getInitialTime(
   }
 
   if (manifest.isLive) {
+    if (lowLatencyMode) {
+      return manifest.getMaximumPosition() - DEFAULT_LIVE_GAP.LOW_LATENCY_MODE;
+    }
     const sgp = manifest.suggestedPresentationDelay;
-    return manifest.getMaximumPosition() - (sgp == null ? DEFAULT_LIVE_GAP :
-                                                          sgp);
+    return manifest.getMaximumPosition() - (sgp == null ? DEFAULT_LIVE_GAP.DEFAULT : sgp);
   }
 
   return manifest.getMinimumPosition();
