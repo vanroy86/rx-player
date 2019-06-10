@@ -335,6 +335,7 @@ export default function RepresentationBuffer<T>({
   //   - append them to the SourceBuffer
   const loadingQueue$ = startQueue$.pipe(
     switchMap(() => {
+      console.log("/// START QUEUE", currentSegmentRequest);
       currentSegmentRequest = null;
       return downloadQueue.length ? loadSegmentsFromQueue() :
                                     EMPTY;
@@ -374,7 +375,7 @@ export default function RepresentationBuffer<T>({
         }
 
         const { segment, priority } = currentNeededSegment;
-        console.log("!!! Want to load ", segment.id);
+        console.log("??? LOAD SEGMENT", segment.id);
         const context = { manifest, period, adaptation, representation, segment };
         const request$ = segmentFetcher.createRequest(context, priority).pipe(
           finalize(() => {

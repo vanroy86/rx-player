@@ -141,6 +141,7 @@ function fetchRequest<T>(
     ).then((response) => {
       if (response.status >= 300) {
         const errorCode = RequestErrorTypes.ERROR_EVENT;
+        console.log("!! FETCH ERROR STATUS", options.url);
         obs.error(new RequestError(response, response.url, errorCode));
       }
       if (timeout != null) {
@@ -165,6 +166,7 @@ function fetchRequest<T>(
           reader.read().then((data) => {
             handleFetchedBytes(data);
           }).catch((e) => {
+            console.log("!! FETCH ERROR READ BUFFER", e.toString(), options.url);
             obs.error(e);
           });
         }
@@ -200,7 +202,7 @@ function fetchRequest<T>(
               readBuffer();
             }
           } else {
-            console.log("!!! URL", options.url);
+            console.log("!! FETCH COMPLETE", options.url);
             obs.complete();
           }
         }
@@ -250,6 +252,7 @@ function fetchRequest<T>(
           RequestErrorTypes.ERROR_EVENT));
         return;
       }
+      console.log("!! FETCH ERROR", e.toString(), options.url);
       obs.error();
       return;
     });
