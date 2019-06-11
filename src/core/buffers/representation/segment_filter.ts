@@ -21,7 +21,6 @@ import {
   Period,
   Representation,
 } from "../../../manifest";
-import SimpleSet from "../../../utils/simple_set";
 import SegmentBookkeeper from "../segment_bookkeeper";
 
 const {
@@ -49,14 +48,25 @@ export default function shouldDownloadSegment(
   },
   segmentBookkeeper: SegmentBookkeeper,
   wantedRange : { start : number; end : number },
-  segmentIDsToIgnore : SimpleSet
+  loadedButNotBuffered : any
 ) : boolean {
-  const { period, adaptation, representation } = content;
-  const shouldIgnore = segmentIDsToIgnore.test(segment.id);
+  const {
+    period,
+    adaptation,
+    representation,
+  } = content;
 
-  if (shouldIgnore) {
-    return false;
+  if (loadedButNotBuffered[segment.id] && loadedButNotBuffered[segment.id].finished) {
+    const isWaitingForBuffering = !!Object.values(loadedButNotBuffered).find((el) => {
+      return el !== "appended" && el !== true;
+    })
+    // If a segment is being bufferized and it is not loaded anymore,
+    // we should ask for download
+    if (isWaitingForBuffering) {
+      return false;
+    }
   }
+
 
   // segment without time info are usually init segments or some
   // kind of metadata segment that we never filter out
@@ -69,14 +79,19 @@ export default function shouldDownloadSegment(
     return true;
   }
 
-  if (duration / timescale < MINIMUM_SEGMENT_SIZE) {
+  if (duration / timescale < MINIMUM_SEGMENT_SIZE.default) {
     return false;
   }
 
   const currentSegment =
     segmentBookkeeper.hasPlayableSegment(wantedRange, { time, duration, timescale });
 
-  if (!currentSegment) {
+  if (!currentSegment ||
+      currentSegment.isComplete > 0
+     ) {
+    if (currentSegment != null) {
+      console.log("=== Is not complete", currentSegment);
+    }
     return true;
   }
 
