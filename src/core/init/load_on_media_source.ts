@@ -76,6 +76,7 @@ export interface IMediaSourceLoaderArguments {
     textTrackOptions : ITextTrackSourceBufferOptions;
     manualBitrateSwitchingMode : "seamless"|"direct";
   };
+  lowLatencyMode: boolean;
 }
 
 // Events emitted when loading content in the MediaSource
@@ -99,6 +100,7 @@ export default function createMediaSourceLoader({
   bufferOptions,
   abrManager,
   segmentPipelinesManager,
+  lowLatencyMode,
 } : IMediaSourceLoaderArguments) : (
   mediaSource : MediaSource,
   position : number,
@@ -152,12 +154,14 @@ export default function createMediaSourceLoader({
     const cancelEndOfStream$ = new Subject<null>();
 
     // Creates Observable which will manage every Buffer for the given Content.
-    const buffers$ = BufferOrchestrator({ manifest, initialPeriod },
-                                        bufferClock$,
-                                        abrManager,
-                                        sourceBuffersManager,
-                                        segmentPipelinesManager,
-                                        bufferOptions
+    const buffers$ = BufferOrchestrator(
+      { manifest, initialPeriod },
+      bufferClock$,
+      abrManager,
+      sourceBuffersManager,
+      segmentPipelinesManager,
+      bufferOptions,
+      lowLatencyMode
     ).pipe(
       mergeMap((evt) : Observable<IMediaSourceLoaderEvent> => {
         switch (evt.type) {

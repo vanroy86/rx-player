@@ -209,7 +209,10 @@ export default {
    * suggested, in seconds.
    * @type {Number}
    */
-  DEFAULT_LIVE_GAP: 10,
+  DEFAULT_LIVE_GAP: {
+    DEFAULT: 10,
+    LOW_LATENCY_MODE: 2,
+  },
 
   /**
    * Default value for a manifest's suggested presentation delay if not
@@ -328,9 +331,12 @@ export default {
   MAX_BACKOFF_DELAY_BASE: 3000,
 
   /**
-   * Minimum interval at which timeupdate events will be "constructed". This
-   * variable is for the "regular" mediasource strategy (that is, not for the
-   * directfile API.
+   * Minimum interval at which timeupdate events will be "constructed".
+   *
+   * This variable has three versions:
+   * - One is for the "regular" mediasource strategy
+   * - One is for the directfile API
+   * - One is for the low latency mode
    *
    * Those events are the base of various important mechanisms in the player:
    *   - set the clock for the buffer.
@@ -344,13 +350,11 @@ export default {
    * triggered when various events of the media element are received.
    * @type {Number}
    */
-  SAMPLING_INTERVAL_MEDIASOURCE: 1000,
-
-  /**
-   * Same than SAMPLING_INTERVAL_MEDIASOURCE but for the directfile API.
-   * @type {Number}
-   */
-  SAMPLING_INTERVAL_NO_MEDIASOURCE: 500,
+  SAMPLING_INTERVAL: {
+    MEDIASOURCE: 1000,
+    NO_MEDIASOURCE: 500,
+    LOW_LATENCY_MODE: 200,
+  },
 
   /**
    * Minimum number of bytes sampled before we trust the estimate.
@@ -361,7 +365,10 @@ export default {
    * This specific value is based on experimentations.
    * @type {Number}
    */
-  ABR_MINIMUM_TOTAL_BYTES: 150e3,
+  ABR_MINIMUM_TOTAL_BYTES: {
+    DEFAULT: 150e3,
+    LOW_LATENCY_MODE: 500e3,
+  },
 
   /**
    * Minimum number of bytes, under which samples are discarded.
@@ -369,24 +376,27 @@ export default {
    * (time to first byte) is considered part of the download time.
    * Because of this, we should ignore very small downloads which would cause
    * our estimate to be too low.
-   * This specific value is based on experimentation.
+   * Those specific values are based on experimentation.
    * @type {Number}
    */
-  ABR_MINIMUM_CHUNK_SIZE: 16e3,
+  ABR_MINIMUM_CHUNK_SIZE: {
+    DEFAULT: 16e3,
+    LOW_LATENCY_MODE: 2e3,
+  },
 
   /**
    * Factor with which is multiplied the bandwidth estimate when the ABR is in
    * starvation mode.
    * @type {Number}
    */
-  ABR_STARVATION_FACTOR: 0.72,
+  ABR_STARVATION_FACTOR: { default: 0.72, lowLatency: 0.37 },
 
   /**
    * Factor with which is multiplied the bandwidth estimate when the ABR is not
    * in starvation mode.
    * @type {Number}
    */
-  ABR_REGULAR_FACTOR: 0.90,
+  ABR_REGULAR_FACTOR: { default: 0.90, lowLatency: 0.65 },
 
   /**
    * If a SourceBuffer has less than ABR_STARVATION_GAP in seconds ahead of the
@@ -407,8 +417,14 @@ export default {
    *
    * @type {Number}
    */
-  ABR_STARVATION_GAP: 5,
-  OUT_OF_STARVATION_GAP: 7,
+  ABR_STARVATION_GAP: {
+    DEFAULT: 5,
+    LOW_LATENCY_MODE: 1,
+  },
+  OUT_OF_STARVATION_GAP: {
+    DEFAULT: 7,
+    LOW_LATENCY_MODE: 4,
+  },
 
   /**
    * This is a security to avoid going into starvation mode when the content is
@@ -453,14 +469,20 @@ export default {
    * the player was stalled due to a low readyState.
    * @type {Number}
    */
-  RESUME_GAP_AFTER_NOT_ENOUGH_DATA: 0.5,
+  RESUME_GAP_AFTER_NOT_ENOUGH_DATA: {
+    DEFAULT: 0.5,
+    LOW_LATENCY_MODE: 0.5,
+  },
 
   /**
    * Number of seconds ahead in the buffer after which playback will resume
    * after the player went through a buffering step.
-   * @type {Number}
+   * @type {Object}
    */
-  RESUME_GAP_AFTER_BUFFERING: 5,
+  RESUME_GAP_AFTER_BUFFERING:  {
+    DEFAULT: 5,
+    LOW_LATENCY_MODE: 0.5,
+  },
 
   /**
    * Maximum number of seconds in the buffer based on which a "stalling"
@@ -470,7 +492,10 @@ export default {
    * buffering.
    * @type {Number}
    */
-  STALL_GAP: 0.5,
+  STALL_GAP: {
+    DEFAULT: 0.5,
+    LOW_LATENCY_MODE: 0.001,
+  },
 
   /**
    * Maximum difference allowed between a segment _announced_ start (what the
@@ -542,7 +567,10 @@ export default {
    * this logic could lead to bugs with the current code.
    * @type {Number}
    */
-  MINIMUM_SEGMENT_SIZE: 0.2,
+  MINIMUM_SEGMENT_SIZE: {
+    default: 0.2,
+    lowLatency: 0.05,
+  },
 
   /**
    * Maximum interval at which text tracks are refreshed in an "html"
