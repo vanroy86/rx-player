@@ -23,6 +23,8 @@
 
 import objectAssign from "object-assign";
 import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
   defer as observableDefer,
   fromEvent as observableFromEvent,
   interval as observableInterval,
@@ -84,6 +86,7 @@ type stalledStatus = { // set if the player is stalled
 // Global informations emitted on each clock tick
 export interface IClockTick extends IMediaInfos {
   stalled : stalledStatus; // see type
+  speed : number; // last speed set by the user
 }
 
 const { SAMPLING_INTERVAL_MEDIASOURCE,
@@ -292,18 +295,21 @@ function getStalledStatus(
  */
 function createClock(
   mediaElement : HTMLMediaElement,
+  speed$ : BehaviorSubject<number>,
   { withMediaSource } : { withMediaSource : boolean }
 ) : Observable<IClockTick> {
   return observableDefer(() : Observable<IClockTick> => {
     let lastTimings : IClockTick = objectAssign(getMediaInfos(mediaElement, "init"),
-                                                { stalled: null });
+                                                { stalled: null,
+                                                  speed: speed$.getValue() });
 
-    function getCurrentClockTick(state : IMediaInfosState) : IClockTick {
+    function getCurrentClockTick(state : IMediaInfosState, speed : number) : IClockTick {
       const mediaTimings = getMediaInfos(mediaElement, state);
       const stalledState = getStalledStatus(lastTimings, mediaTimings, withMediaSource);
 
       // /!\ Mutate mediaTimings
-      return objectAssign(mediaTimings, { stalled: stalledState });
+      return objectAssign(mediaTimings, { stalled: stalledState,
+                                          speed });
     }
 
     const eventObs : Array< Observable< IMediaInfosState > > =
@@ -318,10 +324,12 @@ function createClock(
       observableInterval(interval)
         .pipe(mapTo("timeupdate"));
 
-    return observableMerge(interval$, ...eventObs)
+    const events$ = observableMerge(interval$, ...eventObs);
+
+    return observableCombineLatest([ events$, speed$ ])
       .pipe(
-        map((state : IMediaInfosState) => {
-          lastTimings = getCurrentClockTick(state);
+        map(([ state, speed ] : [ IMediaInfosState, number ]) => {
+          lastTimings = getCurrentClockTick(state, speed);
           log.debug("API: new clock tick", lastTimings);
           return lastTimings;
         }),

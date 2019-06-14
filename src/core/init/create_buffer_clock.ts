@@ -16,7 +16,6 @@
 
 import objectAssign from "object-assign";
 import {
-  combineLatest as observableCombineLatest,
   merge as observableMerge,
   Observable,
 } from "rxjs";
@@ -41,7 +40,6 @@ export default function createBufferClock(
   manifest : Manifest,
   initClock$ : Observable<IInitClockTick>,
   initialSeek$ : Observable<unknown>,
-  speed$ : Observable<number>,
   startTime : number
 ) : Observable<IBufferOrchestratorClockTick> {
   let initialSeekPerformed = false;
@@ -51,25 +49,23 @@ export default function createBufferClock(
   );
 
   const clock$ : Observable<IBufferOrchestratorClockTick> =
-    observableCombineLatest([initClock$, speed$])
-      .pipe(map(([tick, speed]) => {
-        return objectAssign({
-          isLive: manifest.isLive,
-          liveGap: manifest.isLive ?
-            manifest.getMaximumPosition() - tick.currentTime :
-            Infinity,
+    initClock$.pipe(map((tick) => {
+      return objectAssign({
+        isLive: manifest.isLive,
+        liveGap: manifest.isLive ?
+          manifest.getMaximumPosition() - tick.currentTime :
+          Infinity,
 
-          // wantedTimeOffset is an offset to add to the timing's current time to have
-          // the "real" wanted position.
-          // For now, this is seen when the media element has not yet seeked to its
-          // initial position, the currentTime will most probably be 0 where the
-          // effective starting position will be _startTime_.
-          // Thus we initially set a wantedTimeOffset equal to startTime.
-          wantedTimeOffset: initialSeekPerformed ? 0 :
-                                                   startTime - tick.currentTime,
-          speed,
-        }, tick);
-      }));
+        // wantedTimeOffset is an offset to add to the timing's current time to have
+        // the "real" wanted position.
+        // For now, this is seen when the media element has not yet seeked to its
+        // initial position, the currentTime will most probably be 0 where the
+        // effective starting position will be _startTime_.
+        // Thus we initially set a wantedTimeOffset equal to startTime.
+        wantedTimeOffset: initialSeekPerformed ? 0 :
+                                                 startTime - tick.currentTime,
+      }, tick);
+    }));
 
   return observableMerge(clock$, updateTimeOffset$);
 }

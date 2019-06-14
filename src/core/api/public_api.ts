@@ -724,7 +724,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const videoElement = this.videoElement;
 
     // Global clock used for the whole application.
-    const clock$ = createClock(videoElement, { withMediaSource: !isDirectFile });
+    const clock$ = createClock(videoElement,
+                               this._priv_speed$,
+                               { withMediaSource: !isDirectFile });
 
     const contentIsStopped$ = observableMerge(
       this._priv_stopCurrentContent$,

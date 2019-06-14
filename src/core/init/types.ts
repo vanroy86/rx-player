@@ -37,7 +37,8 @@ export interface IInitClockTick { currentTime : number;
                                                        "buffering";
                                               timestamp : number; } |
                                             null;
-                                  seeking : boolean; }
+                                  seeking : boolean;
+                                  speed : number; }
 
 // The manifest has been downloaded and parsed for the first time
 export interface IManifestReadyEvent { type : "manifestReady";

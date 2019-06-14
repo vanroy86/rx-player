@@ -147,7 +147,7 @@ export default function createMediaSourceLoader({
     const { seek$, load$ } =
       seekAndLoadOnMediaEvents(clock$, mediaElement, initialTime, autoPlay);
 
-    const bufferClock$ = createBufferClock(manifest, clock$, seek$, speed$, initialTime);
+    const bufferClock$ = createBufferClock(manifest, clock$, seek$, initialTime);
 
     // Will be used to cancel any endOfStream tries when the contents resume
     const cancelEndOfStream$ = new Subject<null>();
