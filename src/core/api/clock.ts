@@ -54,7 +54,8 @@ export type IMediaInfosState = "init" | // set once on first emit
                                "seeked" | // HTML5 Event
                                "loadedmetadata" | // HTML5 Event
                                "ratechange" | // HTML5 Event
-                               "timeupdate"; // Interval
+                               "timeupdate" | // Interval
+                               "instant"; // When an `instant` tick is asked
 
 // Informations recuperated on the media element on each clock
 // tick
@@ -87,6 +88,7 @@ type stalledStatus = { // set if the player is stalled
 export interface IClockTick extends IMediaInfos {
   stalled : stalledStatus; // see type
   speed : number; // last speed set by the user
+  getInstant() : IClockTick; // allows to ask for a new sample directly
 }
 
 const { SAMPLING_INTERVAL_MEDIASOURCE,
@@ -301,7 +303,8 @@ function createClock(
   return observableDefer(() : Observable<IClockTick> => {
     let lastTimings : IClockTick = objectAssign(getMediaInfos(mediaElement, "init"),
                                                 { stalled: null,
-                                                  speed: speed$.getValue() });
+                                                  speed: speed$.getValue(),
+                                                  getInstant });
 
     function getCurrentClockTick(state : IMediaInfosState, speed : number) : IClockTick {
       const mediaTimings = getMediaInfos(mediaElement, state);
@@ -309,7 +312,12 @@ function createClock(
 
       // /!\ Mutate mediaTimings
       return objectAssign(mediaTimings, { stalled: stalledState,
-                                          speed });
+                                          speed,
+                                          getInstant });
+    }
+
+    function getInstant() {
+      return getCurrentClockTick("instant", speed$.getValue());
     }
 
     const eventObs : Array< Observable< IMediaInfosState > > =
