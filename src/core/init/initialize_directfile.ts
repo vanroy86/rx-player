@@ -39,7 +39,10 @@ import {
   clearElementSrc,
   setElementSrc$,
 } from "../../compat";
-import { MediaError } from "../../errors";
+import {
+  MediaError,
+  isKnownError,
+} from "../../errors";
 import log from "../../log";
 import {
   IEMEManagerEvent,
@@ -203,4 +206,26 @@ export default function initializeDirectfileContent({
                          mediaError$,
                          playbackRate$,
                          stalled$);
+
+  /**
+   * If pertinent (i.e. the content is currently playing), add playbackInfos
+   * to the given error.
+   * /!\ It's important to call this function before the content is actually
+   * stopped.
+   * @param {Error} error
+   */
+  function throwWithPlaybackInfos(error : Error) : never {
+    if (!isKnownError(error)) {
+      log.warn("Init: throwing unknown error");
+      throw error;
+    }
+    if (error.playbackInfos != null || isContentLoading) {
+      throw error;
+    }
+
+    const currentInfos = playbackInfos.getCurrent();
+    error.playbackInfos = { lastPosition: currentInfos.currentTime,
+                            paused: currentInfos.paused };
+    throw error;
+  }
 }

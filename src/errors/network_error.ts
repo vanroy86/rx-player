@@ -21,6 +21,7 @@ import {
 } from "./error_codes";
 import errorMessage from "./error_message";
 import RequestError from "./request_error";
+import { IPlaybackInfos } from "./types";
 
 /**
  * Error linked to network interactions (requests).
@@ -38,6 +39,7 @@ export default class NetworkError extends Error {
   public readonly status : number;
   public readonly errorType : string;
   public fatal : boolean;
+  public playbackInfos : IPlaybackInfos | null;
 
   /**
    * @param {string} code
@@ -62,6 +64,7 @@ export default class NetworkError extends Error {
                   "";
     this.fatal = !!fatal;
     this.message = errorMessage(this.name, this.code, requestError.message);
+    this.playbackInfos = null;
   }
 
   /**

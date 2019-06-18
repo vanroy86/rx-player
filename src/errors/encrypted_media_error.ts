@@ -19,6 +19,7 @@ import {
   ErrorTypes,
 } from "./error_codes";
 import errorMessage from "./error_message";
+import { IPlaybackInfos } from "./types";
 
 /**
  * Error linked to the encryption of the media.
@@ -32,6 +33,7 @@ export default class EncryptedMediaError extends Error {
   public readonly message : string;
   public readonly code : string;
   public fatal : boolean;
+  public playbackInfos : IPlaybackInfos | null;
 
   /**
    * @param {string} code
@@ -51,5 +53,6 @@ export default class EncryptedMediaError extends Error {
                   "";
     this.fatal = !!fatal;
     this.message = errorMessage(this.name, this.code, reason);
+    this.playbackInfos = null;
   }
 }

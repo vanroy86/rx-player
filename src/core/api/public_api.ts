@@ -95,9 +95,9 @@ import initializeMediaSourcePlayback, {
   IStalledEvent,
 } from "../init";
 import { IBufferType } from "../source_buffers";
-import createClock, {
+import getPlaybackInfos, {
   IClockTick
-} from "./clock";
+} from "./get_playback_infos";
 import getPlayerState, {
   PLAYER_STATES,
 } from "./get_player_state";
@@ -724,9 +724,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const videoElement = this.videoElement;
 
     // Global clock used for the whole application.
-    const clock$ = createClock(videoElement,
-                               this._priv_speed$,
-                               { withMediaSource: !isDirectFile });
+    const playbackInfos = getPlaybackInfos(videoElement,
+                                           this._priv_speed$,
+                                           { withMediaSource: !isDirectFile });
 
     const contentIsStopped$ = observableMerge(
       this._priv_stopCurrentContent$,
@@ -785,7 +785,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         autoPlay,
         bufferOptions: objectAssign({ manualBitrateSwitchingMode },
                                     this._priv_bufferOptions),
-        clock$,
+        playbackInfos,
         keySystems,
         mediaElement: videoElement,
         networkConfig,
@@ -802,7 +802,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         throw new Error("DirectFile feature not activated in your build.");
       }
       playback$ = features.directfile({ autoPlay,
-                                        clock$,
+                                        playbackInfos,
                                         keySystems,
                                         mediaElement: videoElement,
                                         speed$: this._priv_speed$,
@@ -892,7 +892,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       .pipe(takeUntil(this._priv_stopCurrentContent$))
       .subscribe(e => this._priv_onPlayPauseNext(e.type === "play"), noop);
 
-    clock$
+    playbackInfos.clock$
       .pipe(takeUntil(this._priv_stopCurrentContent$))
       .subscribe(x => this._priv_triggerTimeChange(x), noop);
 

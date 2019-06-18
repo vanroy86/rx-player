@@ -19,6 +19,7 @@ import {
   ErrorTypes,
 } from "./error_codes";
 import errorMessage from "./error_message";
+import { IPlaybackInfos } from "./types";
 
 /**
  * @class OtherError
@@ -30,6 +31,7 @@ export default class OtherError extends Error {
   public readonly message : string;
   public readonly code : string;
   public fatal : boolean;
+  public playbackInfos : IPlaybackInfos | null;
 
   /**
    * @param {string} code
@@ -49,5 +51,6 @@ export default class OtherError extends Error {
                   "";
     this.fatal = !!fatal;
     this.message = errorMessage(this.name, this.code, reason);
+    this.playbackInfos = null;
   }
 }

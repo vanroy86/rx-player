@@ -50,6 +50,7 @@ All of those are in essence ``Error`` instances with added informations.
 Those supplementary informations are described in this page.
 
 
+
 <a name="structure"></a>
 ## Structure of an Error #######################################################
 
@@ -58,14 +59,28 @@ Each of RxPlayer's error objects have at least those properties:
   - ``type`` (``string``): A large category for the error
     (e.g. ``NETWORK_ERROR``, ``ENCRYPTED_MEDIA_ERROR`` ...)
 
-  - ``code`` (``string``): A set identification "code" for the error encountered
+  - ``code`` (``string``): A set identification "code" for the error
+    encountered. Each code is defined below.
 
   - ``message`` (``string``): A displayable, human-readable, summary of the
     error.
 
   - ``fatal`` (``boolean``): If true, the error was fatal. Meaning that the
-    playback was interrupted by it
+    playback was interrupted by it.
 
+  - ``playbackInfos`` (``Object|null``): As a fatal error stops the content,
+    most playback informations - such as the current position - will be reset at
+    the time the Error is received.
+
+    Because you might want to know those informations after a fatal error
+    happens (e.g. to reload the content at the same time), errors will also come
+    with a `playbackInfos` property. This property is `null` for non-fatal
+    errors and when loading the content, but will contain the following
+    properties in most other cases:
+      - ``lastPosition`` (``number``): The position we were in the content
+        before the fatal error was triggered.
+      - ``paused`` (``boolean``): Whether the content was paused just before
+        throwing a fatal error.
 
 
 

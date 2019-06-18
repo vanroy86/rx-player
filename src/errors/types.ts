@@ -14,27 +14,7 @@
  * limitations under the License.
  */
 
-export {
-  IClockTick,
-  IPlaybackInfos,
-} from "./get_playback_infos";
-import Player from "./public_api";
-export {
-  IConstructorOptions,
-  ILoadVideoOptions,
-
-  // loadVideo arguments:
-  ITransportOptions,
-  IKeySystemOption,
-  ISupplementaryTextTrackOption,
-  ISupplementaryImageTrackOption,
-  IDefaultAudioTrackOption,
-  IDefaultTextTrackOption,
-  INetworkConfigOption,
-  IStartAtOption,
-} from "./option_parsers";
-export {
-  IAudioTrackPreference,
-  ITextTrackPreference,
-} from "./track_manager";
-export default Player;
+export interface IPlaybackInfos {
+  lastPosition : number;
+  paused : boolean;
+}

@@ -64,6 +64,7 @@ function resetMediaSource(
   mediaSource? : MediaSource|null,
   mediaSourceURL? : string|null
 ) : void {
+  debugger;
   if (mediaSource && mediaSource.readyState !== "closed") {
     const { readyState, sourceBuffers } = mediaSource;
     for (let i = sourceBuffers.length - 1; i >= 0; i--) {
