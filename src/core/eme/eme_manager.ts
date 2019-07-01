@@ -38,6 +38,7 @@ import {
 } from "../../compat/";
 import { EncryptedMediaError } from "../../errors";
 import log from "../../log";
+import { concat } from "../../utils/byte_parsing";
 import getSession, {
   IEncryptedEvent,
 } from "./get_session";
@@ -45,6 +46,7 @@ import initMediaKeys from "./init_media_keys";
 import SessionEventsListener from "./session_events_listener";
 import setServerCertificate from "./set_server_certificate";
 import {
+  IContentProtection,
   IEMEManagerEvent,
   IKeySystemOption,
 } from "./types";
@@ -65,7 +67,8 @@ const { onEncrypted$ } = events;
  */
 export default function EMEManager(
   mediaElement : HTMLMediaElement,
-  keySystemsConfigs: IKeySystemOption[]
+  keySystemsConfigs: IKeySystemOption[],
+  contentProtections$ : Observable<IContentProtection>
 ) : Observable<IEMEManagerEvent> {
   log.debug("EME: Starting EMEManager logic.");
 
@@ -89,24 +92,30 @@ export default function EMEManager(
       const { initData, initDataType } = getInitData(evt);
       return { type: initDataType, data: initData };
     }));
+  const externalEvents$ = contentProtections$
+    .pipe(map((evt) : IEncryptedEvent => ({ type: "cenc",
+                                            data: concat(...evt.data) })));
 
-  const bindSession$ = observableCombineLatest([encryptedEvents$,
+  const protectedEvents$ : Observable<IEncryptedEvent> =
+    observableMerge(externalEvents$, encryptedEvents$);
+
+  const bindSession$ = observableCombineLatest([protectedEvents$,
                                                 attachedMediaKeys$]
   ).pipe(
     /* Attach server certificate and create/reuse MediaKeySession */
-    mergeMap(([encryptedEvent, mediaKeysEvent], i) => {
+    mergeMap(([protectedEvent, mediaKeysEvent], i) => {
       const mediaKeysInfos = mediaKeysEvent.value;
       const { keySystemOptions, mediaKeys } = mediaKeysInfos;
       const { serverCertificate } = keySystemOptions;
 
-      const { type: initDataType, data: initData } = encryptedEvent;
+      const { type: initDataType, data: initData } = protectedEvent;
       if (handledInitData.has(initData, initDataType)) {
         log.debug("EME: Init data already received. Skipping it.");
         return EMPTY; // Already handled, quit
       }
       handledInitData.add(initData, initDataType);
 
-      const session$ = getSession(encryptedEvent, mediaKeysInfos)
+      const session$ = getSession(protectedEvent, mediaKeysInfos)
         .pipe(map((evt) => ({
           type: evt.type,
           value: { initData: evt.value.initData,

@@ -51,6 +51,7 @@ import ABRManager, {
   IABRManagerArguments,
 } from "../abr";
 import {
+  IContentProtection,
   IEMEManagerEvent,
   IKeySystemOption,
 } from "../eme";
@@ -182,10 +183,13 @@ export default function InitializeOnMediaSource({
     observeOn(asapScheduler), // to launch subscriptions only when all
     share());                 // Observables here are linked
 
+  // Send content protection data to EMEManager
+  const protectedSegments$ = new Subject<IContentProtection>();
+
   // Create EME Manager, an observable which will manage every EME-related
   // issue.
   const emeManager$ = openMediaSource$.pipe(
-    mergeMap(() => createEMEManager(mediaElement, keySystems)),
+    mergeMap(() => createEMEManager(mediaElement, keySystems, protectedSegments$)),
     observeOn(asapScheduler), // to launch subscriptions only when all
     share());                 // Observables here are linked
 
@@ -244,6 +248,7 @@ export default function InitializeOnMediaSource({
 
     const reloadMediaSource$ = new Subject<IReloadingInfos>();
     const onEvent = createEventListener(reloadMediaSource$,
+                                        protectedSegments$,
                                         refreshManifest);
     const handleReloads$ : Observable<IInitEvent> = reloadMediaSource$.pipe(
       switchMap(({ currentTime, isPaused }) => {
@@ -305,6 +310,7 @@ export default function InitializeOnMediaSource({
  */
 function createEventListener(
   reloadMediaSource$ : Subject<IReloadingInfos>,
+  protectedSegments$ : Subject<IContentProtection>,
   refreshManifest : () => Observable<never>
 ) : (evt : IMediaSourceLoaderEvent) => Observable<IInitEvent> {
   /**
@@ -320,6 +326,11 @@ function createEventListener(
 
       case "needs-manifest-refresh":
         return refreshManifest();
+
+      case "protected-segment":
+        protectedSegments$.next({ type: "pssh",
+                                  data: evt.value.data,
+                                  content: evt.value.content });
     }
     return observableOf(evt);
   };
