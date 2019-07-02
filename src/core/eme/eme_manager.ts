@@ -44,7 +44,9 @@ import getSession, {
   IEncryptedEvent,
 } from "./get_session";
 import initMediaKeys from "./init_media_keys";
-import SessionEventsListener from "./session_events_listener";
+import SessionEventsListener, {
+  BlacklistedSessionError,
+} from "./session_events_listener";
 import setServerCertificate from "./set_server_certificate";
 import {
   IContentProtection,
@@ -79,11 +81,11 @@ export default function EMEManager(
    // This is to avoid handling multiple times the same encrypted events.
   const handledInitData = new InitDataStore();
 
-  // Keep track of the blacklisted sessions.
+  // Keep track of the blacklisted sessions with the corresponding error.
   // If a new event ask for a MediaKeySession which has already been blacklisted,
   // we can directly send the corresponding event.
   const blacklistedSessions = new WeakMap< MediaKeySession | ICustomMediaKeySession,
-                                           boolean >();
+                                           BlacklistedSessionError >();
 
   // store the mediaKeys when ready
   const mediaKeysInfos$ = initMediaKeys(mediaElement, keySystemsConfigs)
@@ -93,7 +95,7 @@ export default function EMEManager(
     return evt.type === "attached-media-keys";
   }));
 
-  const encryptedEvents$ = onEncrypted$(mediaElement).pipe(
+  const mediaEncryptedEvents$ = onEncrypted$(mediaElement).pipe(
     tap((evt) => {
       log.debug("EME: Encrypted event received from media element.", evt);
     }),
@@ -101,30 +103,32 @@ export default function EMEManager(
       const { initData, initDataType } = getInitData(evt);
       return { type: initDataType, data: initData };
     }));
-  const externalEvents$ = contentProtections$
-    .pipe(map((evt) : IEncryptedEvent => ({ type: "cenc",
-                                            data: concat(...evt.data) })));
 
-  const protectedEvents$ : Observable<IEncryptedEvent> =
-    observableMerge(externalEvents$, encryptedEvents$);
+  const externalEvents$ = contentProtections$.pipe(
+    tap((evt) => { log.debug("EME: Encrypted event received from Player", evt); }),
+    map((evt) : IEncryptedEvent => ({ type: "cenc",
+                                      data: concat(...evt.data) })));
 
-  const bindSession$ = observableCombineLatest([protectedEvents$,
+  // Merge all encrypted events
+  const encryptedEvents$ = observableMerge(externalEvents$, mediaEncryptedEvents$);
+
+  const bindSession$ = observableCombineLatest([encryptedEvents$,
                                                 attachedMediaKeys$]
   ).pipe(
     /* Attach server certificate and create/reuse MediaKeySession */
-    mergeMap(([protectedEvent, mediaKeysEvent], i) => {
+    mergeMap(([encryptedEvents, mediaKeysEvent], i) => {
       const mediaKeysInfos = mediaKeysEvent.value;
       const { keySystemOptions, mediaKeys } = mediaKeysInfos;
       const { serverCertificate } = keySystemOptions;
 
-      const { type: initDataType, data: initData } = protectedEvent;
+      const { type: initDataType, data: initData } = encryptedEvents;
       if (handledInitData.has(initData, initDataType)) {
         log.debug("EME: Init data already received. Skipping it.");
         return EMPTY; // Already handled, quit
       }
       handledInitData.add(initData, initDataType);
 
-      const session$ = getSession(protectedEvent, mediaKeysInfos)
+      const session$ = getSession(encryptedEvents, mediaKeysInfos)
         .pipe(map((evt) => ({
           type: evt.type,
           value: { initData: evt.value.initData,
@@ -160,7 +164,18 @@ export default function EMEManager(
               keySystemOptions,
               sessionStorage } = sessionInfosEvt.value;
 
-      if (blacklistedSessions.has(mediaKeySession)) {
+      const blacklistError = blacklistedSessions.get(mediaKeySession);
+      if (blacklistError != null) {
+        // XXX TODO
+        // if (content == null) {
+        //   log.error("EME: The current session has already been blacklisted " +
+        //             "but the current content is not known. Throwing.");
+        //   const { sessionError } = blacklistError;
+        //   sessionError.fatal = true;
+        //   return throwError(sessionError);
+        // }
+        log.warn("EME: The current session has already been blacklisted. " +
+                 "Blacklisting content.");
         return observableOf({ type: "blacklist-content" as const,
                               value: null });
       }
@@ -180,16 +195,29 @@ export default function EMEManager(
             }),
             ignoreElements());
 
-      return observableMerge(SessionEventsListener(mediaKeySession, keySystemOptions)
-                               .pipe(map(evt => {
-                                 if (evt.type !== "blacklist-session") {
-                                   return evt;
-                                 }
-                                 blacklistedSessions.set(mediaKeySession, true);
-                                 return { type: "blacklist-content" as const,
-                                          value: null };
-                               })),
-                             generateRequest$);
+      return observableMerge(SessionEventsListener(mediaKeySession, keySystemOptions),
+                             generateRequest$)
+        .pipe(catchError(err => {
+          if (!(err instanceof BlacklistedSessionError)) {
+            throw err;
+          }
+
+          blacklistedSessions.set(mediaKeySession, err);
+          const { sessionError } = err;
+          // XXX TODO
+          // if (content == null) {
+          //   log.error("EME: Current session blacklisted and content not known. " +
+          //             "Throwing.");
+          //   sessionError.fatal = true;
+          //   throw sessionError;
+          // }
+
+          log.warn("EME: Current session blacklisted. Blacklisting content.");
+          return observableOf({ type: "warning" as const,
+                                value: sessionError },
+                              { type: "blacklist-content" as const,
+                                value: null });
+        }));
     }));
 
   return observableMerge(mediaKeysInfos$, bindSession$);

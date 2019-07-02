@@ -285,17 +285,16 @@ export default function InitializeOnMediaSource({
 
     const blacklistUpdates$ = emeManager$.pipe(tap((evt) => {
       if (evt.type === "blacklist-keys") {
+        log.info("Init: blacklisting based on keyIDs");
         manifest.markUndecipherableKIDs(evt.value);
         reloadMediaSource$.next();
         return;
       } else if (evt.type === "blacklist-content") {
-        if (evt.value == null) {
-          log.error("Init: blacklisted content but the content is not known");
-        } else {
-          manifest.markUndecipherableRepresentation(evt.value);
-          reloadMediaSource$.next();
-          return;
-        }
+        log.info("Init: blacklisting based on Representation.");
+        // XXX TODO
+        // manifest.markUndecipherableRepresentation(evt.value);
+        // reloadMediaSource$.next();
+        return;
       }
     }));
 
@@ -339,8 +338,7 @@ function createEventListener(
 
       case "protected-segment":
         protectedSegments$.next({ type: "pssh",
-                                  data: evt.value.data,
-                                  content: evt.value.content });
+                                  data: evt.value.data });
     }
     return observableOf(evt);
   };
