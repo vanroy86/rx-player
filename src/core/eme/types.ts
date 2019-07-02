@@ -61,7 +61,7 @@ export interface IBlacklistKeysEvent { type : "blacklist-keys";
                                        value: ArrayBuffer[]; }
 
 export interface IBlacklistSessionEvent { type: "blacklist-session";
-                                          value: null; }
+                                          value: ICustomError; }
 
 export interface IContent { adaptation : Adaptation;
                             manifest : Manifest;
@@ -75,7 +75,7 @@ export type IMediaKeySessionHandledEvents = IKeyMessageHandledEvent |
                                             IBlacklistKeysEvent;
 
 export interface IBlacklistContentEvent { type: "blacklist-content";
-                                          value: IContent | null; }
+                                          value: IContent; }
 
 export type IEMEManagerEvent = IEMEWarningEvent |
                                ICreatedMediaKeysEvent |
