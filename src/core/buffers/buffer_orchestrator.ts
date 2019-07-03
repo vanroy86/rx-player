@@ -192,7 +192,7 @@ export default function BufferOrchestrator(
   // TODO do not reload whole content when the decipherability changes
   const reloadOnDecipherabilityUpdate$ = fromEvent(manifest, "decipherability-update")
     .pipe(mergeMap(() =>
-      clock$.pipe(take(1), map(EVENTS.needsMediaSourceReload))));
+      clock$.pipe(take(1), map(t => EVENTS.needsMediaSourceReload(t)))));
 
   return observableMerge(reloadOnDecipherabilityUpdate$,
                          ...buffersArray,
