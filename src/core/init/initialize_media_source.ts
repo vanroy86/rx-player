@@ -287,13 +287,11 @@ export default function InitializeOnMediaSource({
       if (evt.type === "blacklist-keys") {
         log.info("Init: blacklisting based on keyIDs");
         manifest.markUndecipherableKIDs(evt.value);
-        reloadMediaSource$.next();
         return;
       } else if (evt.type === "blacklist-content") {
         log.info("Init: blacklisting based on Representation.");
         // XXX TODO
         // manifest.markUndecipherableRepresentation(evt.value);
-        // reloadMediaSource$.next();
         return;
       }
     }));
