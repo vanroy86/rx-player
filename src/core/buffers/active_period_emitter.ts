@@ -23,12 +23,19 @@
  */
 
 import {
+  combineLatest as observableCombineLatest,
+  EMPTY,
   merge as observableMerge,
-  Observable
+  Observable,
 } from "rxjs";
 import {
   distinctUntilChanged,
+  filter,
   map,
+  mapTo,
+  scan,
+  switchMap,
+  take,
   tap,
 } from "rxjs/operators";
 import log from "../../log";
@@ -39,13 +46,20 @@ import {
 } from "../source_buffers";
 
 // PeriodBuffer informations emitted to the ActivePeriodEmitted
-export interface IPeriodBufferInfos { period: Period;
-                                      type: IBufferType; }
+export interface IAddPeriodBufferInfos { period: Period;
+                                         type: IBufferType;
+                                         periodBufferEvents$: Observable<any>; }
+
+// PeriodBuffer informations emitted to the ActivePeriodEmitted
+export interface IRemovePeriodBufferInfos { period: Period;
+                                           type: IBufferType; }
+
+type IPeriodBuffersItem = Partial<Record<IBufferType, Observable<any>>>;
 
 // structure used internally to keep track of which Period has which
 // PeriodBuffer
 interface IPeriodItem { period: Period;
-                        buffers: Set<IBufferType>; }
+                        buffers: IPeriodBuffersItem; }
 
 /**
  * Emit the active Period each times it changes.
@@ -86,26 +100,27 @@ interface IPeriodItem { period: Period;
  */
 export default function ActivePeriodEmitter(
   bufferTypes: IBufferType[],
-  addPeriodBuffer$ : Observable<IPeriodBufferInfos>,
-  removePeriodBuffer$ : Observable<IPeriodBufferInfos>
-) : Observable<Period|null> {
+  addPeriodBuffer$ : Observable<IAddPeriodBufferInfos>,
+  removePeriodBuffer$ : Observable<IRemovePeriodBufferInfos>
+) : Observable<Period> {
   const periodsList : SortedList<IPeriodItem> =
     new SortedList((a, b) => a.period.start - b.period.start);
 
   const onItemAdd$ = addPeriodBuffer$
-    .pipe(tap(({ period, type }) => {
+    .pipe(tap(({ period, type, periodBufferEvents$ }) => {
       // add or update the periodItem
       let periodItem = periodsList.findFirst(p => p.period === period);
       if (!periodItem) {
         periodItem = { period,
-                       buffers: new Set<IBufferType>() };
+                       buffers: {} };
         periodsList.add(periodItem);
       }
 
-      if (periodItem.buffers.has(type)) {
+      if (periodItem.buffers[type]) {
         log.warn(`ActivePeriodEmitter: Buffer type ${type} already added to the period`);
       }
-      periodItem.buffers.add(type);
+
+      periodItem.buffers[type] = periodBufferEvents$;
     }));
 
   const onItemRemove$ = removePeriodBuffer$
@@ -121,26 +136,57 @@ export default function ActivePeriodEmitter(
         return ;
       }
 
-      periodItem.buffers.delete(type);
+      delete periodItem.buffers[type];
 
-      if (!periodItem.buffers.size) {
+      if (Object.keys(periodItem.buffers).length === 0) {
         periodsList.removeElement(periodItem);
       }
     }));
 
   return observableMerge(onItemAdd$, onItemRemove$).pipe(
-    map(() : Period|null => {
+    map(() : IPeriodItem|undefined => {
       const head = periodsList.head();
       if (!head) {
-        return null;
+        return undefined;
       }
 
       const periodItem = periodsList.findFirst(p =>
         isBufferListFull(bufferTypes, p.buffers)
       );
-      return periodItem != null ? periodItem.period : null;
+      return periodItem;
     }),
-    distinctUntilChanged()
+    filter((periodItem): periodItem is IPeriodItem => !!periodItem),
+    distinctUntilChanged(),
+    switchMap((periodItem) => {
+      const activePeriod$ = bufferTypes.map((type) => {
+        const bufferEvents$ = periodItem.buffers[type];
+        if (!bufferEvents$) {
+          return EMPTY;
+        }
+        return bufferEvents$.pipe(
+          scan((acc, evt) => {
+            switch (evt.type) {
+              case "adaptationChange":
+                acc.hasAdaptation = true;
+                if (evt.value.adaptation == null) {
+                  acc.hasRepresentation = true;
+                }
+                return acc;
+              case "representationChange":
+                acc.hasRepresentation = true;
+                return acc;
+              default:
+                return acc;
+            }
+          }, { hasRepresentation: false, hasAdaptation: false }),
+          filter(({ hasAdaptation, hasRepresentation }) =>
+            hasAdaptation && hasRepresentation)
+        );
+      });
+
+      return observableCombineLatest(activePeriod$)
+        .pipe(take(1), mapTo(periodItem.period));
+    })
   );
 }
 
@@ -153,7 +199,7 @@ export default function ActivePeriodEmitter(
  */
 function isBufferListFull(
   bufferTypes : IBufferType[],
-  bufferList : Set<IBufferType>
+  buffers : IPeriodBuffersItem
 ) : boolean {
-  return bufferList.size >= bufferTypes.length;
+  return Object.keys(buffers).length >= bufferTypes.length;
 }

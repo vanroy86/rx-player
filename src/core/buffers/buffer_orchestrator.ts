@@ -33,6 +33,7 @@ import {
   take,
   takeUntil,
   tap,
+  shareReplay,
 } from "rxjs/operators";
 import config from "../../config";
 import { MediaError } from "../../errors";
@@ -52,7 +53,8 @@ import SourceBuffersManager, {
   QueuedSourceBuffer,
 } from "../source_buffers";
 import ActivePeriodEmitter, {
-  IPeriodBufferInfos,
+  IAddPeriodBufferInfos,
+  IRemovePeriodBufferInfos,
 } from "./active_period_emitter";
 import areBuffersComplete from "./are_buffers_complete";
 import EVENTS from "./events_generators";
@@ -61,9 +63,11 @@ import PeriodBuffer, {
 } from "./period";
 import SegmentBookkeeper from "./segment_bookkeeper";
 import {
+  IAdaptationChangeEvent,
   IBufferOrchestratorEvent,
   IMultiplePeriodBuffersEvent,
   IPeriodBufferEvent,
+  IRepresentationChangeEvent,
 } from "./types";
 
 export type IBufferOrchestratorClockTick = IPeriodBufferClockTick;
@@ -167,16 +171,29 @@ export default function BufferOrchestrator(
       return EMPTY;
     }));
 
-  const addPeriodBuffer$ = new Subject<IPeriodBufferInfos>();
-  const removePeriodBuffer$ = new Subject<IPeriodBufferInfos>();
+  const addPeriodBuffer$ = new Subject<IAddPeriodBufferInfos>();
+  const removePeriodBuffer$ = new Subject<IRemovePeriodBufferInfos>();
   const bufferTypes = getBufferTypes();
 
   // Every PeriodBuffers for every possible types
   const buffersArray = bufferTypes.map((bufferType) => {
-    return manageEveryBuffers(bufferType, initialPeriod).pipe(
+    const managedBuffers$ = manageEveryBuffers(bufferType, initialPeriod)
+      .pipe(shareReplay());
+
+    return managedBuffers$.pipe(
       tap((evt) => {
         if (evt.type === "periodBufferReady") {
-          addPeriodBuffer$.next(evt.value);
+          const periodBufferEvents$ = managedBuffers$
+            .pipe(filter((e): e is IAdaptationChangeEvent|IRepresentationChangeEvent =>
+              e.type === "representationChange" || e.type === "adaptationChange"));
+
+          const periodBufferInfos = {
+            type: evt.value.type,
+            period: evt.value.period,
+            periodBufferEvents$,
+          };
+
+          addPeriodBuffer$.next(periodBufferInfos);
         } else if (evt.type === "periodBufferCleared") {
           removePeriodBuffer$.next(evt.value);
         }
