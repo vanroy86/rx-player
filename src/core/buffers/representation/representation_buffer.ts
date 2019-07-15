@@ -120,8 +120,8 @@ interface ISegmentInfos {
 }
 
 export interface ISegmentProtection { // Describes DRM informations
-  type : "pssh";
-  value : Uint8Array[];
+  type : string;
+  value : Uint8Array;
 }
 
 // Parsed Segment information

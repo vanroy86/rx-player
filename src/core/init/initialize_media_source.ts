@@ -288,10 +288,10 @@ export default function InitializeOnMediaSource({
         log.info("Init: blacklisting based on keyIDs");
         manifest.markUndecipherableKIDs(evt.value);
         return;
-      } else if (evt.type === "blacklist-content") {
-        log.info("Init: blacklisting based on Representation.");
-        // XXX TODO
-        // manifest.markUndecipherableRepresentation(evt.value);
+      } else if (evt.type === "blacklist-protection-data") {
+        log.info("Init: blacklisting based on protection data.");
+        const { type, data } = evt.value;
+        manifest.markUndecipherableProtectionData(type, data);
         return;
       }
     }));
@@ -335,8 +335,7 @@ function createEventListener(
         return refreshManifest();
 
       case "protected-segment":
-        protectedSegments$.next({ type: "pssh",
-                                  data: evt.value.data });
+        protectedSegments$.next(evt.value);
     }
     return observableOf(evt);
   };

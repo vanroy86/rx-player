@@ -141,8 +141,8 @@ const EVENTS = {
   },
 
   protectedSegment(
-    type : "pssh",
-    data : Uint8Array[],
+    type : string,
+    data : Uint8Array,
     content: { adaptation : Adaptation;
                manifest : Manifest;
                period : Period;
