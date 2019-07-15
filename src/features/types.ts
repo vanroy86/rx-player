@@ -43,8 +43,8 @@ export interface IContent { adaptation : Adaptation;
                             period : Period;
                             representation : Representation; }
 
-interface IContentProtection { type : "pssh";
-                               data : Uint8Array[];
+interface IContentProtection { type : string;
+                               data : Uint8Array;
                                content : IContent; }
 
 export type IEMEManager = (mediaElement : HTMLMediaElement,

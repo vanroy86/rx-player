@@ -46,8 +46,8 @@ export interface ISegmentTimingInfos {
 }
 
 export interface ISegmentProtection {
-  type : "pssh";
-  value : Uint8Array[];
+  type : "cenc";
+  value : Uint8Array;
 }
 
 // Contains timing informations on new segments indicated in the metadata of

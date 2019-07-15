@@ -17,7 +17,6 @@
 import {
   concat as observableConcat,
   defer as observableDefer,
-  EMPTY,
   merge as observableMerge,
   Observable,
   of as observableOf,
@@ -35,7 +34,6 @@ import {
   IContent,
   IMediaKeysInfos,
 } from "./types";
-import InitDataStore from "./utils/init_data_store";
 import isSessionUsable from "./utils/is_session_usable";
 
 export interface IEncryptedEvent {
@@ -44,24 +42,44 @@ export interface IEncryptedEvent {
   content : IContent | null; // content linked to that data, if known
 }
 
-export interface IHandledEncryptedEvent {
-  type : "created-session" |
-         "loaded-open-session" |
-         "loaded-persistent-session";
-  value : { mediaKeySession : MediaKeySession |
-                              ICustomMediaKeySession;
-            sessionType : MediaKeySessionType;
-            content : IContent | null;
-            initData : Uint8Array; // assiociated initialization data
-            initDataType : string | // type of the associated initialization data
-                           undefined; }; }
+export interface ISessionData {
+  mediaKeySession : MediaKeySession |
+                    ICustomMediaKeySession;
+  sessionType : MediaKeySessionType;
+  content : IContent | null;
+  initData : Uint8Array; // assiociated initialization data
+  initDataType : string | // type of the associated initialization data
+                 undefined;
+}
+
+// Event sent when a new session has been created
+export interface ICreatedSession {
+  type : "created-session";
+  value : ISessionData;
+}
+
+// Event sent when an already open session is returned
+export interface ILoadedOpenSession {
+  type : "loaded-open-session";
+  value : ISessionData;
+}
+
+// Event sent when a persistent session has been loaded
+export interface ILoadedPersistentSessionEvent {
+  type : "loaded-persistent-session";
+  value : ISessionData;
+}
+
+export type IHandledEncryptedEvent = ICreatedSession |
+                                     ILoadedOpenSession |
+                                     ILoadedPersistentSessionEvent;
 
 const { EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS: MAX_SESSIONS } = config;
 
 /**
  * Handle MediaEncryptedEvents sent by a HTMLMediaElement:
- * Either create a session, skip the event if it is already handled or
- * recuperate a previous session and returns it.
+ * Either create a session, recuperate a previous session and returns it or load
+ * a persistent session.
  * @param {Event} encryptedEvent
  * @param {Object} handledInitData
  * @param {Object} mediaKeysInfos
@@ -69,16 +87,10 @@ const { EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS: MAX_SESSIONS } = config;
  */
 export default function getSession(
   encryptedEvent : IEncryptedEvent,
-  handledInitData : InitDataStore,
   mediaKeysInfos : IMediaKeysInfos
 ) : Observable<IHandledEncryptedEvent> {
   return observableDefer(() : Observable<IHandledEncryptedEvent> => {
     const { type: initDataType, data: initData, content } = encryptedEvent;
-    if (handledInitData.has(initData, initDataType)) {
-      log.debug("EME: Init data already received. Skipping it.");
-      return EMPTY; // Already handled, quit
-    }
-    handledInitData.add(initData, initDataType);
 
     // possible previous loaded session with the same initialization data
     let previousLoadedSession : MediaKeySession|ICustomMediaKeySession|null = null;

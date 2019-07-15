@@ -21,7 +21,7 @@ import resolveURL, {
   normalizeBaseURL,
 } from "../../../utils/resolve_url";
 import {
-  IContentProtection,
+  IContentProtectionKIDs,
   IParsedAdaptation,
   IParsedAdaptations,
   IParsedManifest,
@@ -301,17 +301,15 @@ function createSmoothStreamingParser(
       const id =  adaptationID + "_" + adaptationType + "-" + mimeType + "-" +
         codecs + "-" + qualityLevel.bitrate;
 
-      const contentProtections : IContentProtection[] = [];
+      const keyIDs : IContentProtectionKIDs[] = [];
       let firstProtection : IContentProtectionSmooth|undefined;
       if (protections.length) {
         firstProtection = protections[0];
         protections.forEach((protection) => {
           const keyId = protection.keyId;
           protection.keySystems.forEach((keySystem) => {
-            contentProtections.push({
-              keyId,
-              systemId: keySystem.systemId,
-            });
+            keyIDs.push({ keyId,
+                          systemId: keySystem.systemId });
           });
         });
       }
@@ -340,8 +338,9 @@ function createSmoothStreamingParser(
         codecs,
         id,
       });
-      if (contentProtections.length) {
-        representation.contentProtections = contentProtections;
+      if (keyIDs.length) {
+        representation.contentProtections = { keyIds: keyIDs,
+                                              initData: [] };
       }
       return representation;
     });
