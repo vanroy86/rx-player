@@ -111,11 +111,12 @@ export default function EMEManager(
     tap((evt) => {
       log.debug("EME: Encrypted event received from media element.", evt);
     }),
-    map((evt) : IEncryptedEvent => {
+    mergeMap((evt) : Observable<IEncryptedEvent> => {
       const { initData, initDataType } = getInitData(evt);
-      return { type: initDataType,
-               data: initData,
-               content: null };
+      if (initData == null) {
+        return EMPTY;
+      }
+      return observableOf({ type: initDataType, data: initData, content: null });
     }));
 
   // Merge all encrypted events
