@@ -256,7 +256,7 @@ export default function parseAdaptationSets(
         const adaptationsOfTheSameType = parsedAdaptations[type];
         if (!adaptationsOfTheSameType) {
           parsedAdaptations[type] = [parsedAdaptationSet];
-          if (isMainAdaptation && type === "video") {
+          if (isMainAdaptation && type === "video" && isTrickModeFor == null) {
             acc.videoMainAdaptation = parsedAdaptationSet;
           }
         } else {
@@ -278,7 +278,8 @@ export default function parseAdaptationSets(
                   parsedAdaptationSet.audioDescription &&
                 adaptationToMergeInto.closedCaption ===
                   parsedAdaptationSet.closedCaption &&
-                adaptationToMergeInto.language === parsedAdaptationSet.language
+                adaptationToMergeInto.language === parsedAdaptationSet.language &&
+                adaptationToMergeInto.isTrickModeFor === id
               ) {
                 log.info("DASH Parser: merging \"switchable\" AdaptationSets",
                   originalID, id);
@@ -289,7 +290,7 @@ export default function parseAdaptationSets(
             }
           }
 
-          if (isMainAdaptation && type === "video") {
+          if (isMainAdaptation && type === "video" && isTrickModeFor == null) {
             if (mergedInto == null) {
               // put "main" adaptation as the first
               adaptationsOfTheSameType.unshift(parsedAdaptationSet);
@@ -325,6 +326,5 @@ export default function parseAdaptationSets(
       videoMainAdaptation: null,
       adaptationSwitchingInfos: {},
     });
-
   return adaptations;
 }
