@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  ILocalManifestInitSegmentLoader,
+  ILocalManifestSegmentLoader,
+} from "../../parsers/manifest/local";
+
 // privateInfos specific to Smooth Initialization Segments
 export interface ISmoothInitSegmentPrivateInfos { codecPrivateData? : string;
                                                   bitsPerSample? : number;
@@ -28,19 +33,18 @@ export interface ISmoothInitSegmentPrivateInfos { codecPrivateData? : string;
                                                     }>;
                                                   }; }
 
-// privateInfos specific to local Manifests
+export interface ILocalManifestInitSegmentPrivateInfos {
+  load : ILocalManifestInitSegmentLoader;
+}
+
 export interface ILocalManifestSegmentPrivateInfos {
-  load : (callbacks : { resolve : (args: { data : ArrayBuffer |
-                                                  Uint8Array;
-                                           size : number;
-                                           duration : number; })
-                                  => void;
-                        reject : (err? : Error) => void; })
-         // returns either the aborting callback or nothing
-         => (() => void)|void; }
+  load : ILocalManifestSegmentLoader;
+  segment : { time : number; duration : number; timescale : number };
+}
 
 export interface IPrivateInfos {
   smoothInit? : ISmoothInitSegmentPrivateInfos;
+  localManifestInitSegment? : ILocalManifestInitSegmentPrivateInfos;
   localManifestSegment? : ILocalManifestSegmentPrivateInfos;
 }
 

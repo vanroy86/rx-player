@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-export type ILocalManifestSegmentLoader = (
-  callbacks : {
-    resolve : (args: {
-      data : ArrayBuffer|Uint8Array;
-      size : number;
-      duration : number;
-    }) => void;
+export type ILocalManifestInitSegmentLoader = (
+  callbacks : { resolve : (args: { data : ArrayBuffer | Uint8Array | null;
+                                   size : number; }) => void;
 
-    reject : (err? : Error) => void;
-  }
-) =>
+                reject : (err? : Error) => void; }
   // returns either the aborting callback or nothing
-  (() => void)|void;
+) => (() => void) | void;
 
-export interface ILocalIndexInitSegment {
-  load : ILocalManifestSegmentLoader;
-}
+export type ILocalManifestSegmentLoader = (
+  segment : { time : number;
+              timescale : number;
+              duration : number; },
+  callbacks : { resolve : (args: { data : ArrayBuffer | Uint8Array;
+                                   size : number;
+                                   duration : number; }) => void;
+
+                reject : (err? : Error) => void; }
+  // returns either the aborting callback or nothing
+) => (() => void) | void;
 
 export interface ILocalIndexSegment {
   time : number;
   timescale : number;
   duration : number;
-  load : ILocalManifestSegmentLoader;
 }
 
 export interface ILocalIndex {
-  init? : ILocalIndexInitSegment|null;
+  loadInitSegment : ILocalManifestInitSegmentLoader;
+  loadSegment : ILocalManifestSegmentLoader;
   segments : ILocalIndexSegment[];
 }
 

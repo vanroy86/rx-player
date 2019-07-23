@@ -38,9 +38,6 @@ export default function createRepresentationIndex(
      * @returns {Object}
      */
     getInitSegment() : ISegment|null {
-      if (index.init == null) {
-        return null;
-      }
       return {
         id: `${representationId}_init`,
         isInit: true,
@@ -48,8 +45,7 @@ export default function createRepresentationIndex(
         timescale: 1,
         mediaURL: null,
         privateInfos: {
-          localManifestSegment: { load: index.init.load },
-        },
+          localManifestInitSegment: { load: index.loadInitSegment } },
       };
     },
 
@@ -84,7 +80,8 @@ export default function createRepresentationIndex(
             timescale: wantedSegment.timescale,
             mediaURL: null,
             privateInfos: {
-              localManifestSegment: { load: wantedSegment.load },
+              localManifestSegment: { load: index.loadSegment,
+                                      segment: wantedSegment },
             },
           };
         });

@@ -39,7 +39,9 @@ import {
   ITransportPipelines,
 } from "../types";
 import callCustomManifestLoader from "../utils/call_custom_manifest_loader";
-import loadSegment from "./load_segment";
+import loadSegment, {
+  loadInitSegment,
+} from "./load_segment";
 
 /**
  * Generic segment loader for the local Manifest.
@@ -50,10 +52,17 @@ function segmentLoader(
   { segment } : ISegmentLoaderArguments
 ) : ISegmentLoaderObservable< ArrayBuffer | Uint8Array | null > {
   const privateInfos = segment.privateInfos;
+  if (segment.isInit) {
+    if (!privateInfos || privateInfos.localManifestInitSegment == null) {
+      throw new Error("Segment is not a local Manifest segment");
+    }
+    return loadInitSegment(privateInfos.localManifestInitSegment.load);
+  }
   if (!privateInfos || privateInfos.localManifestSegment == null) {
     throw new Error("Segment is not an local Manifest segment");
   }
-  return loadSegment(privateInfos.localManifestSegment.load);
+  return loadSegment(privateInfos.localManifestSegment.segment,
+                     privateInfos.localManifestSegment.load);
 }
 
 /**

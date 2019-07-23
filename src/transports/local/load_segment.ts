@@ -16,29 +16,60 @@
 
 import { Observable } from "rxjs";
 import {
+  ILocalManifestInitSegmentLoader,
+  ILocalManifestSegmentLoader,
+} from "../../parsers/manifest/local";
+import {
   ISegmentLoaderObservable,
   ISegmentLoaderObserver,
 } from "../types";
 
-export type ILocalManifestSegmentLoader = (
-  callbacks : {
-    resolve : (args: {
-      data : ArrayBuffer|Uint8Array;
-      size : number;
-      duration : number;
-    }) => void;
+export function loadInitSegment(
+  customSegmentLoader : ILocalManifestInitSegmentLoader
+) : ISegmentLoaderObservable< Uint8Array | ArrayBuffer | null > {
+  return new Observable((obs : ISegmentLoaderObserver<Uint8Array|ArrayBuffer|null>) => {
+    let hasFinished = false;
 
-    reject : (err? : Error) => void;
-  }
-) =>
-  // returns either the aborting callback or nothing
-  (() => void)|void;
+    /**
+     * Callback triggered when the custom segment loader has a response.
+     * @param {Object} args
+     */
+    const resolve = (_args : {
+      data : ArrayBuffer | Uint8Array | null;
+      size : number;
+    }) => {
+      hasFinished = true;
+      obs.next({ type: "data-loaded",
+                 value: { responseData: _args.data,
+                          size: _args.size } });
+      obs.complete();
+    };
+
+    /**
+     * Callback triggered when the custom segment loader fails
+     * @param {*} err - The corresponding error encountered
+     */
+    const reject = (err? : Error) => {
+      hasFinished = true;
+      obs.error(err);
+    };
+
+    const abort = customSegmentLoader({ resolve, reject });
+
+    return () => {
+      if (!hasFinished && typeof abort === "function") {
+        abort();
+      }
+    };
+  });
+}
 
 /**
  * @param {Function} customSegmentLoader
  * @returns {Observable}
  */
 export default function loadSegment(
+  segment : { time : number; duration : number; timescale : number },
   customSegmentLoader : ILocalManifestSegmentLoader
 ) : ISegmentLoaderObservable< Uint8Array | ArrayBuffer | null > {
   return new Observable((obs : ISegmentLoaderObserver<Uint8Array|ArrayBuffer>) => {
@@ -70,7 +101,7 @@ export default function loadSegment(
       obs.error(err);
     };
 
-    const abort = customSegmentLoader({ resolve, reject });
+    const abort = customSegmentLoader(segment, { resolve, reject });
 
     return () => {
       if (!hasFinished && typeof abort === "function") {

@@ -15,6 +15,10 @@
  */
 
 import parseLocalManifest from "./parse_local_manifest";
-export { ILocalManifest } from "./types";
+export {
+  ILocalManifest,
+  ILocalManifestSegmentLoader,
+  ILocalManifestInitSegmentLoader,
+} from "./types";
 
 export default parseLocalManifest;
