@@ -54,7 +54,7 @@ export interface ILocalRepresentation {
 }
 
 export interface ILocalAdaptation {
-  type : "audio"|"video"|"text"|"thumbnail";
+  type : "audio" | "video" | "text";
   audioDescription? : boolean; // self-explanatory
   closedCaption? : boolean;
   language? : string; // ISO 639-3 code
