@@ -24,6 +24,10 @@ import {
   ISegmentLoaderObserver,
 } from "../types";
 
+/**
+ * @param {Function} customSegmentLoader
+ * @returns {Observable}
+ */
 export function loadInitSegment(
   customSegmentLoader : ILocalManifestInitSegmentLoader
 ) : ISegmentLoaderObservable< Uint8Array | ArrayBuffer | null > {
@@ -65,6 +69,7 @@ export function loadInitSegment(
 }
 
 /**
+ * @param {Object} segment
  * @param {Function} customSegmentLoader
  * @returns {Observable}
  */
