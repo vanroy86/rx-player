@@ -79,13 +79,13 @@ export default function getLocalManifestPipelines(
     loader() : IManifestLoaderObservable<ILocalManifest> {
       if (customManifestLoader == null) {
         throw new Error("A local Manifest is not loadable through regular HTTP calls." +
-                        " You have to set a `customManifestLoader` when calling " +
+                        " You have to set a `manifestLoader` when calling " +
                         "`loadVideo`");
       }
       return callCustomManifestLoader<ILocalManifest>(
         customManifestLoader,
         () : never => {
-          throw new Error("Cannot fallback from the customManifestLoader of a " +
+          throw new Error("Cannot fallback from the `manifestLoader` of a " +
                           "`local` transport");
         });
     },
