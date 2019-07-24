@@ -74,7 +74,7 @@ export function loadInitSegment(
  * @returns {Observable}
  */
 export default function loadSegment(
-  segment : { time : number; duration : number; timescale : number },
+  id : string,
   customSegmentLoader : ILocalManifestSegmentLoader
 ) : ISegmentLoaderObservable< Uint8Array | ArrayBuffer | null > {
   return new Observable((obs : ISegmentLoaderObserver<Uint8Array|ArrayBuffer>) => {
@@ -106,7 +106,7 @@ export default function loadSegment(
       obs.error(err);
     };
 
-    const abort = customSegmentLoader(segment, { resolve, reject });
+    const abort = customSegmentLoader(id, { resolve, reject });
 
     return () => {
       if (!hasFinished && typeof abort === "function") {

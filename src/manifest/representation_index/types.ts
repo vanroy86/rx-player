@@ -39,7 +39,7 @@ export interface ILocalManifestInitSegmentPrivateInfos {
 
 export interface ILocalManifestSegmentPrivateInfos {
   load : ILocalManifestSegmentLoader;
-  segment : { time : number; duration : number; timescale : number };
+  segmentId : string;
 }
 
 export interface IPrivateInfos {

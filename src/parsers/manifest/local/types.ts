@@ -23,7 +23,7 @@ export type ILocalManifestInitSegmentLoader = (
 ) => (() => void) | void;
 
 export type ILocalManifestSegmentLoader = (
-  segment : ILocalIndexSegment, // Same than the segment from `segments`
+  segmentId : string, // Same than the id from `segments`
   callbacks : { resolve : (args: { data : ArrayBuffer | Uint8Array;
                                    size : number;
                                    duration : number; }) => void;
@@ -36,6 +36,7 @@ export interface ILocalIndexSegment {
   time : number;
   timescale : number;
   duration : number;
+  id : string;
 }
 
 export interface ILocalIndex {

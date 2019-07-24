@@ -81,7 +81,7 @@ export default function createRepresentationIndex(
             mediaURL: null,
             privateInfos: {
               localManifestSegment: { load: index.loadSegment,
-                                      segment: wantedSegment },
+                                      segmentId: wantedSegment.id },
             },
           };
         });

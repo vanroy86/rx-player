@@ -61,7 +61,7 @@ function segmentLoader(
   if (!privateInfos || privateInfos.localManifestSegment == null) {
     throw new Error("Segment is not an local Manifest segment");
   }
-  return loadSegment(privateInfos.localManifestSegment.segment,
+  return loadSegment(privateInfos.localManifestSegment.segmentId,
                      privateInfos.localManifestSegment.load);
 }
 
