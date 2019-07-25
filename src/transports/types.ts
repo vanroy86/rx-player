@@ -145,7 +145,7 @@ export interface IManifestParserResponse {
 export type IManifestParserObservable = Observable<IManifestParserResponse>;
 
 export interface ISegmentParserResponse<T> {
-  segmentData : T; // Data to decode
+  segmentData : T | null; // Data to decode
   segmentInfos : ISegmentTimingInfos|null; // Timing infos about the segment
   segmentOffset : number; // time offset, in seconds, to add to the absolute
                           // timed data defined in `segmentData` to obtain the
@@ -160,15 +160,21 @@ export interface ISegmentParserResponse<T> {
                           // Note that `segmentInfos` needs not to be offseted
                           // as it should already contain the correct time
                           // information.
+  appendWindow : [ number | undefined, // start window for the segment
+                                       // (part of the segment before that time
+                                       // will be ignored)
+                   number | undefined ]; // end window for the segment
+                                         // (part of the segment after that time
+                                         // will be ignored)
 }
 
 // Response object returned by the video's segment parser
 export type IVideoParserResponse =
-  ISegmentParserResponse< Uint8Array | ArrayBuffer | null >;
+  ISegmentParserResponse< Uint8Array | ArrayBuffer >;
 
 // Response object returned by the audio's segment parser
 export type IAudioParserResponse =
-  ISegmentParserResponse< Uint8Array | ArrayBuffer | null >;
+  ISegmentParserResponse< Uint8Array | ArrayBuffer >;
 
 export interface ITextTrackSegmentData {
   data : string; // text track data
@@ -181,7 +187,7 @@ export interface ITextTrackSegmentData {
 
 // Response object returned by the text's segment parser
 export type ITextParserResponse =
-  ISegmentParserResponse< ITextTrackSegmentData | null >;
+  ISegmentParserResponse< ITextTrackSegmentData >;
 
 export interface IImageTrackSegmentData {
   data : IBifThumbnail[]; // image track data, in the given type
@@ -193,7 +199,7 @@ export interface IImageTrackSegmentData {
 
 // Response object returned by the image's segment parser
 export type IImageParserResponse =
-  ISegmentParserResponse< IImageTrackSegmentData | null >;
+  ISegmentParserResponse< IImageTrackSegmentData >;
 
 export type ISegmentParserObservable<T> = Observable<ISegmentParserResponse<T>>;
 export type IVideoParserObservable = Observable<IVideoParserResponse>;

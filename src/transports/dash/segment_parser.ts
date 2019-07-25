@@ -37,12 +37,13 @@ export default function parser({ segment,
                                  init } : ISegmentParserArguments< Uint8Array |
                                                                    ArrayBuffer |
                                                                    null >
-) : ISegmentParserObservable< Uint8Array | ArrayBuffer | null > {
+) : ISegmentParserObservable< Uint8Array | ArrayBuffer > {
   const { responseData } = response;
   if (responseData == null) {
     return observableOf({ segmentData: null,
                           segmentInfos: null,
-                          segmentOffset: 0 });
+                          segmentOffset: 0,
+                          appendWindow: [undefined, undefined] });
   }
   const segmentData : Uint8Array = responseData instanceof Uint8Array ?
                                      responseData :
@@ -61,7 +62,10 @@ export default function parser({ segment,
         timescale: segment.timescale } :
       getISOBMFFTimingInfos(segment, segmentData, nextSegments, init);
     const segmentOffset = segment.timestampOffset || 0;
-    return observableOf({ segmentData, segmentInfos, segmentOffset });
+    return observableOf({ segmentData,
+                          segmentInfos,
+                          segmentOffset,
+                          appendWindow: [undefined, undefined] });
   }
 
   if (nextSegments) {
@@ -73,5 +77,6 @@ export default function parser({ segment,
                         segmentInfos: timescale && timescale > 0 ?
                           { time: -1, duration: 0, timescale } :
                           null,
-                        segmentOffset: segment.timestampOffset || 0 });
+                        segmentOffset: segment.timestampOffset || 0,
+                        appendWindow: [undefined, undefined] });
 }

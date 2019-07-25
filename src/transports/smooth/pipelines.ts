@@ -173,12 +173,13 @@ export default function(
       adaptation,
       manifest,
     } : ISegmentParserArguments< ArrayBuffer | Uint8Array | null >
-    ) : ISegmentParserObservable< ArrayBuffer | Uint8Array | null > {
+    ) : ISegmentParserObservable< ArrayBuffer | Uint8Array > {
       const { responseData } = response;
       if (responseData == null) {
         return observableOf({ segmentData: null,
                               segmentInfos: null,
-                              segmentOffset: 0 });
+                              segmentOffset: 0,
+                              appendWindow: [undefined, undefined] });
       }
 
       if (segment.isInit) {
@@ -189,7 +190,8 @@ export default function(
                                    duration: 0 };
         return observableOf({ segmentData: responseData,
                               segmentInfos: initSegmentInfos,
-                              segmentOffset: 0 });
+                              segmentOffset: 0,
+                              appendWindow: [undefined, undefined] });
       }
       const responseBuffer = responseData instanceof Uint8Array ?
         responseData :
@@ -204,7 +206,10 @@ export default function(
       if (nextSegments) {
         addNextSegments(adaptation, nextSegments, segmentInfos);
       }
-      return observableOf({ segmentData, segmentInfos, segmentOffset: 0 });
+      return observableOf({ segmentData,
+                            segmentInfos,
+                            segmentOffset: 0,
+                            appendWindow: [undefined, undefined] });
     },
   };
 
@@ -257,7 +262,8 @@ export default function(
                                                          segment.time,
                                   timescale: segment.timescale } :
                                 null,
-                              segmentOffset: 0 });
+                              segmentOffset: 0,
+                              appendWindow: [undefined, undefined] });
       }
 
       let parsedResponse : string|Uint8Array;
@@ -357,7 +363,8 @@ export default function(
                                            start: _sdStart,
                                            end: _sdEnd },
                             segmentInfos,
-                            segmentOffset: _sdStart / _sdTimescale });
+                            segmentOffset: _sdStart / _sdTimescale,
+                            appendWindow: [undefined, undefined] });
     },
   };
 
@@ -391,7 +398,8 @@ export default function(
                                                          segment.time,
                                   timescale: segment.timescale } :
                                 null,
-                              segmentOffset: 0 });
+                              segmentOffset: 0,
+                              appendWindow: [undefined, undefined] });
       }
 
       const bifObject = features.imageParser(new Uint8Array(responseData));
@@ -404,7 +412,8 @@ export default function(
                             segmentInfos: { time: 0,
                                             duration: Number.MAX_VALUE,
                                             timescale: bifObject.timescale },
-                            segmentOffset: 0 });
+                            segmentOffset: 0,
+                            appendWindow: [undefined, undefined] });
     },
   };
 

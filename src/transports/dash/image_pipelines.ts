@@ -50,7 +50,8 @@ export function imageParser(
                               time: segment.isInit ? -1 : segment.time,
                               timescale: segment.timescale } :
                             null,
-                          segmentOffset: segment.timestampOffset || 0 });
+                          segmentOffset: segment.timestampOffset || 0,
+                          appendWindow: [undefined, undefined] });
   }
 
   const bifObject = features.imageParser(new Uint8Array(responseData));
@@ -63,5 +64,6 @@ export function imageParser(
                         segmentInfos: { time: 0,
                                         duration: Number.MAX_VALUE,
                                         timescale: bifObject.timescale },
-                        segmentOffset: segment.timestampOffset || 0 });
+                        segmentOffset: segment.timestampOffset || 0,
+                        appendWindow: [undefined, undefined] });
 }

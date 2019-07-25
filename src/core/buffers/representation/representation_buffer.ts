@@ -423,7 +423,9 @@ export default function RepresentationBuffer<T>({
         initSegmentObject = evt.value.data;
       }
 
-      const { segmentInfos, segmentData, segmentOffset } = evt.value.data;
+      const { segmentInfos,
+              segmentData,
+              segmentOffset } = evt.value.data;
       if (segmentData == null) {
         // no segmentData to add here (for example, a text init segment)
         // just complete directly without appending anything
