@@ -18,6 +18,10 @@ import { ICustomError } from "../errors";
 import log from "../log";
 import { IParsedManifest } from "../parsers/manifest";
 import arrayFind from "../utils/array_find";
+import {
+  areBytesEqual,
+  isABEqualBytes,
+} from "../utils/byte_parsing";
 import EventEmitter from "../utils/event_emitter";
 import idGenerator from "../utils/id_generator";
 import warnOnce from "../utils/warn_once";
@@ -26,6 +30,7 @@ import Adaptation, {
   IRepresentationFilter,
 } from "./adaptation";
 import Period from "./period";
+import Representation from "./representation";
 import { StaticRepresentationIndex } from "./representation_index";
 import updatePeriodInPlace from "./update_period";
 
@@ -53,8 +58,15 @@ interface IManifestParsingOptions {
   representationFilter? : IRepresentationFilter;
 }
 
+export interface IDecipherabilityUpdateElement {
+  period : Period;
+  adaptation : Adaptation;
+  representation : Representation;
+}
+
 export interface IManifestEvents {
   manifestUpdate : null;
+  ["decipherability-update"] : IDecipherabilityUpdateElement[];
 }
 
 /**
@@ -196,6 +208,18 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     if (supplementaryTextTracks.length) {
       this.addSupplementaryTextAdaptations(supplementaryTextTracks);
     }
+  }
+
+  /**
+   * Returns Period corresponding to the given ID.
+   * Returns undefined if there is none.
+   * @param {string} id
+   * @returns {Period|undefined}
+   */
+  getPeriod(id : string) : Period|undefined {
+    return arrayFind(this.periods, (period) => {
+      return id === period.id;
+    });
   }
 
   /**
@@ -399,6 +423,66 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
   }
 
   /**
+   * Look in the Manifest for Representations linked to the given key ID,
+   * and mark them as being impossible to decrypt.
+   * Then trigger a "blacklist-update" event to notify everyone of the changes
+   * performed.
+   * @param {Array.<ArrayBuffer>} keyIDs
+   */
+  public markUndecipherableKIDs(keyIDs : ArrayBuffer[]) : void {
+    const updates = updateDeciperability(this, (representation) => {
+      if (representation.decipherable === false ||
+          representation.contentProtections == null)
+      {
+        return true;
+      }
+      const contentKIDs = representation.contentProtections.keyIds;
+      for (let i = 0; i < contentKIDs.length; i++) {
+        const elt = contentKIDs[i];
+        for (let j = 0; j < keyIDs.length; j++) {
+           if (isABEqualBytes(keyIDs[j], elt.keyId)) {
+             return false;
+           }
+        }
+      }
+      return true;
+    });
+
+    if (updates.length) {
+      this.trigger("decipherability-update", updates);
+    }
+  }
+
+  /**
+   * Look in the Manifest for Representations linked to the given init data
+   * and mark them as being impossible to decrypt.
+   * Then trigger a "blacklist-update" event to notify everyone of the changes
+   * performed.
+   * @param {Array.<ArrayBuffer>} keyIDs
+   */
+  public markUndecipherableProtectionData(type : string, data: Uint8Array) : void {
+    const updates = updateDeciperability(this, (representation) => {
+      if (representation.decipherable === false ||
+          representation.contentProtections == null)
+      {
+        return true;
+      }
+      const elements = representation.contentProtections.initData;
+      for (let i = 0; i < elements.length; i++) {
+        const elt = elements[i];
+        if (elt.type === type && areBytesEqual(elt.data, data)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    if (updates.length) {
+      this.trigger("decipherability-update", updates);
+    }
+  }
+
+  /**
    * Add supplementary image Adaptation(s) to the manifest.
    * @private
    * @param {Object|Array.<Object>} imageTracks
@@ -480,6 +564,38 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                            newTextAdaptations;
     }
   }
+}
+
+/**
+ * Update decipherability based on a predicate given.
+ * Do nothing for a Representation when the predicate returns false, mark as
+ * undecipherable when the predicate returns false. Returns every updates in
+ * an array.
+ * @param {Manifest} manifest
+ * @param {Function} predicate
+ * @returns {Array.<Object>}
+ */
+function updateDeciperability(
+  manifest : Manifest,
+  predicate : (rep : Representation) => boolean
+) : IDecipherabilityUpdateElement[] {
+  const updates : IDecipherabilityUpdateElement[] = [];
+  for (let i = 0; i < manifest.periods.length; i++) {
+    const period = manifest.periods[i];
+    const adaptations = period.getAdaptations();
+    for (let j = 0; j < adaptations.length; j++) {
+      const adaptation = adaptations[j];
+      const representations = adaptation.representations;
+      for (let k = 0; k < representations.length; k++) {
+        const representation = representations[k];
+        if (!predicate(representation)) {
+          updates.push({ period, adaptation, representation });
+          representation.decipherable = false;
+        }
+      }
+    }
+  }
+  return updates;
 }
 
 export {

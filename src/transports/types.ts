@@ -46,6 +46,11 @@ export interface ISegmentTimingInfos {
                       //   durationInSeconds = duration / timescale
 }
 
+export interface ISegmentProtection {
+  type : "cenc";
+  value : Uint8Array;
+}
+
 // Contains timing informations on new segments indicated in the metadata of
 // a previous segment
 export interface INextSegmentsInfos {
@@ -167,6 +172,9 @@ export interface ISegmentParserResponse<T> {
                           // Note that `segmentInfos` needs not to be offseted
                           // as it should already contain the correct time
                           // information.
+  segmentProtection: ISegmentProtection | null; // If set, we could deduce
+                                                // the protection used for that
+                                                // segment.
   appendWindow : [ number | undefined, // start window for the segment
                                        // (part of the segment before that time
                                        // will be ignored)

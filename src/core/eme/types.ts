@@ -52,14 +52,31 @@ export interface ISessionUpdatedEvent { type: "session-updated";
                                                           ICustomMediaKeySession;
                                                  license: ILicense|null; }; }
 
+export interface IBlacklistKeysEvent { type : "blacklist-keys";
+                                       value: ArrayBuffer[]; }
+
+export interface IBlacklistSessionEvent { type: "blacklist-session";
+                                          value: ICustomError; }
+
 export type IMediaKeySessionHandledEvents = IKeyMessageHandledEvent |
                                             IKeyStatusChangeHandledEvent |
-                                            ISessionUpdatedEvent;
+                                            ISessionUpdatedEvent |
+                                            IBlacklistSessionEvent |
+                                            IBlacklistKeysEvent;
+
+export interface IBlacklistProtectionDataEvent { type: "blacklist-protection-data";
+                                                 value: { type : string;
+                                                          data : Uint8Array; }; }
 
 export type IEMEManagerEvent = IEMEWarningEvent |
                                ICreatedMediaKeysEvent |
                                IAttachedMediaKeysEvent |
-                               IMediaKeySessionHandledEvents;
+                               IMediaKeySessionHandledEvents |
+                               IBlacklistKeysEvent |
+                               IBlacklistProtectionDataEvent;
+
+export interface IContentProtection { type : string;
+                                      data : Uint8Array; }
 
 // Infos indentifying a MediaKeySystemAccess
 export interface IKeySystemAccessInfos {
@@ -128,4 +145,6 @@ export interface IKeySystemOption {
   audioRobustnesses?: Array<string|undefined>;
   throwOnLicenseExpiration? : boolean;
   disableMediaKeysAttachmentLock? : boolean;
+  fallbackOn? : { keyInternalError? : boolean;
+                  keyOutputRestricted? : boolean; };
 }

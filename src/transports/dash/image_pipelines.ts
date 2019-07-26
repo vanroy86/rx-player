@@ -45,6 +45,7 @@ export function imageParser(
   // TODO image Parsing should be more on the sourceBuffer side, no?
   if (responseData === null || features.imageParser == null) {
     return observableOf({ segmentData: null,
+                          segmentProtection: null,
                           segmentInfos: segment.timescale > 0 ?
                             { duration: segment.isInit ? 0 : segment.duration,
                               time: segment.isInit ? -1 : segment.time,
@@ -65,5 +66,6 @@ export function imageParser(
                                         duration: Number.MAX_VALUE,
                                         timescale: bifObject.timescale },
                         segmentOffset: segment.timestampOffset || 0,
+                        segmentProtection: null,
                         appendWindow: [undefined, undefined] });
 }

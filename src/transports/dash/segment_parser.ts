@@ -20,6 +20,7 @@ import {
 import {
   getMDHDTimescale,
   getSegmentsFromSidx,
+  takePSSHOut,
 } from "../../parsers/containers/isobmff";
 import {
   getSegmentsFromCues,
@@ -28,6 +29,7 @@ import {
 import {
   ISegmentParserArguments,
   ISegmentParserObservable,
+  ISegmentProtection,
 } from "../types";
 import getISOBMFFTimingInfos from "./isobmff_timing_infos";
 
@@ -43,6 +45,7 @@ export default function parser({ segment,
     return observableOf({ segmentData: null,
                           segmentInfos: null,
                           segmentOffset: 0,
+                          segmentProtection: null,
                           appendWindow: [undefined, undefined] });
   }
   const segmentData : Uint8Array = responseData instanceof Uint8Array ?
@@ -65,6 +68,7 @@ export default function parser({ segment,
     return observableOf({ segmentData,
                           segmentInfos,
                           segmentOffset,
+                          segmentProtection: null,
                           appendWindow: [undefined, undefined] });
   }
 
@@ -73,7 +77,18 @@ export default function parser({ segment,
   }
   const timescale = isWEBM ?  getTimeCodeScale(segmentData, 0) :
                               getMDHDTimescale(segmentData);
+
+  let segmentProtection : ISegmentProtection | null = null;
+  if (!isWEBM) {
+    const psshBoxes = takePSSHOut(segmentData);
+    if (psshBoxes.length > 0) {
+      representation._addProtectionData("cenc", psshBoxes);
+      segmentProtection = { type: "cenc",
+                            value: psshBoxes };
+    }
+  }
   return observableOf({ segmentData,
+                        segmentProtection,
                         segmentInfos: timescale && timescale > 0 ?
                           { time: -1, duration: 0, timescale } :
                           null,

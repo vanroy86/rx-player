@@ -16,10 +16,14 @@
 
 import { IRepresentationIndex } from "../../manifest";
 
-export interface IContentProtection {
-  systemId? : string;
-  keyId : Uint8Array;
-}
+export interface IContentProtectionKIDs { keyId : Uint8Array;
+                                          systemId?: string; }
+
+export interface IContentProtectionInitData { type : string;
+                                              data : Uint8Array; }
+
+export interface IContentProtections { keyIds : IContentProtectionKIDs[];
+                                       initData : IContentProtectionInitData[]; }
 
 export interface IParsedRepresentation {
   // required
@@ -29,7 +33,7 @@ export interface IParsedRepresentation {
 
   // optional
   codecs?: string;
-  contentProtections? : IContentProtection[];
+  contentProtections? : IContentProtections;
   frameRate?: string;
   height?: number;
   mimeType?: string;

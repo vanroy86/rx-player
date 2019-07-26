@@ -25,7 +25,10 @@ import Manifest, {
   Adaptation,
   Representation,
 } from "../../manifest";
-import { getMDAT } from "../../parsers/containers/isobmff";
+import {
+  getMDAT,
+  takePSSHOut,
+} from "../../parsers/containers/isobmff";
 import createSmoothManifestParser from "../../parsers/manifest/smooth";
 import assert from "../../utils/assert";
 import request from "../../utils/request";
@@ -42,6 +45,7 @@ import {
   ISegmentLoaderObservable,
   ISegmentParserArguments,
   ISegmentParserObservable,
+  ISegmentProtection,
   ISegmentTimingInfos,
   ITextParserObservable,
   ITransportOptions,
@@ -171,15 +175,21 @@ export default function(
       response,
       adaptation,
       manifest,
+      representation,
     } : ISegmentParserArguments< ArrayBuffer | Uint8Array | null >
     ) : ISegmentParserObservable< ArrayBuffer | Uint8Array > {
       const { responseData } = response;
       if (responseData == null) {
         return observableOf({ segmentData: null,
+                              segmentProtection: null,
                               segmentInfos: null,
                               segmentOffset: 0,
                               appendWindow: [undefined, undefined] });
       }
+
+      const responseBuffer = responseData instanceof Uint8Array ?
+        responseData :
+        new Uint8Array(responseData);
 
       if (segment.isInit) {
         // smooth init segments are crafted by hand. Their timescale is the one
@@ -187,14 +197,20 @@ export default function(
         const initSegmentInfos = { timescale: segment.timescale,
                                    time: -1,
                                    duration: 0 };
-        return observableOf({ segmentData: responseData,
+
+        const psshBoxes = takePSSHOut(responseBuffer);
+        let segmentProtection : ISegmentProtection | null = null;
+        if (psshBoxes.length > 0) {
+          representation._addProtectionData("cenc", psshBoxes);
+          segmentProtection = { type: "cenc",
+                                value: psshBoxes };
+        }
+        return observableOf({ segmentData: responseBuffer,
+                              segmentProtection,
                               segmentInfos: initSegmentInfos,
                               segmentOffset: 0,
                               appendWindow: [undefined, undefined] });
       }
-      const responseBuffer = responseData instanceof Uint8Array ?
-        responseData :
-        new Uint8Array(responseData);
 
       const { nextSegments, segmentInfos } = extractTimingsInfos(responseBuffer,
                                                                  segment,
@@ -208,6 +224,7 @@ export default function(
       return observableOf({ segmentData,
                             segmentInfos,
                             segmentOffset: 0,
+                            segmentProtection: null,
                             appendWindow: [undefined, undefined] });
     },
   };
@@ -254,6 +271,7 @@ export default function(
 
       if (responseData === null) {
         return observableOf({ segmentData: null,
+                              segmentProtection: null,
                               segmentInfos: segment.timescale > 0 ?
                                 { duration: segment.isInit ? 0 :
                                                              segment.duration,
@@ -361,6 +379,7 @@ export default function(
                                            timescale: _sdTimescale,
                                            start: _sdStart,
                                            end: _sdEnd },
+                            segmentProtection: null,
                             segmentInfos,
                             segmentOffset: _sdStart / _sdTimescale,
                             appendWindow: [undefined, undefined] });
@@ -390,6 +409,7 @@ export default function(
       // TODO image Parsing should be more on the sourceBuffer side, no?
       if (responseData === null || features.imageParser == null) {
         return observableOf({ segmentData: null,
+                              segmentProtection: null,
                               segmentInfos: segment.timescale > 0 ?
                                 { duration: segment.isInit ? 0 :
                                                              segment.duration,
@@ -412,6 +432,7 @@ export default function(
                                             duration: Number.MAX_VALUE,
                                             timescale: bifObject.timescale },
                             segmentOffset: 0,
+                            segmentProtection: null,
                             appendWindow: [undefined, undefined] });
     },
   };

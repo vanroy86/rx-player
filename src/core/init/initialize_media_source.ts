@@ -51,6 +51,7 @@ import ABRManager, {
   IABRManagerArguments,
 } from "../abr";
 import {
+  IContentProtection,
   IEMEManagerEvent,
   IKeySystemOption,
 } from "../eme";
@@ -194,10 +195,13 @@ export default function InitializeOnMediaSource({
     observeOn(asapScheduler), // to launch subscriptions only when all
     share());                 // Observables here are linked
 
+  // Send content protection data to EMEManager
+  const protectedSegments$ = new Subject<IContentProtection>();
+
   // Create EME Manager, an observable which will manage every EME-related
   // issue.
   const emeManager$ = openMediaSource$.pipe(
-    mergeMap(() => createEMEManager(mediaElement, keySystems)),
+    mergeMap(() => createEMEManager(mediaElement, keySystems, protectedSegments$)),
     observeOn(asapScheduler), // to launch subscriptions only when all
     share());                 // Observables here are linked
 
@@ -256,6 +260,7 @@ export default function InitializeOnMediaSource({
 
     const reloadMediaSource$ = new Subject<IReloadingInfos>();
     const onEvent = createEventListener(reloadMediaSource$,
+                                        protectedSegments$,
                                         refreshManifest);
     const handleReloads$ : Observable<IInitEvent> = reloadMediaSource$.pipe(
       switchMap(({ currentTime, isPaused }) => {
@@ -290,7 +295,23 @@ export default function InitializeOnMediaSource({
       })
     ).pipe(mergeMap(refreshManifest));
 
-    return observableMerge(loadOnMediaSource$, handleReloads$, manifestAutoRefresh$);
+    const blacklistUpdates$ = emeManager$.pipe(tap((evt) => {
+      if (evt.type === "blacklist-keys") {
+        log.info("Init: blacklisting based on keyIDs");
+        manifest.markUndecipherableKIDs(evt.value);
+        return;
+      } else if (evt.type === "blacklist-protection-data") {
+        log.info("Init: blacklisting based on protection data.");
+        const { type, data } = evt.value;
+        manifest.markUndecipherableProtectionData(type, data);
+        return;
+      }
+    }));
+
+    return observableMerge(blacklistUpdates$,
+                           loadOnMediaSource$,
+                           handleReloads$,
+                           manifestAutoRefresh$);
   }));
 
   return observableMerge(loadContent$,
@@ -308,6 +329,7 @@ export default function InitializeOnMediaSource({
  */
 function createEventListener(
   reloadMediaSource$ : Subject<IReloadingInfos>,
+  protectedSegments$ : Subject<IContentProtection>,
   refreshManifest : () => Observable<never>
 ) : (evt : IMediaSourceLoaderEvent) => Observable<IInitEvent> {
   /**
@@ -323,6 +345,9 @@ function createEventListener(
 
       case "needs-manifest-refresh":
         return refreshManifest();
+
+      case "protected-segment":
+        protectedSegments$.next(evt.value);
     }
     return observableOf(evt);
   };

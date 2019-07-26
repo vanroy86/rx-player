@@ -226,12 +226,14 @@ export default function(options: ITransportOptions = {}): ITransportPipelines {
     { segmentData,
       segmentInfos,
       segmentOffset,
+      segmentProtection,
       appendWindow } : ISegmentParserResponse<T>
   ) : ISegmentParserResponse<T> {
     if (segmentData == null) {
       return { segmentData: null,
                segmentInfos: null,
                segmentOffset: 0,
+               segmentProtection,
                appendWindow: [undefined, undefined] };
     }
     if (segmentInfos && segmentInfos.time > -1) {
@@ -253,6 +255,7 @@ export default function(options: ITransportOptions = {}): ITransportPipelines {
     }
     return { segmentData,
              segmentInfos,
+             segmentProtection,
              segmentOffset: offsetedSegmentOffset,
              appendWindow: [offsetedWindowStart, offsetedWindowEnd] };
   }
