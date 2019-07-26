@@ -30,12 +30,11 @@
 method to use to load a new video.</p>
 <p>These options take the form of a single objects with multiple properties, like
 this:</p>
-<pre><code class="language-js"><span class="hljs-comment">// Setting the only two mandatory keys for a clear content (without DRM).</span>
+<pre><code class="language-js"><span class="hljs-comment">// Simply loading a DASH MPD</span>
 <span class="hljs-keyword">const</span> options = {
   <span class="hljs-attr">transport</span>: <span class="hljs-string">&quot;dash&quot;</span>,
   <span class="hljs-attr">url</span>: myManifestUrl
 };
-
 player.loadVideo(options);
 </code></pre>
 <p><a name="prop"></a>
@@ -62,16 +61,22 @@ using a transport protocol.</p>
 This is documented in the documentation of each concerned method, option or
 event in the API.</p>
 </li>
+<li>
+<p><code>&quot;metaplaylist&quot;</code> for <a href="metaplaylist.html">MetaPlaylist</a> streams</p>
+</li>
 </ul>
 <p>This property is mandatory.</p>
 <p><a name="prop-url"></a>
 <a name="subchapter-url"></a></p>
 <h3>url</h3>
 <p><em>type</em>: <code>string|undefined</code></p>
-<p>For Smooth or DASH contents, the URL to the <a href="../terms.html#manifest">Manifest</a>.</p>
+<p>For Smooth, DASH or MetaPlaylist contents, the URL to the
+<a href="../terms.html#manifest">Manifest</a> (or equivalent)</p>
 <p>For <em>DirectFile</em> mode contents, the URL of the content (the supported contents
 depends on the current browser).</p>
-<p>This property is mandatory.</p>
+<p>This property is mandatory unless a <code>manifestLoader</code> is defined in the
+<a href="#prop-transportOptions">transportOptions</a>, in which case that callback will be
+called instead any time we want to load the Manifest.</p>
 <p><a name="prop-keySystems"></a>
 <a name="subchapter-keySystems"></a></p>
 <h3>keySystems</h3>
