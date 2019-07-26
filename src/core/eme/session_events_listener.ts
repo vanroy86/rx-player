@@ -103,7 +103,8 @@ export class BlacklistedSessionError extends Error {
  */
 export default function SessionEventsListener(
   session: MediaKeySession|ICustomMediaKeySession,
-  keySystem: IKeySystemOption
+  keySystem: IKeySystemOption,
+  initData: ArrayBuffer
 ) : Observable<IMediaKeySessionHandledEvents | IEMEWarningEvent> {
   log.debug("EME: Binding session events", session);
 
@@ -179,7 +180,7 @@ export default function SessionEventsListener(
       log.debug(`EME: Event message type ${messageType}`, session, messageEvent);
 
       const getLicense$ = observableDefer(() => {
-        const getLicense = keySystem.getLicense(message, messageType);
+        const getLicense = keySystem.getLicense(message, messageType, initData);
         const getLicenseTimeout = getLicenseConfig.timeout != null ?
           getLicenseConfig.timeout :
           10 * 1000;

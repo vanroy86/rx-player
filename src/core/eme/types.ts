@@ -118,7 +118,7 @@ export type TypedArray = Int8Array |
 // Options given by the caller
 export interface IKeySystemOption {
   type : string;
-  getLicense : (message : Uint8Array, messageType : string)
+  getLicense : (message : Uint8Array, messageType : string, initData : ArrayBuffer)
                  => Promise<TypedArray |
                             ArrayBuffer |
                             null> |

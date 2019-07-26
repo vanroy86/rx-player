@@ -197,7 +197,9 @@ export default function EMEManager(
             }),
             ignoreElements());
 
-      return observableMerge(SessionEventsListener(mediaKeySession, keySystemOptions),
+      return observableMerge(SessionEventsListener(mediaKeySession,
+                                                   keySystemOptions,
+                                                   initData),
                              generateRequest$)
         .pipe(catchError(err => {
           if (!(err instanceof BlacklistedSessionError)) {
