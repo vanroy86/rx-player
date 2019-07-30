@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import objectAssign from "object-assign";
-import { concat as observableConcat, EMPTY, merge as observableMerge, Observable, of as observableOf, Subject, } from "rxjs";
-import { catchError, finalize, map, mergeMap, tap, } from "rxjs/operators";
+import { concat as observableConcat, EMPTY, Observable, of as observableOf, } from "rxjs";
+import { catchError, map, mergeMap, tap, } from "rxjs/operators";
 import config from "../../../config";
 import { isKnownError, NetworkError, OtherError, RequestError, } from "../../../errors";
 import castToObservable from "../../../utils/cast_to_observable";
@@ -79,14 +79,12 @@ function errorSelector(code, error, fatal) {
  * @param {Object} options
  * @returns {Function}
  */
-export default function createLoader(transportPipeline, options) {
+export default function createLoader(transportPipeline, options, warning$) {
     var cache = options.cache, maxRetry = options.maxRetry, maxRetryOffline = options.maxRetryOffline;
     var loader = transportPipeline.loader;
     // TODO Remove the resolver completely
     var resolver = transportPipeline.resolver != null ?
         transportPipeline.resolver : observableOf.bind(Observable);
-    // Subject that will emit non-fatal errors.
-    var retryErrorSubject = new Subject();
     // Backoff options given to the backoff retry done with the loader function.
     var backoffOptions = {
         baseDelay: INITIAL_BACKOFF_DELAY_BASE,
@@ -94,7 +92,7 @@ export default function createLoader(transportPipeline, options) {
         maxRetryRegular: maxRetry,
         maxRetryOffline: maxRetryOffline,
         onRetry: function (error) {
-            retryErrorSubject
+            warning$
                 .next(errorSelector("PIPELINE_LOAD_ERROR", error, false));
         },
     };
@@ -152,7 +150,7 @@ export default function createLoader(transportPipeline, options) {
      * @returns {Observable}
      */
     return function startPipeline(pipelineInputData) {
-        var pipeline$ = callResolver(pipelineInputData).pipe(mergeMap(function (resolverResponse) {
+        return callResolver(pipelineInputData).pipe(mergeMap(function (resolverResponse) {
             return loadData(resolverResponse).pipe(mergeMap(function (arg) {
                 // "cache": data taken from cache by the pipeline
                 // "data": the data is available but no request has been done
@@ -185,9 +183,6 @@ export default function createLoader(transportPipeline, options) {
                         return observableOf(arg);
                 }
             }));
-        }), finalize(function () { retryErrorSubject.complete(); }));
-        var retryError$ = retryErrorSubject
-            .pipe(map(function (error) { return ({ type: "error", value: error }); }));
-        return observableMerge(pipeline$, retryError$);
+        }));
     };
 }

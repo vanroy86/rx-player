@@ -94,7 +94,7 @@ export default function createSegmentFetcher<T>(
   warning$ : Subject<Error|ICustomError>,
   options : IPipelineLoaderOptions<ISegmentLoaderArguments, T>
 ) : ISegmentFetcher<T> {
-  const segmentLoader = createLoader(transport[bufferType], options);
+  const segmentLoader = createLoader(transport[bufferType], options, warning$);
   const segmentParser = transport[bufferType].parser as any; // deal with it
   let request$ : Subject<IABRRequest>|undefined;
   let id : string|undefined;
@@ -116,10 +116,6 @@ export default function createSegmentFetcher<T>(
 
       tap((arg) => {
         switch (arg.type) {
-          case "error":
-            warning$.next(objectAssign(arg.value, { pipelineType: bufferType }));
-            break;
-
           case "metrics": {
             const { value } = arg;
             const { size, duration } = value; // unwrapping for TS

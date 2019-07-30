@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { catchError, filter, map, mergeMap, share, tap, } from "rxjs/operators";
+import { catchError, filter, map, mergeMap, share, } from "rxjs/operators";
 import config from "../../../config";
 import { isKnownError, NetworkError, OtherError, RequestError, } from "../../../errors";
 import tryCatch from "../../../utils/rx-try_catch";
@@ -54,7 +54,7 @@ function errorSelector(code, error, fatal) {
  * @returns {Function}
  */
 export default function createManifestPipeline(pipelines, pipelineOptions, warning$) {
-    var loader = createLoader(pipelines.manifest, pipelineOptions);
+    var loader = createLoader(pipelines.manifest, pipelineOptions, warning$);
     var parser = pipelines.manifest.parser;
     /**
      * Allow the parser to schedule a new request.
@@ -83,11 +83,7 @@ export default function createManifestPipeline(pipelines, pipelineOptions, warni
      * @returns {Observable}
      */
     return function fetchManifest(url) {
-        return loader({ url: url }).pipe(tap(function (arg) {
-            if (arg.type === "error") {
-                warning$.next(arg.value);
-            }
-        }), filter(function (arg) {
+        return loader({ url: url }).pipe(filter(function (arg) {
             return arg.type === "response";
         }), mergeMap(function (_a) {
             var value = _a.value;

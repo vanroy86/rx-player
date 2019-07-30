@@ -367,6 +367,7 @@ function createSmoothStreamingParser(parserOptions) {
             id: "gen-smooth-manifest-" + generateManifestID(),
             availabilityStartTime: availabilityStartTime || 0,
             duration: duration,
+            lifetime: isLive ? 5 : undefined,
             presentationLiveGap: presentationLiveGap,
             suggestedPresentationDelay: suggestedPresentationDelay,
             timeShiftBufferDepth: timeShiftBufferDepth,

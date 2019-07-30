@@ -1436,52 +1436,6 @@ and limitations under the License.
         }(Subscriber);
         /* harmony import */    }, 
     /* 9 */
-    /***/ function(module, exports, __webpack_require__) {
-        "use strict";
-        /*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-        /* eslint-disable no-unused-vars */        var getOwnPropertySymbols = Object.getOwnPropertySymbols, hasOwnProperty = Object.prototype.hasOwnProperty, propIsEnumerable = Object.prototype.propertyIsEnumerable;
-        function toObject(val) {
-            if (null == val) throw new TypeError("Object.assign cannot be called with null or undefined");
-            return Object(val);
-        }
-        module.exports = function shouldUseNative() {
-            try {
-                if (!Object.assign) return !1;
-                // Detect buggy property enumeration order in older V8 versions.
-                // https://bugs.chromium.org/p/v8/issues/detail?id=4118
-                                var test1 = new String("abc");
- // eslint-disable-line no-new-wrappers
-                                if (test1[5] = "de", "5" === Object.getOwnPropertyNames(test1)[0]) return !1;
-                // https://bugs.chromium.org/p/v8/issues/detail?id=3056
-                                for (var test2 = {}, i = 0; i < 10; i++) test2["_" + String.fromCharCode(i)] = i;
-                if ("0123456789" !== Object.getOwnPropertyNames(test2).map(function(n) {
-                    return test2[n];
-                }).join("")) return !1;
-                // https://bugs.chromium.org/p/v8/issues/detail?id=3056
-                                var test3 = {};
-                return "abcdefghijklmnopqrst".split("").forEach(function(letter) {
-                    test3[letter] = letter;
-                }), "abcdefghijklmnopqrst" === Object.keys(Object.assign({}, test3)).join("");
-            } catch (err) {
-                // We don't expect any of the above to throw, but better to be safe.
-                return !1;
-            }
-        }() ? Object.assign : function(target, source) {
-            for (var from, symbols, to = toObject(target), s = 1; s < arguments.length; s++) {
-                for (var key in from = Object(arguments[s])) hasOwnProperty.call(from, key) && (to[key] = from[key]);
-                if (getOwnPropertySymbols) {
-                    symbols = getOwnPropertySymbols(from);
-                    for (var i = 0; i < symbols.length; i++) propIsEnumerable.call(from, symbols[i]) && (to[symbols[i]] = from[symbols[i]]);
-                }
-            }
-            return to;
-        };
-    }, 
-    /* 10 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         /**
@@ -1527,6 +1481,52 @@ object-assign
             htmlTextTracksParsers: {},
             emeManager: null,
             directfile: null
+        };
+    }, 
+    /* 10 */
+    /***/ function(module, exports, __webpack_require__) {
+        "use strict";
+        /*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+        /* eslint-disable no-unused-vars */        var getOwnPropertySymbols = Object.getOwnPropertySymbols, hasOwnProperty = Object.prototype.hasOwnProperty, propIsEnumerable = Object.prototype.propertyIsEnumerable;
+        function toObject(val) {
+            if (null == val) throw new TypeError("Object.assign cannot be called with null or undefined");
+            return Object(val);
+        }
+        module.exports = function shouldUseNative() {
+            try {
+                if (!Object.assign) return !1;
+                // Detect buggy property enumeration order in older V8 versions.
+                // https://bugs.chromium.org/p/v8/issues/detail?id=4118
+                                var test1 = new String("abc");
+ // eslint-disable-line no-new-wrappers
+                                if (test1[5] = "de", "5" === Object.getOwnPropertyNames(test1)[0]) return !1;
+                // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+                                for (var test2 = {}, i = 0; i < 10; i++) test2["_" + String.fromCharCode(i)] = i;
+                if ("0123456789" !== Object.getOwnPropertyNames(test2).map(function(n) {
+                    return test2[n];
+                }).join("")) return !1;
+                // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+                                var test3 = {};
+                return "abcdefghijklmnopqrst".split("").forEach(function(letter) {
+                    test3[letter] = letter;
+                }), "abcdefghijklmnopqrst" === Object.keys(Object.assign({}, test3)).join("");
+            } catch (err) {
+                // We don't expect any of the above to throw, but better to be safe.
+                return !1;
+            }
+        }() ? Object.assign : function(target, source) {
+            for (var from, symbols, to = toObject(target), s = 1; s < arguments.length; s++) {
+                for (var key in from = Object(arguments[s])) hasOwnProperty.call(from, key) && (to[key] = from[key]);
+                if (getOwnPropertySymbols) {
+                    symbols = getOwnPropertySymbols(from);
+                    for (var i = 0; i < symbols.length; i++) propIsEnumerable.call(from, symbols[i]) && (to[symbols[i]] = from[symbols[i]]);
+                }
+            }
+            return to;
         };
     }, 
     /* 11 */
@@ -1631,7 +1631,7 @@ object-assign
             /* tslint:disable ban */
             return arr.includes(searchElement, fromIndex);
             /* tslint:enable ban */            var len = arr.length >>> 0;
-            if (0 == len) return !1;
+            if (0 === len) return !1;
             for (var n = 0 | fromIndex, k = 0 <= n ? Math.min(n, len - 1) : Math.max(len + n, 0), areTheSame = function areTheSame(x, y) {
                 return x === y || // Viva las JavaScriptas!
                 "number" == typeof x && "number" == typeof y && isNaN(x) && isNaN(y);
@@ -5473,8 +5473,8 @@ object-assign
  * @param {string} ksType - Obtained via inversion
  * @returns {string|undefined} - Either the canonical name, or undefined.
  */        function findKeySystemCanonicalName(ksType) {
-            for (var _i = 0, _Object$keys = Object.keys(EME_KEY_SYSTEMS); _i < _Object$keys.length; _i++) {
-                var ksName = _Object$keys[_i];
+            for (var _arr = Object.keys(EME_KEY_SYSTEMS), _i = 0; _i < _arr.length; _i++) {
+                var ksName = _arr[_i];
                 if (Object(array_includes.a)(EME_KEY_SYSTEMS[ksName], ksType)) return ksName;
             }
         }
@@ -6978,7 +6978,7 @@ object-assign
  * @param {Number} retryDelay
  * @returns {Number}
  */        function getFuzzedDelay(retryDelay) {
-            return retryDelay * (1 + (2 * Math.random() - 1) * FUZZ_FACTOR);
+            return retryDelay * ((2 * Math.random() - 1) * FUZZ_FACTOR + 1);
  // Max 1.3 Min 0.7
                 }
         /**
@@ -7479,7 +7479,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return createEMEManager;
         });
-        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(112), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(30), rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(34), _compat___WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(7), _compat___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(116), _errors__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(121), _features__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(10), _log__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(0), onEncrypted$ = _compat___WEBPACK_IMPORTED_MODULE_3__.a.onEncrypted$;
+        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(112), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(30), rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(34), _compat___WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(7), _compat___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(116), _errors__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(121), _features__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(9), _log__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(0), onEncrypted$ = _compat___WEBPACK_IMPORTED_MODULE_3__.a.onEncrypted$;
         /* harmony import */        
         /**
  * Create EMEManager if possible (has the APIs and configuration).
@@ -10999,7 +10999,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/deep-equal/index.js
-        var deep_equal = __webpack_require__(137), deep_equal_default = /* */ __webpack_require__.n(deep_equal), object_assign = __webpack_require__(9), object_assign_default = /* */ __webpack_require__.n(object_assign), Subject = __webpack_require__(42), ReplaySubject = __webpack_require__(138), tslib_es6 = __webpack_require__(3), ObjectUnsubscribedError = __webpack_require__(49), BehaviorSubject_BehaviorSubject = /* */ function(_super) {
+        var deep_equal = __webpack_require__(137), deep_equal_default = /* */ __webpack_require__.n(deep_equal), object_assign = __webpack_require__(10), object_assign_default = /* */ __webpack_require__.n(object_assign), Subject = __webpack_require__(42), ReplaySubject = __webpack_require__(138), tslib_es6 = __webpack_require__(3), ObjectUnsubscribedError = __webpack_require__(49), BehaviorSubject_BehaviorSubject = /* */ function(_super) {
             function BehaviorSubject(_value) {
                 var _this = _super.call(this) || this;
                 return _this._value = _value, _this;
@@ -11062,8 +11062,116 @@ object-assign
                     this.destination.error(err);
                 }
             }, SkipWhileSubscriber;
-        }(Subscriber.a), switchMapTo = __webpack_require__(184), mergeMapTo = __webpack_require__(177), catchError = __webpack_require__(170), config = __webpack_require__(2), log = __webpack_require__(0), event_emitter = __webpack_require__(33), noop = __webpack_require__(27), promise = __webpack_require__(28), utils_ranges = __webpack_require__(13), warn_once = __webpack_require__(26), compat = __webpack_require__(7), fullscreen = __webpack_require__(77), error_codes = __webpack_require__(21), media_error = __webpack_require__(58), features = __webpack_require__(10), eme_manager = __webpack_require__(70), asap = __webpack_require__(171), timer = __webpack_require__(181), observeOn = __webpack_require__(119), mergeMap = __webpack_require__(39), tap = __webpack_require__(122), ignoreElements = __webpack_require__(169), switchMap = __webpack_require__(118), Observable = __webpack_require__(6);
-        // CONCATENATED MODULE: ./src/utils/rx-throttle.ts
+        }(Subscriber.a), switchMapTo = __webpack_require__(184), mergeMapTo = __webpack_require__(177), catchError = __webpack_require__(170), config = __webpack_require__(2), log = __webpack_require__(0), event_emitter = __webpack_require__(33), noop = __webpack_require__(27), promise = __webpack_require__(28), utils_ranges = __webpack_require__(13), warn_once = __webpack_require__(26), compat = __webpack_require__(7), fullscreen = __webpack_require__(77), error_codes = __webpack_require__(21), media_error = __webpack_require__(58), error_message = __webpack_require__(55);
+        // CONCATENATED MODULE: ./src/errors/network_error.ts
+        function _assertThisInitialized(self) {
+            if (void 0 === self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+            return self;
+        }
+        function _inheritsLoose(subClass, superClass) {
+            subClass.prototype = Object.create(superClass.prototype), (subClass.prototype.constructor = subClass).__proto__ = superClass;
+        }
+        function _wrapNativeSuper(Class) {
+            var _cache = "function" == typeof Map ? new Map() : void 0;
+            return (_wrapNativeSuper = function _wrapNativeSuper(Class) {
+                if (null === Class || !_isNativeFunction(Class)) return Class;
+                if ("function" != typeof Class) throw new TypeError("Super expression must either be null or a function");
+                if (void 0 !== _cache) {
+                    if (_cache.has(Class)) return _cache.get(Class);
+                    _cache.set(Class, Wrapper);
+                }
+                function Wrapper() {
+                    return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+                }
+                return Wrapper.prototype = Object.create(Class.prototype, {
+                    constructor: {
+                        value: Wrapper,
+                        enumerable: !1,
+                        writable: !0,
+                        configurable: !0
+                    }
+                }), _setPrototypeOf(Wrapper, Class);
+            })(Class);
+        }
+        function isNativeReflectConstruct() {
+            if ("undefined" == typeof Reflect || !Reflect.construct) return !1;
+            if (Reflect.construct.sham) return !1;
+            if ("function" == typeof Proxy) return !0;
+            try {
+                return Date.prototype.toString.call(Reflect.construct(Date, [], function() {})), 
+                !0;
+            } catch (e) {
+                return !1;
+            }
+        }
+        function _construct(Parent, args, Class) {
+            return (_construct = isNativeReflectConstruct() ? Reflect.construct : function _construct(Parent, args, Class) {
+                var a = [ null ];
+                a.push.apply(a, args);
+                var instance = new (Function.bind.apply(Parent, a))();
+                return Class && _setPrototypeOf(instance, Class.prototype), instance;
+            }).apply(null, arguments);
+        }
+        function _isNativeFunction(fn) {
+            return -1 !== Function.toString.call(fn).indexOf("[native code]");
+        }
+        function _setPrototypeOf(o, p) {
+            return (_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+                return o.__proto__ = p, o;
+            })(o, p);
+        }
+        function _getPrototypeOf(o) {
+            return (_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+                return o.__proto__ || Object.getPrototypeOf(o);
+            })(o);
+        }
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Error linked to network interactions (requests).
+ *
+ * @class NetworkError
+ * @extends Error
+ */        var network_error_NetworkError = 
+        /* */
+        function(_Error) {
+            /**
+   * @param {string} code
+   * @param {Error} requestError
+   * @param {Boolean} fatal
+   */
+            function NetworkError(code, requestError, fatal) {
+                var _this;
+                return _this = _Error.call(this) || this, // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+                Object.setPrototypeOf(_assertThisInitialized(_this), NetworkError.prototype), _this.name = "NetworkError", 
+                _this.type = error_codes.b.NETWORK_ERROR, _this.xhr = requestError.xhr, _this.url = requestError.url, 
+                _this.status = requestError.status, _this.errorType = requestError.type, _this.code = error_codes.a.hasOwnProperty(code) ? error_codes.a[code] : "", 
+                _this.fatal = !!fatal, _this.message = Object(error_message.a)(_this.name, _this.code, requestError.message), 
+                _this;
+            }
+            /**
+   * Returns true if the NetworkError is due to the given http error code
+   * @param {number} httpErrorCode
+   * @returns {Boolean}
+   */            return _inheritsLoose(NetworkError, _Error), NetworkError.prototype.isHttpError = function isHttpError(httpErrorCode) {
+                return this.errorType === error_codes.c.ERROR_HTTP_CODE && this.status === httpErrorCode;
+            }, NetworkError;
+        }(_wrapNativeSuper(Error)), features = __webpack_require__(9), eme_manager = __webpack_require__(70), asap = __webpack_require__(171), timer = __webpack_require__(181), observeOn = __webpack_require__(119), mergeMap = __webpack_require__(39), tap = __webpack_require__(122), ignoreElements = __webpack_require__(169), switchMap = __webpack_require__(118), Observable = __webpack_require__(6);
+        // EXTERNAL MODULE: ./src/features/index.ts
+                // CONCATENATED MODULE: ./src/utils/rx-throttle.ts
         /**
  * Copyright 2015 CANAL+ Group
  *
@@ -12130,7 +12238,7 @@ object-assign
                 this._choosers[bufferType] = abr_manager_createChooser(bufferType, this._mediaElement, this._chooserInstanceOptions)), 
                 this._choosers[bufferType];
             }, ABRManager;
-        }(), is_known_error = __webpack_require__(180), request_error = __webpack_require__(182), error_message = __webpack_require__(55);
+        }(), is_known_error = __webpack_require__(180), request_error = __webpack_require__(182);
         // CONCATENATED MODULE: ./src/core/abr/abr_manager.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -12147,115 +12255,8 @@ object-assign
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */        
-        // CONCATENATED MODULE: ./src/errors/network_error.ts
-        function _assertThisInitialized(self) {
-            if (void 0 === self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-            return self;
-        }
-        function _inheritsLoose(subClass, superClass) {
-            subClass.prototype = Object.create(superClass.prototype), (subClass.prototype.constructor = subClass).__proto__ = superClass;
-        }
-        function _wrapNativeSuper(Class) {
-            var _cache = "function" == typeof Map ? new Map() : void 0;
-            return (_wrapNativeSuper = function _wrapNativeSuper(Class) {
-                if (null === Class || !_isNativeFunction(Class)) return Class;
-                if ("function" != typeof Class) throw new TypeError("Super expression must either be null or a function");
-                if (void 0 !== _cache) {
-                    if (_cache.has(Class)) return _cache.get(Class);
-                    _cache.set(Class, Wrapper);
-                }
-                function Wrapper() {
-                    return _construct(Class, arguments, _getPrototypeOf(this).constructor);
-                }
-                return Wrapper.prototype = Object.create(Class.prototype, {
-                    constructor: {
-                        value: Wrapper,
-                        enumerable: !1,
-                        writable: !0,
-                        configurable: !0
-                    }
-                }), _setPrototypeOf(Wrapper, Class);
-            })(Class);
-        }
-        function isNativeReflectConstruct() {
-            if ("undefined" == typeof Reflect || !Reflect.construct) return !1;
-            if (Reflect.construct.sham) return !1;
-            if ("function" == typeof Proxy) return !0;
-            try {
-                return Date.prototype.toString.call(Reflect.construct(Date, [], function() {})), 
-                !0;
-            } catch (e) {
-                return !1;
-            }
-        }
-        function _construct(Parent, args, Class) {
-            return (_construct = isNativeReflectConstruct() ? Reflect.construct : function _construct(Parent, args, Class) {
-                var a = [ null ];
-                a.push.apply(a, args);
-                var instance = new (Function.bind.apply(Parent, a))();
-                return Class && _setPrototypeOf(instance, Class.prototype), instance;
-            }).apply(null, arguments);
-        }
-        function _isNativeFunction(fn) {
-            return -1 !== Function.toString.call(fn).indexOf("[native code]");
-        }
-        function _setPrototypeOf(o, p) {
-            return (_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-                return o.__proto__ = p, o;
-            })(o, p);
-        }
-        function _getPrototypeOf(o) {
-            return (_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-                return o.__proto__ || Object.getPrototypeOf(o);
-            })(o);
-        }
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * Error linked to network interactions (requests).
- *
- * @class NetworkError
- * @extends Error
- */        var network_error_NetworkError = 
-        /* */
-        function(_Error) {
-            /**
-   * @param {string} code
-   * @param {Error} requestError
-   * @param {Boolean} fatal
-   */
-            function NetworkError(code, requestError, fatal) {
-                var _this;
-                return _this = _Error.call(this) || this, // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
-                Object.setPrototypeOf(_assertThisInitialized(_this), NetworkError.prototype), _this.name = "NetworkError", 
-                _this.type = error_codes.b.NETWORK_ERROR, _this.xhr = requestError.xhr, _this.url = requestError.url, 
-                _this.status = requestError.status, _this.errorType = requestError.type, _this.code = error_codes.a.hasOwnProperty(code) ? error_codes.a[code] : "", 
-                _this.fatal = !!fatal, _this.message = Object(error_message.a)(_this.name, _this.code, requestError.message), 
-                _this;
-            }
-            /**
-   * Returns true if the NetworkError is due to the given http error code
-   * @param {number} httpErrorCode
-   * @returns {Boolean}
-   */            return _inheritsLoose(NetworkError, _Error), NetworkError.prototype.isHttpError = function isHttpError(httpErrorCode) {
-                return this.errorType === error_codes.c.ERROR_HTTP_CODE && this.status === httpErrorCode;
-            }, NetworkError;
-        }(_wrapNativeSuper(Error));
         // CONCATENATED MODULE: ./src/errors/other_error.ts
-                function other_error_assertThisInitialized(self) {
+        function other_error_assertThisInitialized(self) {
             if (void 0 === self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
             return self;
         }
@@ -12411,30 +12412,9 @@ object-assign
                     return source;
                 }));
             }));
-        }, Subscription = __webpack_require__(14);
-        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
-                // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/finalize.js
-        /** PURE_IMPORTS_START tslib,_Subscriber,_Subscription PURE_IMPORTS_END */
-        function finalize(callback) {
-            return function(source) {
-                return source.lift(new FinallyOperator(callback));
-            };
-        }
-        var FinallyOperator = /* */ function() {
-            function FinallyOperator(callback) {
-                this.callback = callback;
-            }
-            return FinallyOperator.prototype.call = function(subscriber, source) {
-                return source.subscribe(new finalize_FinallySubscriber(subscriber, this.callback));
-            }, FinallyOperator;
-        }(), finalize_FinallySubscriber = /* */ function(_super) {
-            function FinallySubscriber(destination, callback) {
-                var _this = _super.call(this, destination) || this;
-                return _this.add(new Subscription.a(callback)), _this;
-            }
-            return tslib_es6.a(FinallySubscriber, _super), FinallySubscriber;
-        }(Subscriber.a), cast_to_observable = __webpack_require__(17), MAX_BACKOFF_DELAY_BASE = config.a.MAX_BACKOFF_DELAY_BASE, INITIAL_BACKOFF_DELAY_BASE = config.a.INITIAL_BACKOFF_DELAY_BASE;
-        /**
+        }, cast_to_observable = __webpack_require__(17), MAX_BACKOFF_DELAY_BASE = config.a.MAX_BACKOFF_DELAY_BASE, INITIAL_BACKOFF_DELAY_BASE = config.a.INITIAL_BACKOFF_DELAY_BASE;
+        // EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
+                /**
  * Generate a new error from the infos given.
  * @param {string} code
  * @param {Error} error
@@ -12484,14 +12464,14 @@ object-assign
  * @param {Object} transportPipeline
  * @param {Object} options
  * @returns {Function}
- */        function createLoader(transportPipeline, options) {
-            var cache = options.cache, maxRetry = options.maxRetry, maxRetryOffline = options.maxRetryOffline, loader = transportPipeline.loader, resolver = null != transportPipeline.resolver ? transportPipeline.resolver : of.a.bind(Observable.a), retryErrorSubject = new Subject.a(), backoffOptions = {
+ */        function createLoader(transportPipeline, options, warning$) {
+            var cache = options.cache, maxRetry = options.maxRetry, maxRetryOffline = options.maxRetryOffline, loader = transportPipeline.loader, resolver = null != transportPipeline.resolver ? transportPipeline.resolver : of.a.bind(Observable.a), backoffOptions = {
                 baseDelay: INITIAL_BACKOFF_DELAY_BASE,
                 maxDelay: MAX_BACKOFF_DELAY_BASE,
                 maxRetryRegular: maxRetry,
                 maxRetryOffline: maxRetryOffline,
                 onRetry: function onRetry(error) {
-                    retryErrorSubject.next(errorSelector("PIPELINE_LOAD_ERROR", error, !1));
+                    warning$.next(errorSelector("PIPELINE_LOAD_ERROR", error, !1));
                 }
             };
             /**
@@ -12542,7 +12522,7 @@ object-assign
    * @param {Object} pipelineInputData
    * @returns {Observable}
    */            return function startPipeline(pipelineInputData) {
-                var pipeline$ = callResolver(pipelineInputData).pipe(Object(mergeMap.a)(function(resolverResponse) {
+                return callResolver(pipelineInputData).pipe(Object(mergeMap.a)(function(resolverResponse) {
                     return loadData(resolverResponse).pipe(Object(mergeMap.a)(function(arg) {
                         // "cache": data taken from cache by the pipeline
                         // "data": the data is available but no request has been done
@@ -12572,15 +12552,7 @@ object-assign
                             return Object(of.a)(arg);
                         }
                     }));
-                }), finalize(function() {
-                    retryErrorSubject.complete();
-                })), retryError$ = retryErrorSubject.pipe(Object(map.a)(function(error) {
-                    return {
-                        type: "error",
-                        value: error
-                    };
                 }));
-                return Object(merge.a)(pipeline$, retryError$);
             };
         }
         // CONCATENATED MODULE: ./src/core/pipelines/manifest/create_manifest_pipeline.ts
@@ -12642,7 +12614,7 @@ object-assign
  * limitations under the License.
  */
         /* harmony default export */ var pipelines_manifest = function createManifestPipeline(pipelines, pipelineOptions, warning$) {
-            var loader = createLoader(pipelines.manifest, pipelineOptions), parser = pipelines.manifest.parser;
+            var loader = createLoader(pipelines.manifest, pipelineOptions, warning$), parser = pipelines.manifest.parser;
             /**
    * Allow the parser to schedule a new request.
    * @param {Object} transportPipeline
@@ -12670,9 +12642,7 @@ object-assign
    */            return function fetchManifest(url) {
                 return loader({
                     url: url
-                }).pipe(Object(tap.a)(function(arg) {
-                    "error" === arg.type && warning$.next(arg.value);
-                }), Object(filter.a)(function(arg) {
+                }).pipe(Object(filter.a)(function(arg) {
                     return "response" === arg.type;
                 }), Object(mergeMap.a)(function(_ref) {
                     var value = _ref.value, sendingTime = value.sendingTime;
@@ -12741,7 +12711,29 @@ object-assign
             };
         }
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/defer.js
-                var defer = __webpack_require__(168), prioritizer_ObservablePrioritizer = 
+                var defer = __webpack_require__(168), Subscription = __webpack_require__(14);
+        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
+                // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/finalize.js
+        /** PURE_IMPORTS_START tslib,_Subscriber,_Subscription PURE_IMPORTS_END */
+        function finalize(callback) {
+            return function(source) {
+                return source.lift(new FinallyOperator(callback));
+            };
+        }
+        var FinallyOperator = /* */ function() {
+            function FinallyOperator(callback) {
+                this.callback = callback;
+            }
+            return FinallyOperator.prototype.call = function(subscriber, source) {
+                return source.subscribe(new finalize_FinallySubscriber(subscriber, this.callback));
+            }, FinallyOperator;
+        }(), finalize_FinallySubscriber = /* */ function(_super) {
+            function FinallySubscriber(destination, callback) {
+                var _this = _super.call(this, destination) || this;
+                return _this.add(new Subscription.a(callback)), _this;
+            }
+            return tslib_es6.a(FinallySubscriber, _super), FinallySubscriber;
+        }(Subscriber.a), prioritizer_ObservablePrioritizer = 
         /* */
         function() {
             function ObservablePrioritizer() {
@@ -12819,82 +12811,6 @@ object-assign
                 }));
             }, ObservablePrioritizer;
         }(), id_generator = __webpack_require__(48), generateRequestID = Object(id_generator.a)();
-        // CONCATENATED MODULE: ./src/core/pipelines/segment/prioritizer.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * Create Observables which can be priorized between one another.
- *
- * With this class, you can create Observables with linked priority numbers.
- * The lower this number is, the more priority the resulting Observable will
- * have.
- *
- * Such Observable will then basically wait for pending Observables with more
- * priority to finish before "starting".
- *
- * You can also update the priority of an already-created Observable.
- * This will only have an effect if the Observable is currently "waiting" for
- * its turn (started observable won't be canceled if their priority were
- * lowered).
- *
- * ```js
- * const prioritizer = new ObservablePrioritizer();
- *
- * const observable1 = Observable.of(1);
- * const observable2 = Observable.of(2);
- * const observable3 = Observable.of(3);
- * const observable4 = Observable.of(4);
- * const observable5 = Observable.of(5);
- *
- * const pObservable1 = prioritizer.create(observable1, 4);
- * const pObservable2 = prioritizer.create(observable2, 2);
- * const pObservable3 = prioritizer.create(observable3, 1);
- * const pObservable4 = prioritizer.create(observable4, 3);
- * const pObservable5 = prioritizer.create(observable5, 2);
- *
- * // start every Observables at the same time
- * observableMerge(
- *   pObservable1,
- *   pObservable2,
- *   pObservable3,
- *   pObservable4,
- *   pObservable5
- * ).subscribe((i) => {
- *   // To spice things up, update pObservable1 priority to go before
- *   // pObservable4
- *   if (i === 5) { // if pObservable5 is currently emitting
- *     prioritizer.updatePriority(pObservable1, 1);
- *   }
- *   console.log(i);
- * });
- *
- * // Result:
- * // 3
- * // 2
- * // 5
- * // 1
- * // 4
- *
- * // Note: here "1" goes before "4" only because the former's priority has been
- * // updated before the latter was started.
- * // It would be the other way around if not.
- * ```
- *
- * @class ObservablePrioritizer
- */        
         /**
  * Create a function which will fetch segments.
  *
@@ -12914,7 +12830,7 @@ object-assign
  * @returns {Function}
  */
         function createSegmentFetcher(bufferType, transport, network$, requests$, warning$, options) {
-            var request$, id, segmentLoader = createLoader(transport[bufferType], options), segmentParser = transport[bufferType].parser;
+            var request$, id, segmentLoader = createLoader(transport[bufferType], options, warning$), segmentParser = transport[bufferType].parser;
             /**
    * Process a pipeline observable to adapt it to the the rest of the code:
    *   - use the network$ subject for network metrics (bandwitdh mesure)
@@ -12928,12 +12844,6 @@ object-assign
             return function fetchSegment(content) {
                 return segmentLoader(content).pipe(Object(tap.a)(function(arg) {
                     switch (arg.type) {
-                      case "error":
-                        warning$.next(object_assign_default()(arg.value, {
-                            pipelineType: bufferType
-                        }));
-                        break;
-
                       case "metrics":
                         var value = arg.value, size = value.size, duration = value.duration;
                         // unwrapping for TS
@@ -17635,7 +17545,7 @@ object-assign
                 var positionWanted, _this$_priv_contentIn8 = this._priv_contentInfos, isDirectFile = _this$_priv_contentIn8.isDirectFile, manifest = _this$_priv_contentIn8.manifest;
                 if (!isDirectFile && null == manifest) throw new Error("player: the content did not load yet");
                 var typeOf = typeof time;
-                if ("number" == typeOf) positionWanted = time; else if ("object" == typeOf) {
+                if ("number" === typeOf) positionWanted = time; else if ("object" === typeOf) {
                     var currentTs = this.videoElement.currentTime;
                     if (null != time.relative) positionWanted = currentTs + time.relative; else if (null != time.position) positionWanted = time.position; else {
                         if (null == time.wallClockTime) throw new Error('invalid time object. You must set one of the following properties: "relative", "position" or "wallClockTime"');
@@ -18050,7 +17960,11 @@ object-assign
    * @param {Error} error
    * @private
    */ , _proto._priv_onPlaybackWarning = function _priv_onPlaybackWarning(error) {
-                log.a.warn("API: Sending warning:", error), this.trigger("warning", error);
+                if (log.a.warn("API: Sending warning:", error), this.trigger("warning", error), 
+                error instanceof network_error_NetworkError && 404 === error.status) {
+                    var warning = new media_error.a("MEDIA_TIME_BEFORE_MANIFEST", "The current position is behind the earliest time announced in the Manifest.", !1);
+                    this.trigger("warning", warning);
+                }
             }
             /**
    * Triggered when the Manifest has been loaded for the current content.
@@ -18367,7 +18281,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
-        var of = __webpack_require__(30), combineLatest = __webpack_require__(179), filter = __webpack_require__(166), map = __webpack_require__(34), mergeMap = __webpack_require__(39), features = __webpack_require__(10), src_manifest = __webpack_require__(104), utils = __webpack_require__(183), log = __webpack_require__(0), SEGMENT_ID = 408125543, INFO_ID = 357149030, TIMECODESCALE_ID = 2807729, DURATION_ID = 17545;
+        var of = __webpack_require__(30), combineLatest = __webpack_require__(179), filter = __webpack_require__(166), map = __webpack_require__(34), mergeMap = __webpack_require__(39), features = __webpack_require__(9), src_manifest = __webpack_require__(104), utils = __webpack_require__(183), log = __webpack_require__(0), SEGMENT_ID = 408125543, INFO_ID = 357149030, TIMECODESCALE_ID = 2807729, DURATION_ID = 17545;
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/combineLatest.js
                 /**
  * Find the offsets of the value linked to the given element ID.
@@ -18414,7 +18328,7 @@ object-assign
             var timeCodeScaleOffsets = findNextElement(DURATION_ID, [ SEGMENT_ID, INFO_ID ], buffer, [ initialOffset, buffer.length ]);
             if (null == timeCodeScaleOffsets) return null;
             var length = timeCodeScaleOffsets[1] - timeCodeScaleOffsets[0];
-            return 4 == length ? get_IEEE754_32Bits(buffer, timeCodeScaleOffsets[0]) : 8 == length ? get_IEEE754_64Bits(buffer, timeCodeScaleOffsets[0]) : null;
+            return 4 === length ? get_IEEE754_32Bits(buffer, timeCodeScaleOffsets[0]) : 8 === length ? get_IEEE754_64Bits(buffer, timeCodeScaleOffsets[0]) : null;
         }
         /**
  * @param {Uint8Array} buffer
@@ -18658,7 +18572,7 @@ object-assign
             };
         }
         // EXTERNAL MODULE: ./node_modules/object-assign/index.js
-                var object_assign = __webpack_require__(9), object_assign_default = /* */ __webpack_require__.n(object_assign), iso8601Duration = /^P(([\d.]*)Y)?(([\d.]*)M)?(([\d.]*)D)?T?(([\d.]*)H)?(([\d.]*)M)?(([\d.]*)S)?/, rangeRe = /([0-9]+)-([0-9]+)/;
+                var object_assign = __webpack_require__(10), object_assign_default = /* */ __webpack_require__.n(object_assign), iso8601Duration = /^P(([\d.]*)Y)?(([\d.]*)M)?(([\d.]*)D)?T?(([\d.]*)H)?(([\d.]*)M)?(([\d.]*)S)?/, rangeRe = /([0-9]+)-([0-9]+)/;
         /**
  * Parse MPD boolean attributes.
  * @param {string} str
@@ -20260,7 +20174,7 @@ object-assign
  */        function getSegmentIndex(index, start) {
             for (var timeline = index.timeline, low = 0, high = timeline.length; low < high; ) {
                 var mid = low + high >>> 1;
-                timeline[mid].start < start ? low = 1 + mid : high = mid;
+                timeline[mid].start < start ? low = mid + 1 : high = mid;
             }
             return 0 < low ? low - 1 : low;
         }
@@ -21360,7 +21274,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
-        var of = __webpack_require__(30), map = __webpack_require__(34), features = __webpack_require__(10), log = __webpack_require__(0), src_manifest = __webpack_require__(104), read = __webpack_require__(111), object_assign = __webpack_require__(9), object_assign_default = /* */ __webpack_require__.n(object_assign), config = __webpack_require__(2), assert = __webpack_require__(16), id_generator = __webpack_require__(48), resolve_url = __webpack_require__(32), check_manifest_ids = __webpack_require__(90);
+        var of = __webpack_require__(30), map = __webpack_require__(34), features = __webpack_require__(9), log = __webpack_require__(0), src_manifest = __webpack_require__(104), read = __webpack_require__(111), object_assign = __webpack_require__(10), object_assign_default = /* */ __webpack_require__.n(object_assign), config = __webpack_require__(2), assert = __webpack_require__(16), id_generator = __webpack_require__(48), resolve_url = __webpack_require__(32), check_manifest_ids = __webpack_require__(90);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/map.js
                 // CONCATENATED MODULE: ./src/parsers/manifest/smooth/get_codecs.ts
         /**
@@ -21603,7 +21517,7 @@ object-assign
  */        function getSegmentIndex(index, start) {
             for (var timeline = index.timeline, low = 0, high = timeline.length; low < high; ) {
                 var mid = low + high >>> 1;
-                timeline[mid].start < start ? low = 1 + mid : high = mid;
+                timeline[mid].start < start ? low = mid + 1 : high = mid;
             }
             return 0 < low ? low - 1 : low;
         }
@@ -21833,7 +21747,7 @@ object-assign
                             // adjust repeatCount + add supplementary segments
                             if (oldTimelineRange.duration !== lastNewTimelineElement.duration) return;
                             var rangeDuration = newEnd - oldTimelineRange.start;
-                            if (0 == rangeDuration) return log.a.warn("Smooth Parser: a discontinuity detected in the previous manifest has been resolved."), 
+                            if (0 === rangeDuration) return log.a.warn("Smooth Parser: a discontinuity detected in the previous manifest has been resolved."), 
                             void (this._index.timeline = this._index.timeline.concat(oldTimeline.slice(i)));
                             if (rangeDuration < 0 || rangeDuration % oldTimelineRange.duration != 0) return;
                             var repeatWithOld = rangeDuration / oldTimelineRange.duration - 1, relativeRepeat = oldTimelineRange.repeatCount - repeatWithOld;
@@ -22150,6 +22064,7 @@ object-assign
                     id: "gen-smooth-manifest-" + generateManifestID(),
                     availabilityStartTime: availabilityStartTime || 0,
                     duration: duration,
+                    lifetime: isLive ? 5 : void 0,
                     presentationLiveGap: presentationLiveGap,
                     suggestedPresentationDelay: suggestedPresentationDelay,
                     timeShiftBufferDepth: timeShiftBufferDepth,
@@ -22650,7 +22565,7 @@ object-assign
             var oldMoofLength = moofOffsets[1] - moofOffsets[0], moofDelta = newMoof.length - oldMoofLength, mdatOffsets = Object(get_box.c)(segment, 1835295092
             /* "mdat" */);
             if (null == mdatOffsets) throw new Error("Smooth: Invalid ISOBMFF given");
-            if (Object(can_patch_isobmff.a)() && (0 == moofDelta || moofDelta <= -8)) 
+            if (Object(can_patch_isobmff.a)() && (0 === moofDelta || moofDelta <= -8)) 
             // patch trun data_offset
             return newMoof.set(Object(byte_parsing.l)(mdatOffsets[0] + 8), trunOffsetInMoof + 16), 
             segment.set(newMoof, moofOffsets[0]), moofDelta <= -8 && segment.set(createFreeBox(-moofDelta), newMoof.length), 
@@ -23587,7 +23502,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/object-assign/index.js
-        var object_assign = __webpack_require__(9), object_assign_default = /* */ __webpack_require__.n(object_assign), array_find = __webpack_require__(11), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(65), get_styling = __webpack_require__(29), nodes = __webpack_require__(50), get_time_delimiters = __webpack_require__(110), regexps = __webpack_require__(18);
+        var object_assign = __webpack_require__(10), object_assign_default = /* */ __webpack_require__.n(object_assign), array_find = __webpack_require__(11), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(65), get_styling = __webpack_require__(29), nodes = __webpack_require__(50), get_time_delimiters = __webpack_require__(110), regexps = __webpack_require__(18);
         // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/generate_css_test_outline.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -24367,7 +24282,7 @@ object-assign
                 // These cues should be the last one
                                 cuesBuffer.push(cuesInfosToInsert);
             }, TextBufferManager;
-        }(), features = __webpack_require__(10);
+        }(), features = __webpack_require__(9);
         // EXTERNAL MODULE: ./src/features/index.ts
                 // CONCATENATED MODULE: ./src/core/source_buffers/text/html/parsers.ts
         /**
@@ -24575,7 +24490,7 @@ object-assign
             }
         }
         // EXTERNAL MODULE: ./src/core/source_buffers/abstract_source_buffer.ts + 1 modules
-                var abstract_source_buffer = __webpack_require__(66), features = __webpack_require__(10);
+                var abstract_source_buffer = __webpack_require__(66), features = __webpack_require__(9);
         // EXTERNAL MODULE: ./src/features/index.ts
                 // CONCATENATED MODULE: ./src/core/source_buffers/text/native/parsers.ts
         /**
@@ -24936,7 +24851,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/object-assign/index.js
-        var object_assign = __webpack_require__(9), object_assign_default = /* */ __webpack_require__.n(object_assign), make_vtt_cue = __webpack_require__(95), is_vtt_cue = __webpack_require__(131), array_find = __webpack_require__(11), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(65), get_styling = __webpack_require__(29), get_time_delimiters = __webpack_require__(110), nodes = __webpack_require__(50), regexps = __webpack_require__(18), WANTED_STYLE_ATTRIBUTES = [ "extent", "writingMode", "origin", "align" ], TEXT_ALIGN_TO_LIGN_ALIGN = {
+        var object_assign = __webpack_require__(10), object_assign_default = /* */ __webpack_require__.n(object_assign), make_vtt_cue = __webpack_require__(95), is_vtt_cue = __webpack_require__(131), array_find = __webpack_require__(11), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(65), get_styling = __webpack_require__(29), get_time_delimiters = __webpack_require__(110), nodes = __webpack_require__(50), regexps = __webpack_require__(18), WANTED_STYLE_ATTRIBUTES = [ "extent", "writingMode", "origin", "align" ], TEXT_ALIGN_TO_LIGN_ALIGN = {
             left: "start",
             center: "center",
             right: "end",
@@ -25829,7 +25744,7 @@ object-assign
                 pos += 4;
                 var refSize = 2147483647 & refChunk;
                 // when set to 1 indicates that the reference is to a sidx, else to media
-                if (1 == (2147483648 & refChunk) >>> 31) throw new Error("not implemented");
+                if (1 === (2147483648 & refChunk) >>> 31) throw new Error("not implemented");
                 var duration = Object(_utils_byte_parsing__WEBPACK_IMPORTED_MODULE_2__.c)(buf, pos);
                 pos += 4, // let sapChunk = be4toi(buf, pos + 8);
                 pos += 4, // TODO(pierre): handle sap

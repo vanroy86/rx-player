@@ -39,7 +39,7 @@ var generateRequestID = idGenerator();
  * @returns {Function}
  */
 export default function createSegmentFetcher(bufferType, transport, network$, requests$, warning$, options) {
-    var segmentLoader = createLoader(transport[bufferType], options);
+    var segmentLoader = createLoader(transport[bufferType], options, warning$);
     var segmentParser = transport[bufferType].parser; // deal with it
     var request$;
     var id;
@@ -56,9 +56,6 @@ export default function createSegmentFetcher(bufferType, transport, network$, re
     return function fetchSegment(content) {
         return segmentLoader(content).pipe(tap(function (arg) {
             switch (arg.type) {
-                case "error":
-                    warning$.next(objectAssign(arg.value, { pipelineType: bufferType }));
-                    break;
                 case "metrics": {
                     var value = arg.value;
                     var size = value.size, duration = value.duration; // unwrapping for TS

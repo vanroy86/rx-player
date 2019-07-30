@@ -74,6 +74,7 @@ import {
   ErrorTypes,
   ICustomError,
   MediaError,
+  NetworkError,
 } from "../../errors";
 import features from "../../features";
 import Manifest, {
@@ -1969,6 +1970,12 @@ class Player extends EventEmitter<IPublicAPIEvent> {
   private _priv_onPlaybackWarning(error : Error) : void {
     log.warn("API: Sending warning:", error);
     this.trigger("warning", error);
+
+    if (error instanceof NetworkError && error.status === 404) {
+      const warning = new MediaError("MEDIA_TIME_BEFORE_MANIFEST", "The current " +
+        "position is behind the earliest time announced in the Manifest.", false);
+      this.trigger("warning", warning);
+    }
   }
 
   /**

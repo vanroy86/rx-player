@@ -18,14 +18,12 @@ import objectAssign from "object-assign";
 import {
   concat as observableConcat,
   EMPTY,
-  merge as observableMerge,
   Observable,
   of as observableOf,
   Subject,
 } from "rxjs";
 import {
   catchError,
-  finalize,
   map,
   mergeMap,
   tap,
@@ -89,7 +87,6 @@ export type IPipelineLoaderEvent<T, U> =
   IPipelineLoaderRequest<T> |
   IPipelineLoaderResponse<U> |
   ILoaderProgress |
-  IPipelineLoaderError |
   IPipelineLoaderMetrics;
 
 const {
@@ -166,7 +163,8 @@ export interface IPipelineLoaderOptions<T, U> {
  */
 export default function createLoader<T, U>(
   transportPipeline : ITransportPipeline,
-  options : IPipelineLoaderOptions<T, U>
+  options : IPipelineLoaderOptions<T, U>,
+  warning$ : Subject<Error|ICustomError>
 ) : (x : T) => Observable<IPipelineLoaderEvent<T, U>> {
   const { cache, maxRetry, maxRetryOffline } = options;
   const { loader } = transportPipeline;
@@ -175,9 +173,6 @@ export default function createLoader<T, U>(
   const resolver = (transportPipeline as any).resolver != null ?
     (transportPipeline as any).resolver : observableOf.bind(Observable);
 
-  // Subject that will emit non-fatal errors.
-  const retryErrorSubject : Subject<Error> = new Subject();
-
   // Backoff options given to the backoff retry done with the loader function.
   const backoffOptions = {
     baseDelay: INITIAL_BACKOFF_DELAY_BASE,
@@ -185,7 +180,7 @@ export default function createLoader<T, U>(
     maxRetryRegular: maxRetry,
     maxRetryOffline,
     onRetry: (error : Error) => {
-      retryErrorSubject
+      warning$
         .next(errorSelector("PIPELINE_LOAD_ERROR", error, false));
     },
   };
@@ -269,7 +264,7 @@ export default function createLoader<T, U>(
   return function startPipeline(
     pipelineInputData : T
   ) : Observable<IPipelineLoaderEvent<T, U>> {
-    const pipeline$ = callResolver(pipelineInputData).pipe(
+    return callResolver(pipelineInputData).pipe(
       mergeMap((resolverResponse : T) => {
         return loadData(resolverResponse).pipe(
           mergeMap((arg) : Observable<IPipelineLoaderEvent<T, U>> => {
@@ -304,13 +299,7 @@ export default function createLoader<T, U>(
                 return observableOf(arg);
             }
           }));
-      }),
-      finalize(() => { retryErrorSubject.complete(); })
+      })
     );
-
-    const retryError$ : Observable<IPipelineLoaderError> = retryErrorSubject
-      .pipe(map(error => ({ type: "error" as "error", value: error })));
-
-    return observableMerge(pipeline$, retryError$);
   };
 }

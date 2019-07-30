@@ -42,7 +42,7 @@ import PPromise from "../../utils/promise";
 import { getLeftSizeOfRange, getPlayedSizeOfRange, getSizeOfRange, } from "../../utils/ranges";
 import warnOnce from "../../utils/warn_once";
 import { events, exitFullscreen, isFullscreen, requestFullscreen, } from "../../compat";
-import { ErrorCodes, ErrorTypes, MediaError, } from "../../errors";
+import { ErrorCodes, ErrorTypes, MediaError, NetworkError, } from "../../errors";
 import features from "../../features";
 import { clearEMESession, disposeEME, getCurrentKeySystem, } from "../eme";
 import initializeMediaSourcePlayback from "../init";
@@ -1351,6 +1351,11 @@ var Player = /** @class */ (function (_super) {
     Player.prototype._priv_onPlaybackWarning = function (error) {
         log.warn("API: Sending warning:", error);
         this.trigger("warning", error);
+        if (error instanceof NetworkError && error.status === 404) {
+            var warning = new MediaError("MEDIA_TIME_BEFORE_MANIFEST", "The current " +
+                "position is behind the earliest time announced in the Manifest.", false);
+            this.trigger("warning", warning);
+        }
     };
     /**
      * Triggered when the Manifest has been loaded for the current content.

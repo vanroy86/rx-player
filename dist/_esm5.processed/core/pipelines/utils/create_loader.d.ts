@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Observable } from "rxjs";
+import { Observable, Subject } from "rxjs";
 import { ICustomError } from "../../../errors";
 import { ILoaderProgress, ILoaderResponseValue, ITransportPipeline } from "../../../transports";
 export interface IPipelineLoaderError {
@@ -44,7 +44,7 @@ export interface IPipelineLoaderResponse<T> {
  *   T: Argument given to the loader
  *   U: ResponseType of the request
  */
-export declare type IPipelineLoaderEvent<T, U> = IPipelineLoaderRequest<T> | IPipelineLoaderResponse<U> | ILoaderProgress | IPipelineLoaderError | IPipelineLoaderMetrics;
+export declare type IPipelineLoaderEvent<T, U> = IPipelineLoaderRequest<T> | IPipelineLoaderResponse<U> | ILoaderProgress | IPipelineLoaderMetrics;
 export interface IPipelineLoaderOptions<T, U> {
     cache?: {
         add: (obj: T, arg: ILoaderResponseValue<U>) => void;
@@ -93,4 +93,4 @@ export interface IPipelineLoaderOptions<T, U> {
  * @param {Object} options
  * @returns {Function}
  */
-export default function createLoader<T, U>(transportPipeline: ITransportPipeline, options: IPipelineLoaderOptions<T, U>): (x: T) => Observable<IPipelineLoaderEvent<T, U>>;
+export default function createLoader<T, U>(transportPipeline: ITransportPipeline, options: IPipelineLoaderOptions<T, U>, warning$: Subject<Error | ICustomError>): (x: T) => Observable<IPipelineLoaderEvent<T, U>>;

@@ -24,7 +24,6 @@ import {
   map,
   mergeMap,
   share,
-  tap,
 } from "rxjs/operators";
 import config from "../../../config";
 import {
@@ -105,7 +104,7 @@ export default function createManifestPipeline(
 ) : (url : string) => Observable<IFetchManifestResult> {
   const loader = createLoader<
     IManifestLoaderArguments, Document|string
-  >(pipelines.manifest, pipelineOptions);
+  >(pipelines.manifest, pipelineOptions, warning$);
   const { parser } = pipelines.manifest;
 
   /**
@@ -139,12 +138,6 @@ export default function createManifestPipeline(
    */
   return function fetchManifest(url : string) : Observable<IFetchManifestResult> {
     return loader({ url }).pipe(
-
-      tap((arg) => {
-        if (arg.type === "error") {
-          warning$.next(arg.value);
-        }
-      }),
 
       filter((arg) : arg is IPipelineLoaderResponse<Document|string> =>
         arg.type === "response"
