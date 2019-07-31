@@ -56,7 +56,7 @@ import Manifest, {
   Period,
   Representation,
 } from "../../../manifest";
-import SimpleSet from "../../../utils/simple_set";
+import arrayFind from "../../../utils/array_find";
 import {
   IPrioritizedSegmentFetcher,
   ISegmentFetcherEvent,
@@ -147,6 +147,14 @@ interface ISegmentRequestObject<T> {
   priority : number; // The current priority of the request
 }
 
+// Cache for recording segments being buffering
+export interface IWaitingSegmentCache {
+  [ segmentId: string ]: {
+    hasChunkComplete: boolean;
+    chunks: Array<[number, "loaded"|"appended"]>;
+  };
+}
+
 const { MINIMUM_SEGMENT_SIZE } = config;
 
 /**
@@ -201,7 +209,7 @@ export default function RepresentationBuffer<T>({
 
   // Keep track of downloaded segments currently awaiting to be appended to the
   // SourceBuffer.
-  const sourceBufferWaitingQueue = new SimpleSet();
+  const waitingSegmentCache: IWaitingSegmentCache = {};
 
   const status$ = observableCombineLatest([
     clock$,
@@ -357,6 +365,23 @@ export default function RepresentationBuffer<T>({
 
   return observableMerge(status$, bufferQueue$).pipe(share());
 
+  function validateContent(segment: ISegment) {
+    const { chunks, hasChunkComplete } = waitingSegmentCache[segment.id];
+    const hasAppendedAllChunks = !arrayFind(chunks, ([_, status]) => {
+      return status !== "appended";
+    });
+
+    if (hasAppendedAllChunks && hasChunkComplete) {
+      segmentBookkeeper.validateContent({
+        period,
+        adaptation,
+        representation,
+        segment,
+      });
+      delete waitingSegmentCache[segment.id];
+    }
+  }
+
   /**
    * Request every Segment in the ``downloadQueue`` on subscription.
    * Emit the data of a segment when a request succeeded.
@@ -383,23 +408,59 @@ export default function RepresentationBuffer<T>({
         const request$ = segmentFetcher.createRequest(context, priority);
 
         currentSegmentRequest = { segment, priority, request$ };
-        const response$ = request$
-          .pipe(mergeMap((evt) : Observable<ISegmentLoadingEvent<T>> => {
-            if (evt.type === "warning") {
-              return observableOf(evt);
-            } else if (evt.type === "chunk-complete") {
-              currentSegmentRequest = null;
-              return EMPTY;
-            }
 
-            const initInfos = initSegmentObject &&
-                              initSegmentObject.chunkInfos ||
-                              undefined;
-            return evt.parse(initInfos).pipe(map(data => {
-              return { type: "parsed-segment" as const,
-                       value: { segment, data } };
-            }));
-          }));
+        if (waitingSegmentCache[segment.id] == null) {
+          waitingSegmentCache[segment.id] = {
+            hasChunkComplete: false,
+            chunks: [],
+          };
+        }
+
+        const response$ = request$
+          .pipe(
+            mergeMap((evt) : Observable<ISegmentLoadingEvent<T>> => {
+              if (evt.type === "warning") {
+                // we're retrying, notify and re-check availability
+                return observableConcat(
+                  observableOf(evt),
+                  observableDefer(() => { // better if done after warning is emitted
+                    const repIndex = representation.index;
+                    if (repIndex.isSegmentStillAvailable(segment) === false) {
+                      reCheckNeededSegments$.next();
+                    }
+                    return EMPTY;
+                  }));
+              } else if (evt.type === "chunk-complete") {
+                if (waitingSegmentCache[segment.id]) {
+                  waitingSegmentCache[segment.id].hasChunkComplete = true;
+                  validateContent(segment);
+                }
+                return EMPTY;
+              }
+
+              const initInfos = initSegmentObject &&
+                                initSegmentObject.chunkInfos ||
+                                undefined;
+              return evt.parse(initInfos).pipe(
+                map(data => {
+                  const { chunkInfos } = data;
+                  const chunkId = chunkInfos.time / chunkInfos.timescale;
+                  if (waitingSegmentCache[segment.id]) {
+                    waitingSegmentCache[segment.id].chunks.push([chunkId, "loaded"]);
+                  }
+                  return { type: "parsed-segment" as const,
+                           value: { segment, data } };
+                })
+              );
+          }),
+          finalize(() => {
+            if (waitingSegmentCache[segment.id] &&
+                !waitingSegmentCache[segment.id].hasChunkComplete
+            ) {
+              delete waitingSegmentCache[segment.id];
+            }
+          })
+        );
 
         return observableConcat(response$, requestNextSegment$);
       });
@@ -427,7 +488,7 @@ export default function RepresentationBuffer<T>({
         initSegmentObject = evt.value.data;
       }
 
-      const { /* chunkInfos, */ chunkData, chunkOffset } = evt.value.data;
+      const { chunkInfos, chunkData, chunkOffset } = evt.value.data;
       if (chunkData == null) {
         // no chunkData to add here (for example, a text init segment)
         // just complete directly without appending anything
@@ -443,23 +504,38 @@ export default function RepresentationBuffer<T>({
         codec,
       });
 
-      sourceBufferWaitingQueue.add(segment.id);
-
       return append$.pipe(
         map(() => { // add to SegmentBookkeeper
-          // if (!segment.isInit) {
-          //   const { time, duration, timescale } = chunkInfos != null ? chunkInfos :
-          //                                                              segment;
-          //   const start = time / timescale;
-          //   const end = duration && (time + duration) / timescale;
-          //   segmentBookkeeper
-          //     .insert(period, adaptation, representation, segment, start, end);
-          // }
+          if (!segment.isInit) {
+            const { time, timescale } = chunkInfos != null ? chunkInfos :
+              segment;
+            const start = time / timescale;
+            const end = chunkInfos && chunkInfos.duration ?
+              (chunkInfos.duration / chunkInfos.timescale) + start :
+              undefined;
+
+              segmentBookkeeper.setContent({
+                period,
+                adaptation,
+                representation,
+                segment,
+              },
+              { start, end });
+
+            if (waitingSegmentCache[segment.id]) {
+              const loadedChunk = arrayFind(
+                waitingSegmentCache[segment.id].chunks, ([ chunkId ]) => {
+                  return chunkId === start;
+                }
+              );
+              if (loadedChunk) {
+                loadedChunk[1] = "appended";
+              }
+              validateContent(segment);
+            }
+          }
           const buffered = queuedSourceBuffer.getBuffered();
           return EVENTS.addedSegment(content, segment, buffered, chunkData);
-        }),
-        finalize(() => { // remove from queue
-          sourceBufferWaitingQueue.remove(segment.id);
         }));
     });
   }
@@ -476,8 +552,21 @@ export default function RepresentationBuffer<T>({
     neededRange : { start: number; end: number },
     fastSwitchingStep : number | undefined
   ) : boolean {
-    if (sourceBufferWaitingQueue.test(segment.id)) {
-      return false; // we're already pushing it
+    if (waitingSegmentCache[segment.id] &&
+        (
+          currentSegmentRequest == null ||
+          currentSegmentRequest.segment.id !== segment.id
+        )
+      ) {
+      const isWaitingForBuffering = arrayFind(
+        waitingSegmentCache[segment.id].chunks, ([_, status]) => {
+          return status !== "appended";
+        });
+      // If a segment is being bufferized and it is not loaded anymore,
+      // we should ask for download
+      if (isWaitingForBuffering) {
+        return false;
+      }
     }
 
     const { duration, time, timescale } = segment;
@@ -491,7 +580,8 @@ export default function RepresentationBuffer<T>({
                                                                 { duration,
                                                                   time,
                                                                   timescale });
-    if (currentSegment == null) {
+    if (currentSegment == null ||
+        !currentSegment.isComplete) {
       return true;
     }
 
