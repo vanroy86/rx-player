@@ -277,8 +277,8 @@ export default function InitializeOnMediaSource({
           return observableTimer(updateTimeout);
         }
         return EMPTY;
-      })
-    ).pipe(mergeMap(refreshManifest));
+      }),
+      mergeMap(refreshManifest));
 
     return observableMerge(loadOnMediaSource$, handleReloads$, manifestAutoRefresh$);
   }));
