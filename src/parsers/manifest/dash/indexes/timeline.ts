@@ -424,6 +424,13 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
   }
 
   /**
+   * @returns {Boolean}
+   */
+  canBeOutOfSync() : boolean {
+    return this._isDynamic;
+  }
+
+  /**
    * @param {Object} newIndex
    */
   _update(newIndex : TimelineRepresentationIndex) : void {

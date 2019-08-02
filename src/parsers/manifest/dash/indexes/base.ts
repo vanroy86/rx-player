@@ -259,6 +259,13 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
   }
 
   /**
+   * @returns {Boolean}
+   */
+  canBeOutOfSync() : false {
+    return false;
+  }
+
+  /**
    * @param {Object} newIndex
    */
   _update(newIndex : BaseRepresentationIndex) : void {

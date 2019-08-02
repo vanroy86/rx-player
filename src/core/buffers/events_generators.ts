@@ -28,6 +28,7 @@ import {
   IAdaptationChangeEvent,
   IBitrateEstimationChangeEvent,
   IBufferEventAddedSegment,
+  IBufferManifestMightBeOutOfSync,
   IBufferNeedsDiscontinuitySeek,
   IBufferNeedsManifestRefresh,
   IBufferStateActive,
@@ -112,6 +113,13 @@ const EVENTS = {
 
   needsManifestRefresh(bufferType : IBufferType) : IBufferNeedsManifestRefresh {
     return { type : "needs-manifest-refresh",
+             value : { bufferType } };
+  },
+
+  manifestMightBeOufOfSync(
+    bufferType : IBufferType
+  ) : IBufferManifestMightBeOutOfSync {
+    return { type : "manifest-might-be-out-of-sync",
              value : { bufferType } };
   },
 

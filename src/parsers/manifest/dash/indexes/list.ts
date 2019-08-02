@@ -244,6 +244,13 @@ export default class ListRepresentationIndex implements IRepresentationIndex {
   }
 
   /**
+   * @returns {Boolean}
+   */
+  canBeOutOfSync() : false {
+    return false;
+  }
+
+  /**
    * @param {Object} newIndex
    */
   _update(newIndex : ListRepresentationIndex) : void {

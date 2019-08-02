@@ -466,6 +466,13 @@ export default class SmoothRepresentationIndex implements IRepresentationIndex {
   }
 
   /**
+   * @returns {Boolean}
+   */
+  canBeOutOfSync() : true {
+    return true;
+  }
+
+  /**
    * Update this RepresentationIndex by a newly downloaded one.
    * Check if the old index had more informations about new segments and
    * re-add them if that's the case.

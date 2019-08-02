@@ -332,6 +332,13 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
   }
 
   /**
+   * @returns {Boolean}
+   */
+  canBeOutOfSync() : false {
+    return false;
+  }
+
+  /**
    * We do not have to add new segments to SegmentList-based indexes.
    * @returns {Array}
    */

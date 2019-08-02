@@ -113,6 +113,13 @@ export default interface IRepresentationIndex {
   isSegmentStillAvailable(segment : ISegment) : boolean | undefined;
 
   /**
+   * Returns true if this index can become "unsynchronized" with the server
+   * version, in which case a Manifest update has to be performed.
+   * @returns {Boolean}
+   */
+  canBeOutOfSync() : boolean;
+
+  /**
    * Checks if the given time - in seconds - is in a discontinuity. That is:
    *   - We're on the upper bound of the current range (end of the range - time
    *     is inferior to the timescale)
